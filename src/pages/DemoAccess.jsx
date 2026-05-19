@@ -258,13 +258,55 @@ export default function DemoAccess() {
           })}
         </div>
 
-        {/* Footer note */}
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
-          <p className="text-sm text-amber-800 font-medium">⚠️ Important: Demo accounts must first be invited via the app dashboard</p>
-          <p className="text-xs text-amber-700 mt-1">
-            Go to <strong>Dashboard → Users → Invite User</strong> and add each email with its corresponding role (<code>general_user</code>, <code>surveyor_general</code>, <code>surveyor</code>, <code>field_agent</code>).
-            All demo data is already seeded and will appear immediately after login.
-          </p>
+        {/* Setup Steps — prominent */}
+        <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-6 space-y-4">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">⚠️</span>
+            <div>
+              <p className="font-bold text-amber-900 text-base">Required Setup Before Logging In</p>
+              <p className="text-sm text-amber-800 mt-1">
+                Demo accounts do not exist automatically — they must be invited from the Base44 dashboard first. Each invitation sets up the user account so they can log in with the password above.
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-amber-200 p-4 space-y-3">
+            <p className="text-xs font-bold text-amber-900 uppercase tracking-wide">Step-by-Step Instructions</p>
+            {[
+              { step: "1", text: "Open the Base44 Dashboard and navigate to your app" },
+              { step: "2", text: 'Click "Users" in the left sidebar, then click "Invite User"' },
+              { step: "3", text: "Enter the email address and select the matching role from the table below" },
+              { step: "4", text: "Repeat for all 4 demo emails" },
+              { step: "5", text: 'Each user receives an invite email — set password to LandSecure@2025' },
+              { step: "6", text: "Return here and click the Login button on any role card" },
+            ].map(({ step, text }) => (
+              <div key={step} className="flex items-start gap-3">
+                <div className="w-5 h-5 rounded-full bg-amber-400 text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{step}</div>
+                <p className="text-sm text-amber-900">{text}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-white rounded-xl border border-amber-200 overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-amber-100">
+                  <th className="text-left px-4 py-2 text-xs font-bold text-amber-900">Email to Invite</th>
+                  <th className="text-left px-4 py-2 text-xs font-bold text-amber-900">Role to Select</th>
+                  <th className="text-left px-4 py-2 text-xs font-bold text-amber-900">Name</th>
+                </tr>
+              </thead>
+              <tbody>
+                {roles.map((r, i) => (
+                  <tr key={r.key} className={i % 2 === 0 ? "bg-white" : "bg-amber-50/50"}>
+                    <td className="px-4 py-2.5 font-mono text-xs text-amber-800">{r.email}</td>
+                    <td className="px-4 py-2.5 text-xs font-medium text-amber-900">{r.key}</td>
+                    <td className="px-4 py-2.5 text-xs text-amber-700">{r.name}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
