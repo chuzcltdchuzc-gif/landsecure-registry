@@ -24,6 +24,7 @@ import FieldReports from './pages/FieldReports';
 import Notifications from './pages/Notifications';
 import AuditLogs from './pages/AuditLogs';
 import AssignedParcels from './pages/AssignedParcels';
+import DemoAccess from './pages/DemoAccess';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -66,6 +67,7 @@ const AuthenticatedApp = () => {
         <Route path="/audit-logs" element={<AuditLogs />} />
         <Route path="/assigned-parcels" element={<AssignedParcels />} />
       </Route>
+      <Route path="/demo" element={<DemoAccess />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

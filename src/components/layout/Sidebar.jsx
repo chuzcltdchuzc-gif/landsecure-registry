@@ -4,11 +4,9 @@ import {
   LayoutDashboard,
   Map,
   FileText,
-  Users,
   AlertTriangle,
   ClipboardList,
   Bell,
-  Settings,
   ChevronLeft,
   ChevronRight,
   Shield,
@@ -17,7 +15,8 @@ import {
   History,
   Menu,
   X,
-  LogOut
+  LogOut,
+  PlayCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
@@ -101,7 +100,15 @@ export default function Sidebar({ user, collapsed, setCollapsed }) {
         })}
       </nav>
 
-      <div className="p-3 border-t border-border">
+      <div className="p-3 border-t border-border space-y-1">
+        <Link
+          to="/demo"
+          onClick={() => setMobileOpen(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground w-full transition-all"
+        >
+          <PlayCircle className="w-4 h-4 flex-shrink-0 text-primary" />
+          {!collapsed && <span>Demo Guide</span>}
+        </Link>
         <button
           onClick={() => base44.auth.logout()}
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive w-full transition-all"
