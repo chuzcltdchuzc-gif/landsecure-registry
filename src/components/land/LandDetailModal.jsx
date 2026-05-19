@@ -1,0 +1,83 @@
+import React from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import StatusBadge from "../shared/StatusBadge";
+import { MapPin, User, Ruler, FileText, Calendar } from "lucide-react";
+import { format } from "date-fns";
+
+export default function LandDetailModal({ parcel, onClose }) {
+  if (!parcel) return null;
+
+  return (
+    <Dialog open={!!parcel} onOpenChange={onClose}>
+      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-primary" />
+            {parcel.parcel_number}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="flex gap-2 flex-wrap">
+            <StatusBadge status={parcel.status} />
+            <StatusBadge status={parcel.verification_status} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <InfoItem icon={User} label="Owner" value={parcel.owner_name} />
+            <InfoItem icon={Ruler} label="Size" value={parcel.size_hectares ? `${parcel.size_hectares} ha` : "N/A"} />
+            <InfoItem icon={MapPin} label="Address" value={parcel.address} />
+            <InfoItem icon={FileText} label="Land Use" value={parcel.land_use?.replace(/_/g, " ") || "N/A"} />
+            {parcel.state && <InfoItem icon={MapPin} label="State" value={parcel.state} />}
+            {parcel.lga && <InfoItem icon={MapPin} label="LGA" value={parcel.lga} />}
+          </div>
+
+          {(parcel.latitude && parcel.longitude) && (
+            <div className="p-3 bg-muted rounded-lg">
+              <p className="text-xs font-medium text-muted-foreground mb-1">GPS Coordinates</p>
+              <p className="text-sm font-mono">{parcel.latitude}, {parcel.longitude}</p>
+            </div>
+          )}
+
+          {parcel.photos?.length > 0 && (
+            <div>
+              <p className="text-xs font-medium text-muted-foreground mb-2">Photos</p>
+              <div className="flex gap-2 overflow-x-auto">
+                {parcel.photos.map((url, i) => (
+                  <img key={i} src={url} alt={`Photo ${i + 1}`} className="w-24 h-24 rounded-lg object-cover flex-shrink-0" />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {parcel.approval_date && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Calendar className="w-3 h-3" />
+              Approved: {format(new Date(parcel.approval_date), "MMM d, yyyy")}
+            </div>
+          )}
+
+          {parcel.notes && (
+            <div className="p-3 bg-muted rounded-lg">
+              <p className="text-xs font-medium text-muted-foreground mb-1">Notes</p>
+              <p className="text-sm">{parcel.notes}</p>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function InfoItem({ icon: Icon, label, value }) {
+  return (
+    <div className="flex items-start gap-2">
+      <Icon className="w-3.5 h-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
+      <div>
+        <p className="text-[10px] text-muted-foreground">{label}</p>
+        <p className="text-sm font-medium">{value}</p>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,38 @@
+{
+  "name": "AuditLog",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "User who performed the action"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "User full name"
+    },
+    "action": {
+      "type": "string",
+      "description": "Action performed"
+    },
+    "entity_type": {
+      "type": "string",
+      "description": "Type of entity affected"
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "ID of affected entity"
+    },
+    "details": {
+      "type": "string",
+      "description": "Additional details about the action"
+    },
+    "ip_address": {
+      "type": "string",
+      "description": "IP address if available"
+    }
+  },
+  "required": [
+    "user_email",
+    "action"
+  ]
+}

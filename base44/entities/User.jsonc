@@ -1,0 +1,34 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "general_user",
+        "surveyor_general",
+        "surveyor",
+        "field_agent"
+      ],
+      "default": "general_user",
+      "description": "User role in the system"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number"
+    },
+    "organization": {
+      "type": "string",
+      "description": "Organization or agency name"
+    },
+    "license_number": {
+      "type": "string",
+      "description": "Professional license number for surveyors"
+    },
+    "avatar_url": {
+      "type": "string",
+      "description": "Profile photo URL"
+    }
+  },
+  "required": []
+}

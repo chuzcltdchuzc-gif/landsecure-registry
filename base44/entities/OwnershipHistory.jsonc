@@ -1,0 +1,65 @@
+{
+  "name": "OwnershipHistory",
+  "type": "object",
+  "properties": {
+    "parcel_id": {
+      "type": "string",
+      "description": "Reference to land parcel ID"
+    },
+    "parcel_number": {
+      "type": "string",
+      "description": "Parcel number for reference"
+    },
+    "from_owner": {
+      "type": "string",
+      "description": "Previous owner name"
+    },
+    "to_owner": {
+      "type": "string",
+      "description": "New owner name"
+    },
+    "transfer_type": {
+      "type": "string",
+      "enum": [
+        "purchase",
+        "inheritance",
+        "government_allocation",
+        "reallocation",
+        "gift",
+        "court_order"
+      ],
+      "description": "Type of ownership transfer"
+    },
+    "transfer_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of transfer"
+    },
+    "document_url": {
+      "type": "string",
+      "description": "Supporting document URL"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending"
+    },
+    "approved_by": {
+      "type": "string",
+      "description": "Approving officer email"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "parcel_id",
+    "from_owner",
+    "to_owner",
+    "transfer_type"
+  ]
+}

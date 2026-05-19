@@ -1,0 +1,64 @@
+{
+  "name": "SurveyDocument",
+  "type": "object",
+  "properties": {
+    "parcel_id": {
+      "type": "string",
+      "description": "Reference to land parcel ID"
+    },
+    "parcel_number": {
+      "type": "string",
+      "description": "Parcel number"
+    },
+    "document_type": {
+      "type": "string",
+      "enum": [
+        "survey_plan",
+        "cad_drawing",
+        "topographic_map",
+        "boundary_report",
+        "gis_data",
+        "other"
+      ],
+      "description": "Type of survey document"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "Uploaded file URL"
+    },
+    "surveyor_email": {
+      "type": "string",
+      "description": "Surveyor who uploaded"
+    },
+    "surveyor_name": {
+      "type": "string",
+      "description": "Surveyor full name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Document description"
+    },
+    "review_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "reviewed",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending"
+    },
+    "reviewed_by": {
+      "type": "string",
+      "description": "Reviewer email"
+    },
+    "review_notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "parcel_id",
+    "document_type",
+    "file_url"
+  ]
+}

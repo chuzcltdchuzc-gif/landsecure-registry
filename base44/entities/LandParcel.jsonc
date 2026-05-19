@@ -1,0 +1,126 @@
+{
+  "name": "LandParcel",
+  "type": "object",
+  "properties": {
+    "parcel_number": {
+      "type": "string",
+      "description": "Unique parcel identifier"
+    },
+    "title": {
+      "type": "string",
+      "description": "Land title or name"
+    },
+    "owner_name": {
+      "type": "string",
+      "description": "Current owner full name"
+    },
+    "owner_email": {
+      "type": "string",
+      "description": "Owner email reference"
+    },
+    "size_hectares": {
+      "type": "number",
+      "description": "Size in hectares"
+    },
+    "address": {
+      "type": "string",
+      "description": "Physical address"
+    },
+    "state": {
+      "type": "string",
+      "description": "State/Province"
+    },
+    "lga": {
+      "type": "string",
+      "description": "Local Government Area"
+    },
+    "latitude": {
+      "type": "number",
+      "description": "GPS latitude"
+    },
+    "longitude": {
+      "type": "number",
+      "description": "GPS longitude"
+    },
+    "boundary_coordinates": {
+      "type": "string",
+      "description": "JSON string of boundary polygon coordinates"
+    },
+    "land_use": {
+      "type": "string",
+      "enum": [
+        "residential",
+        "commercial",
+        "agricultural",
+        "industrial",
+        "mixed_use",
+        "government"
+      ],
+      "description": "Land use type"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "disputed",
+        "transferred"
+      ],
+      "default": "pending",
+      "description": "Registration status"
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "unverified",
+        "field_verified",
+        "survey_verified",
+        "fully_verified"
+      ],
+      "default": "unverified",
+      "description": "Verification level"
+    },
+    "survey_plan_url": {
+      "type": "string",
+      "description": "Uploaded survey plan file URL"
+    },
+    "cad_file_url": {
+      "type": "string",
+      "description": "CAD/PDF file URL"
+    },
+    "photos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of photo URLs"
+    },
+    "registered_by": {
+      "type": "string",
+      "description": "Email of the surveyor who registered"
+    },
+    "approved_by": {
+      "type": "string",
+      "description": "Email of the officer who approved"
+    },
+    "approval_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of approval"
+    },
+    "rejection_reason": {
+      "type": "string",
+      "description": "Reason for rejection if rejected"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    }
+  },
+  "required": [
+    "parcel_number",
+    "owner_name",
+    "address"
+  ]
+}

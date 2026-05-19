@@ -5,43 +5,73 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-// Add page imports here
+
+// Layout
+import AppLayout from './components/layout/AppLayout';
+
+// Pages
+import Dashboard from './pages/Dashboard';
+import LandRegistry from './pages/LandRegistry';
+import GISMap from './pages/GISMap';
+import Approvals from './pages/Approvals';
+import RegisterLand from './pages/RegisterLand';
+import Disputes from './pages/Disputes';
+import MySubmissions from './pages/MySubmissions';
+import MyClaims from './pages/MyClaims';
+import SurveyDocuments from './pages/SurveyDocuments';
+import SurveyReviews from './pages/SurveyReviews';
+import FieldReports from './pages/FieldReports';
+import Notifications from './pages/Notifications';
+import AuditLogs from './pages/AuditLogs';
+import AssignedParcels from './pages/AssignedParcels';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
 
-  // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+      <div className="fixed inset-0 flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-muted border-t-primary rounded-full animate-spin"></div>
+          <p className="text-sm text-muted-foreground">Loading LandSecure Registry...</p>
+        </div>
       </div>
     );
   }
 
-  // Handle authentication errors
   if (authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
       navigateToLogin();
       return null;
     }
   }
 
-  // Render the main app
   return (
     <Routes>
-      {/* Add your page Route elements here */}
+      <Route element={<AppLayout />}>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/lands" element={<LandRegistry />} />
+        <Route path="/gis-map" element={<GISMap />} />
+        <Route path="/approvals" element={<Approvals />} />
+        <Route path="/register-land" element={<RegisterLand />} />
+        <Route path="/disputes" element={<Disputes />} />
+        <Route path="/my-submissions" element={<MySubmissions />} />
+        <Route path="/my-claims" element={<MyClaims />} />
+        <Route path="/survey-documents" element={<SurveyDocuments />} />
+        <Route path="/survey-reviews" element={<SurveyReviews />} />
+        <Route path="/field-reports" element={<FieldReports />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/audit-logs" element={<AuditLogs />} />
+        <Route path="/assigned-parcels" element={<AssignedParcels />} />
+      </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
 };
 
-
 function App() {
-
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>

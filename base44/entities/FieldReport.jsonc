@@ -1,0 +1,71 @@
+{
+  "name": "FieldReport",
+  "type": "object",
+  "properties": {
+    "parcel_id": {
+      "type": "string",
+      "description": "Reference to land parcel ID"
+    },
+    "parcel_number": {
+      "type": "string",
+      "description": "Parcel number"
+    },
+    "agent_email": {
+      "type": "string",
+      "description": "Field agent who created the report"
+    },
+    "agent_name": {
+      "type": "string",
+      "description": "Agent full name"
+    },
+    "report_type": {
+      "type": "string",
+      "enum": [
+        "boundary_check",
+        "photo_capture",
+        "gps_survey",
+        "drone_survey",
+        "site_inspection",
+        "verification"
+      ],
+      "description": "Type of field report"
+    },
+    "latitude": {
+      "type": "number",
+      "description": "GPS latitude captured"
+    },
+    "longitude": {
+      "type": "number",
+      "description": "GPS longitude captured"
+    },
+    "photos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Photo URLs"
+    },
+    "description": {
+      "type": "string",
+      "description": "Report description and findings"
+    },
+    "boundary_valid": {
+      "type": "boolean",
+      "description": "Whether boundary matched records"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "submitted",
+        "reviewed"
+      ],
+      "default": "draft"
+    }
+  },
+  "required": [
+    "parcel_id",
+    "report_type",
+    "description"
+  ]
+}
