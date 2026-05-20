@@ -25,9 +25,10 @@ import Notifications from './pages/Notifications';
 import AuditLogs from './pages/AuditLogs';
 import AssignedParcels from './pages/AssignedParcels';
 import DemoAccess from './pages/DemoAccess';
+import RoleSelection from './pages/RoleSelection';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkUserAuth } = useAuth();
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -47,6 +48,12 @@ const AuthenticatedApp = () => {
       navigateToLogin();
       return null;
     }
+  }
+
+  // New user with no role assigned yet — show role selection before entering the app
+  // (excludes /demo which is public and doesn't need a role)
+  if (user && !user.role_confirmed && user.role !== 'surveyor_general' && window.location.pathname !== '/demo') {
+    return <RoleSelection onRoleSelected={() => checkUserAuth()} />;
   }
 
   return (

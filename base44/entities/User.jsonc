@@ -13,6 +13,11 @@
       "default": "general_user",
       "description": "User role in the system"
     },
+    "role_confirmed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user has explicitly selected their role during onboarding"
+    },
     "phone": {
       "type": "string",
       "description": "Phone number"
