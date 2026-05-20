@@ -16,12 +16,37 @@ import {
   Menu,
   X,
   LogOut,
-  PlayCircle
+  PlayCircle,
+  Users,
+  Settings,
+  AlertOctagon,
+  FileSearch,
+  BarChart3
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
 
 const roleMenus = {
+  super_admin: [
+    { label: "Dashboard", icon: LayoutDashboard, path: "/" },
+    { label: "User Management", icon: Users, path: "/governance/users" },
+    { label: "Fraud Alerts", icon: AlertTriangle, path: "/governance/fraud-alerts" },
+    { label: "Global Audit Log", icon: History, path: "/governance/audit" },
+    { label: "Compliance Reports", icon: FileSearch, path: "/governance/compliance-reports" },
+    { label: "Land Registry", icon: Map, path: "/lands" },
+    { label: "Disputes", icon: AlertOctagon, path: "/disputes" },
+    { label: "Platform Settings", icon: Settings, path: "/governance/settings" },
+    { label: "Notifications", icon: Bell, path: "/notifications" },
+  ],
+  compliance_officer: [
+    { label: "Dashboard", icon: LayoutDashboard, path: "/" },
+    { label: "Fraud Alerts", icon: AlertTriangle, path: "/governance/fraud-alerts" },
+    { label: "Compliance Reports", icon: FileSearch, path: "/governance/compliance-reports" },
+    { label: "Audit Trail", icon: History, path: "/governance/audit" },
+    { label: "Land Registry", icon: Map, path: "/lands" },
+    { label: "Disputes", icon: AlertOctagon, path: "/disputes" },
+    { label: "Notifications", icon: Bell, path: "/notifications" },
+  ],
   general_user: [
     { label: "Dashboard", icon: LayoutDashboard, path: "/" },
     { label: "Search Lands", icon: Map, path: "/lands" },

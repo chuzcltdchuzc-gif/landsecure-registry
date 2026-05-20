@@ -8,7 +8,9 @@
         "general_user",
         "surveyor_general",
         "surveyor",
-        "field_agent"
+        "field_agent",
+        "super_admin",
+        "compliance_officer"
       ],
       "default": "general_user",
       "description": "User role in the system"
@@ -17,6 +19,33 @@
       "type": "boolean",
       "default": false,
       "description": "Whether the user has explicitly selected their role during onboarding"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "suspended",
+        "pending"
+      ],
+      "default": "active",
+      "description": "Account status"
+    },
+    "suspension_reason": {
+      "type": "string",
+      "description": "Reason for account suspension"
+    },
+    "suspended_by": {
+      "type": "string",
+      "description": "Email of admin who suspended the account"
+    },
+    "suspended_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of suspension"
+    },
+    "region": {
+      "type": "string",
+      "description": "Assigned region/state"
     },
     "phone": {
       "type": "string",

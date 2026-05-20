@@ -26,6 +26,11 @@ import AuditLogs from './pages/AuditLogs';
 import AssignedParcels from './pages/AssignedParcels';
 import DemoAccess from './pages/DemoAccess';
 import RoleSelection from './pages/RoleSelection';
+import UserManagement from './pages/governance/UserManagement';
+import FraudAlerts from './pages/governance/FraudAlerts';
+import GovernanceAuditLog from './pages/governance/GovernanceAuditLog';
+import ComplianceReports from './pages/governance/ComplianceReports';
+import PlatformSettings from './pages/governance/PlatformSettings';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkUserAuth } = useAuth();
@@ -51,8 +56,9 @@ const AuthenticatedApp = () => {
   }
 
   // New user with no role assigned yet — show role selection before entering the app
-  // (excludes /demo which is public and doesn't need a role)
-  if (user && !user.role_confirmed && user.role !== 'surveyor_general' && window.location.pathname !== '/demo') {
+  // (excludes /demo which is public, and governance/admin roles which are assigned by admins)
+  const governanceRoles = ['surveyor_general', 'super_admin', 'compliance_officer'];
+  if (user && !user.role_confirmed && !governanceRoles.includes(user.role) && window.location.pathname !== '/demo') {
     return <RoleSelection onRoleSelected={() => checkUserAuth()} />;
   }
 
@@ -73,6 +79,12 @@ const AuthenticatedApp = () => {
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/audit-logs" element={<AuditLogs />} />
         <Route path="/assigned-parcels" element={<AssignedParcels />} />
+        {/* Governance routes */}
+        <Route path="/governance/users" element={<UserManagement />} />
+        <Route path="/governance/fraud-alerts" element={<FraudAlerts />} />
+        <Route path="/governance/audit" element={<GovernanceAuditLog />} />
+        <Route path="/governance/compliance-reports" element={<ComplianceReports />} />
+        <Route path="/governance/settings" element={<PlatformSettings />} />
       </Route>
       <Route path="/demo" element={<DemoAccess />} />
       <Route path="*" element={<PageNotFound />} />

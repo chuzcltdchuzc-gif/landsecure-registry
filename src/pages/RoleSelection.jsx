@@ -95,7 +95,7 @@ export default function RoleSelection({ onRoleSelected }) {
         </div>
 
         <p className="text-xs text-muted-foreground text-center mb-5">
-          The <strong>Surveyor General</strong> role is reserved and assigned by system administrators only.
+          <strong>Surveyor General</strong>, <strong>Super Admin</strong>, and <strong>Compliance Officer</strong> roles are reserved and assigned by system administrators only.
         </p>
 
         <Button

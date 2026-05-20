@@ -1,0 +1,97 @@
+{
+  "name": "FraudAlert",
+  "type": "object",
+  "properties": {
+    "parcel_id": {
+      "type": "string",
+      "description": "Related land parcel ID"
+    },
+    "parcel_number": {
+      "type": "string",
+      "description": "Parcel number"
+    },
+    "flagged_by": {
+      "type": "string",
+      "description": "Email of the user who flagged"
+    },
+    "flagged_by_name": {
+      "type": "string",
+      "description": "Name of user who flagged"
+    },
+    "alert_type": {
+      "type": "string",
+      "enum": [
+        "duplicate_registration",
+        "forged_document",
+        "boundary_manipulation",
+        "ownership_fraud",
+        "suspicious_transfer",
+        "identity_theft",
+        "other"
+      ],
+      "description": "Type of fraud alert"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "medium"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the suspicious activity"
+    },
+    "evidence_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Supporting evidence URLs"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "under_investigation",
+        "resolved",
+        "dismissed"
+      ],
+      "default": "open"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Compliance officer assigned"
+    },
+    "investigation_notes": {
+      "type": "string",
+      "description": "Notes from investigation"
+    },
+    "resolved_by": {
+      "type": "string",
+      "description": "Email of officer who resolved"
+    },
+    "resolved_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "resolution": {
+      "type": "string",
+      "enum": [
+        "confirmed_fraud",
+        "false_positive",
+        "escalated",
+        "pending_review"
+      ],
+      "description": "Final resolution"
+    }
+  },
+  "required": [
+    "parcel_id",
+    "alert_type",
+    "description"
+  ]
+}

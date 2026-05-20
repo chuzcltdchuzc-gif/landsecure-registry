@@ -81,6 +81,29 @@
       "default": "unverified",
       "description": "Verification level"
     },
+    "frozen": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the parcel is frozen/locked by governance"
+    },
+    "frozen_by": {
+      "type": "string",
+      "description": "Email of the officer who froze the parcel"
+    },
+    "frozen_reason": {
+      "type": "string",
+      "description": "Reason for freezing the parcel"
+    },
+    "frozen_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when frozen"
+    },
+    "fraud_flagged": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this parcel has an active fraud flag"
+    },
     "survey_plan_url": {
       "type": "string",
       "description": "Uploaded survey plan file URL"

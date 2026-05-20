@@ -14,10 +14,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 
 const roleBadgeLabels = {
-  general_user: "General User",
+  super_admin: "Super Admin",
+  compliance_officer: "Compliance Officer",
   surveyor_general: "Surveyor General",
   surveyor: "Surveyor",
   field_agent: "Field Agent",
+  general_user: "General User",
 };
 
 export default function TopBar({ user }) {

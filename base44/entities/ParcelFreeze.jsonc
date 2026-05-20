@@ -1,0 +1,56 @@
+{
+  "name": "ParcelFreeze",
+  "type": "object",
+  "properties": {
+    "parcel_id": {
+      "type": "string",
+      "description": "Frozen parcel ID"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "frozen_by": {
+      "type": "string",
+      "description": "Email of officer who froze"
+    },
+    "frozen_by_name": {
+      "type": "string"
+    },
+    "freeze_reason": {
+      "type": "string",
+      "enum": [
+        "fraud_investigation",
+        "court_order",
+        "dispute_escalation",
+        "compliance_review",
+        "system_recovery",
+        "other"
+      ]
+    },
+    "notes": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "lifted"
+      ],
+      "default": "active"
+    },
+    "lifted_by": {
+      "type": "string"
+    },
+    "lifted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "lift_notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "parcel_id",
+    "freeze_reason"
+  ]
+}

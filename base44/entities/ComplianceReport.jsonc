@@ -1,0 +1,56 @@
+{
+  "name": "ComplianceReport",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "report_type": {
+      "type": "string",
+      "enum": [
+        "fraud_summary",
+        "approval_audit",
+        "parcel_freeze_log",
+        "user_activity",
+        "regional_overview",
+        "escalation_summary"
+      ],
+      "description": "Type of compliance report"
+    },
+    "generated_by": {
+      "type": "string",
+      "description": "Email of compliance officer"
+    },
+    "period_start": {
+      "type": "string",
+      "format": "date"
+    },
+    "period_end": {
+      "type": "string",
+      "format": "date"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "findings": {
+      "type": "string",
+      "description": "Key findings as JSON or text"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "finalized",
+        "submitted"
+      ],
+      "default": "draft"
+    },
+    "file_url": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "report_type"
+  ]
+}
