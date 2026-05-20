@@ -31,6 +31,7 @@ import ParcelFreeze from './pages/gov/ParcelFreeze';
 import FraudAlerts from './pages/gov/FraudAlerts';
 import GlobalAudit from './pages/gov/GlobalAudit';
 import ComplianceReports from './pages/gov/ComplianceReports';
+import PendingApprovals from './pages/gov/PendingApprovals';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkUserAuth } = useAuth();
@@ -85,6 +86,7 @@ const AuthenticatedApp = () => {
         <Route path="/gov/fraud-alerts" element={<FraudAlerts />} />
         <Route path="/gov/global-audit" element={<GlobalAudit />} />
         <Route path="/gov/compliance-reports" element={<ComplianceReports />} />
+        <Route path="/gov/pending-approvals" element={<PendingApprovals />} />
       </Route>
       <Route path="/demo" element={<DemoAccess />} />
       <Route path="*" element={<PageNotFound />} />

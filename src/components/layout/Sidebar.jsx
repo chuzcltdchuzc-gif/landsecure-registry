@@ -72,6 +72,7 @@ const roleMenus = {
   ],
   compliance_officer: [
     { label: "Dashboard", icon: LayoutDashboard, path: "/" },
+    { label: "Pending Approvals", icon: ClipboardList, path: "/gov/pending-approvals" },
     { label: "Fraud Alerts", icon: AlertTriangle, path: "/gov/fraud-alerts" },
     { label: "Freeze Parcels", icon: Lock, path: "/gov/parcel-freeze" },
     { label: "Compliance Reports", icon: FileText, path: "/gov/compliance-reports" },
