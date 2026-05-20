@@ -2,14 +2,24 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
-import { Users, Map, ShieldAlert, BarChart3, Lock, Activity, AlertTriangle, CheckCircle2 } from "lucide-react";
+import {
+  Users, Map, ShieldAlert, Lock, Activity, AlertTriangle,
+  CheckCircle2, BarChart3, ClipboardList, Scale,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import StatCard from "@/components/shared/StatCard";
 import LoadingSpinner from "@/components/shared/LoadingSpinner";
+import StatusBadge from "@/components/shared/StatusBadge";
 import { format } from "date-fns";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
-const COLORS = ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
+const COLORS = [
+  "hsl(var(--chart-1))",
+  "hsl(var(--chart-2))",
+  "hsl(var(--chart-3))",
+  "hsl(var(--chart-4))",
+  "hsl(var(--chart-5))",
+];
 
 export default function SuperAdminDashboard({ user }) {
   const { data: users = [], isLoading: loadingUsers } = useQuery({
@@ -28,6 +38,10 @@ export default function SuperAdminDashboard({ user }) {
     queryKey: ["fraud-alerts-admin"],
     queryFn: () => base44.entities.FraudAlert.list("-created_date", 100),
   });
+  const { data: disputes = [] } = useQuery({
+    queryKey: ["disputes-admin"],
+    queryFn: () => base44.entities.Dispute.list("-created_date", 200),
+  });
   const { data: logs = [] } = useQuery({
     queryKey: ["audit-logs-admin"],
     queryFn: () => base44.entities.AuditLog.list("-created_date", 50),
@@ -35,54 +49,123 @@ export default function SuperAdminDashboard({ user }) {
 
   if (loadingUsers || loadingParcels) return <LoadingSpinner text="Loading governance dashboard..." />;
 
+  // Key metrics
+  const totalParcels = parcels.length;
+  const approvedParcels = parcels.filter(p => p.status === "approved").length;
+  const pendingParcels = parcels.filter(p => p.status === "pending").length;
+  const disputedParcels = parcels.filter(p => p.status === "disputed").length;
+
+  const pendingDisputes = disputes.filter(d => d.status === "open" || d.status === "under_review");
+  const escalatedDisputes = disputes.filter(d => d.status === "escalated");
+  const openAlerts = alerts.filter(a => a.status === "open" || a.status === "under_investigation");
+  const criticalAlerts = alerts.filter(a => a.severity === "critical");
+  const activeFreezes = freezes.filter(f => f.status === "active");
+  const suspendedUsers = users.filter(u => u.account_status === "suspended");
+
+  // Charts
+  const parcelStatusData = [
+    { name: "Pending", value: pendingParcels },
+    { name: "Approved", value: approvedParcels },
+    { name: "Rejected", value: parcels.filter(p => p.status === "rejected").length },
+    { name: "Disputed", value: disputedParcels },
+  ].filter(d => d.value > 0);
+
   const roleBreakdown = users.reduce((acc, u) => {
-    acc[u.role] = (acc[u.role] || 0) + 1;
+    const label = (u.role || "unknown").replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+    acc[label] = (acc[label] || 0) + 1;
     return acc;
   }, {});
-  const roleChartData = Object.entries(roleBreakdown).map(([role, count]) => ({
-    name: role.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
-    count,
-  }));
-
-  const parcelStatusData = ["pending", "approved", "rejected", "disputed"].map(s => ({
-    name: s.charAt(0).toUpperCase() + s.slice(1),
-    value: parcels.filter(p => p.status === s).length,
-  }));
-
-  const suspendedUsers = users.filter(u => u.account_status === "suspended").length;
-  const activeFreezes = freezes.filter(f => f.status === "active").length;
-  const openAlerts = alerts.filter(a => a.status === "open" || a.status === "under_investigation").length;
+  const roleChartData = Object.entries(roleBreakdown).map(([name, count]) => ({ name, count }));
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <ShieldAlert className="w-6 h-6 text-primary" />
           Super Admin Dashboard
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Global platform oversight and governance controls</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          Platform-wide governance overview — registrations, disputes, and fraud monitoring
+        </p>
       </div>
 
-      {/* Stats */}
+      {/* Primary KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Total Users" value={users.length} icon={Users} color="text-blue-600" bg="bg-blue-50" />
-        <StatCard title="Total Parcels" value={parcels.length} icon={Map} color="text-emerald-600" bg="bg-emerald-50" />
-        <StatCard title="Active Freezes" value={activeFreezes} icon={Lock} color="text-orange-600" bg="bg-orange-50" />
-        <StatCard title="Open Fraud Alerts" value={openAlerts} icon={AlertTriangle} color="text-red-600" bg="bg-red-50" />
+        <StatCard
+          title="Total Land Registrations"
+          value={totalParcels}
+          icon={Map}
+          color="text-blue-600"
+          bg="bg-blue-50"
+        />
+        <StatCard
+          title="Pending Disputes"
+          value={pendingDisputes.length}
+          icon={Scale}
+          color="text-amber-600"
+          bg="bg-amber-50"
+        />
+        <StatCard
+          title="Open Fraud Alerts"
+          value={openAlerts.length}
+          icon={AlertTriangle}
+          color="text-red-600"
+          bg="bg-red-50"
+        />
+        <StatCard
+          title="Active Parcel Freezes"
+          value={activeFreezes.length}
+          icon={Lock}
+          color="text-orange-600"
+          bg="bg-orange-50"
+        />
       </div>
 
-      {/* Secondary stats */}
+      {/* Secondary KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Suspended Accounts" value={suspendedUsers} icon={Users} color="text-red-600" bg="bg-red-50" />
-        <StatCard title="Pending Parcels" value={parcels.filter(p => p.status === "pending").length} icon={Activity} color="text-amber-600" bg="bg-amber-50" />
-        <StatCard title="Approved Parcels" value={parcels.filter(p => p.status === "approved").length} icon={CheckCircle2} color="text-emerald-600" bg="bg-emerald-50" />
-        <StatCard title="Disputed Parcels" value={parcels.filter(p => p.status === "disputed").length} icon={AlertTriangle} color="text-orange-600" bg="bg-orange-50" />
+        <StatCard title="Approved Parcels" value={approvedParcels} icon={CheckCircle2} color="text-emerald-600" bg="bg-emerald-50" />
+        <StatCard title="Escalated Disputes" value={escalatedDisputes.length} icon={ClipboardList} color="text-purple-600" bg="bg-purple-50" />
+        <StatCard title="Critical Fraud Alerts" value={criticalAlerts.length} icon={AlertTriangle} color="text-red-700" bg="bg-red-100" />
+        <StatCard title="Suspended Users" value={suspendedUsers.length} icon={Users} color="text-red-600" bg="bg-red-50" />
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
-          <CardHeader><CardTitle className="text-sm font-semibold flex items-center gap-2"><BarChart3 className="w-4 h-4" /> Users by Role</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" /> Land Registration by Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={200}>
+              <PieChart>
+                <Pie
+                  data={parcelStatusData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={75}
+                  label={({ name, value }) => `${name}: ${value}`}
+                >
+                  {parcelStatusData.map((_, i) => (
+                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <Users className="w-4 h-4" /> Users by Role
+            </CardTitle>
+          </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={roleChartData}>
@@ -94,18 +177,52 @@ export default function SuperAdminDashboard({ user }) {
             </ResponsiveContainer>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Disputes & Alerts side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-sm font-semibold">Pending Disputes</CardTitle>
+            <Link to="/disputes" className="text-xs text-primary hover:underline">View all</Link>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {pendingDisputes.slice(0, 5).map(d => (
+              <div key={d.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{d.complainant_name}</p>
+                  <p className="text-xs text-muted-foreground capitalize">{d.dispute_type?.replace(/_/g, " ")}</p>
+                </div>
+                <div className="flex items-center gap-2 ml-2">
+                  <StatusBadge status={d.priority} />
+                  <StatusBadge status={d.status} />
+                </div>
+              </div>
+            ))}
+            {pendingDisputes.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-4">No pending disputes</p>
+            )}
+          </CardContent>
+        </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-sm font-semibold flex items-center gap-2"><Map className="w-4 h-4" /> Parcel Status Distribution</CardTitle></CardHeader>
-          <CardContent className="flex items-center justify-center">
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie data={parcelStatusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} label={({ name, value }) => value > 0 ? `${name}: ${value}` : ""}>
-                  {parcelStatusData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-sm font-semibold">Open Fraud Alerts</CardTitle>
+            <Link to="/gov/fraud-alerts" className="text-xs text-primary hover:underline">View all</Link>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {openAlerts.slice(0, 5).map(a => (
+              <div key={a.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">Parcel: {a.parcel_number || a.parcel_id}</p>
+                  <p className="text-xs text-muted-foreground capitalize">{a.alert_type?.replace(/_/g, " ")}</p>
+                </div>
+                <StatusBadge status={a.severity} />
+              </div>
+            ))}
+            {openAlerts.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-4">No open fraud alerts</p>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -129,7 +246,7 @@ export default function SuperAdminDashboard({ user }) {
         ))}
       </div>
 
-      {/* Recent Audit Logs */}
+      {/* Recent System Activity */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-sm font-semibold">Recent System Activity</CardTitle>
@@ -142,10 +259,14 @@ export default function SuperAdminDashboard({ user }) {
                 <p className="text-sm font-medium">{log.action}</p>
                 <p className="text-xs text-muted-foreground">{log.user_name || log.user_email}</p>
               </div>
-              <span className="text-[10px] text-muted-foreground">{format(new Date(log.created_date), "MMM d, h:mm a")}</span>
+              <span className="text-[10px] text-muted-foreground">
+                {format(new Date(log.created_date), "MMM d, h:mm a")}
+              </span>
             </div>
           ))}
-          {logs.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No activity logged yet</p>}
+          {logs.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-4">No activity logged yet</p>
+          )}
         </CardContent>
       </Card>
     </div>
