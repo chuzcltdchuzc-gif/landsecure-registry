@@ -12,12 +12,12 @@ export default function Dashboard() {
   const role = user?.role || "general_user";
 
   const dashboards = {
-    super_admin: SuperAdminDashboard,
-    compliance_officer: ComplianceDashboard,
     general_user: GeneralDashboard,
     surveyor_general: SurveyorGeneralDashboard,
     surveyor: SurveyorDashboard,
     field_agent: FieldAgentDashboard,
+    super_admin: SuperAdminDashboard,
+    compliance_officer: ComplianceDashboard,
   };
 
   const DashboardComponent = dashboards[role] || GeneralDashboard;

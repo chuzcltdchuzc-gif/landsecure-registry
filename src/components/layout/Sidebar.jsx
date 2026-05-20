@@ -18,35 +18,15 @@ import {
   LogOut,
   PlayCircle,
   Users,
-  Settings,
-  AlertOctagon,
-  FileSearch,
-  BarChart3
+  Lock,
+  ShieldAlert,
+  ShieldCheck,
+  Activity,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
 
 const roleMenus = {
-  super_admin: [
-    { label: "Dashboard", icon: LayoutDashboard, path: "/" },
-    { label: "User Management", icon: Users, path: "/governance/users" },
-    { label: "Fraud Alerts", icon: AlertTriangle, path: "/governance/fraud-alerts" },
-    { label: "Global Audit Log", icon: History, path: "/governance/audit" },
-    { label: "Compliance Reports", icon: FileSearch, path: "/governance/compliance-reports" },
-    { label: "Land Registry", icon: Map, path: "/lands" },
-    { label: "Disputes", icon: AlertOctagon, path: "/disputes" },
-    { label: "Platform Settings", icon: Settings, path: "/governance/settings" },
-    { label: "Notifications", icon: Bell, path: "/notifications" },
-  ],
-  compliance_officer: [
-    { label: "Dashboard", icon: LayoutDashboard, path: "/" },
-    { label: "Fraud Alerts", icon: AlertTriangle, path: "/governance/fraud-alerts" },
-    { label: "Compliance Reports", icon: FileSearch, path: "/governance/compliance-reports" },
-    { label: "Audit Trail", icon: History, path: "/governance/audit" },
-    { label: "Land Registry", icon: Map, path: "/lands" },
-    { label: "Disputes", icon: AlertOctagon, path: "/disputes" },
-    { label: "Notifications", icon: Bell, path: "/notifications" },
-  ],
   general_user: [
     { label: "Dashboard", icon: LayoutDashboard, path: "/" },
     { label: "Search Lands", icon: Map, path: "/lands" },
@@ -77,6 +57,27 @@ const roleMenus = {
     { label: "Field Reports", icon: Camera, path: "/field-reports" },
     { label: "GIS Map", icon: Map, path: "/gis-map" },
     { label: "Assigned Parcels", icon: ClipboardList, path: "/assigned-parcels" },
+    { label: "Notifications", icon: Bell, path: "/notifications" },
+  ],
+  super_admin: [
+    { label: "Dashboard", icon: LayoutDashboard, path: "/" },
+    { label: "User Management", icon: Users, path: "/gov/user-management" },
+    { label: "Freeze Parcels", icon: Lock, path: "/gov/parcel-freeze" },
+    { label: "Fraud Alerts", icon: AlertTriangle, path: "/gov/fraud-alerts" },
+    { label: "Global Audit", icon: Activity, path: "/gov/global-audit" },
+    { label: "Land Registry", icon: Map, path: "/lands" },
+    { label: "Disputes", icon: ShieldAlert, path: "/disputes" },
+    { label: "Audit Logs", icon: History, path: "/audit-logs" },
+    { label: "Notifications", icon: Bell, path: "/notifications" },
+  ],
+  compliance_officer: [
+    { label: "Dashboard", icon: LayoutDashboard, path: "/" },
+    { label: "Fraud Alerts", icon: AlertTriangle, path: "/gov/fraud-alerts" },
+    { label: "Freeze Parcels", icon: Lock, path: "/gov/parcel-freeze" },
+    { label: "Compliance Reports", icon: FileText, path: "/gov/compliance-reports" },
+    { label: "Global Audit", icon: Activity, path: "/gov/global-audit" },
+    { label: "All Parcels", icon: Map, path: "/lands" },
+    { label: "Disputes", icon: ShieldAlert, path: "/disputes" },
     { label: "Notifications", icon: Bell, path: "/notifications" },
   ],
 };

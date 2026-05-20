@@ -14,12 +14,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 
 const roleBadgeLabels = {
-  super_admin: "Super Admin",
-  compliance_officer: "Compliance Officer",
+  general_user: "General User",
   surveyor_general: "Surveyor General",
   surveyor: "Surveyor",
   field_agent: "Field Agent",
-  general_user: "General User",
+  super_admin: "Super Admin",
+  compliance_officer: "Compliance Officer",
 };
 
 export default function TopBar({ user }) {
@@ -38,7 +38,10 @@ export default function TopBar({ user }) {
       </div>
 
       <div className="flex items-center gap-3">
-        <Badge variant="secondary" className="hidden sm:flex text-xs">
+        <Badge variant="secondary" className={`hidden sm:flex text-xs ${
+          user?.role === "super_admin" ? "bg-purple-100 text-purple-700 border-purple-200" :
+          user?.role === "compliance_officer" ? "bg-indigo-100 text-indigo-700 border-indigo-200" : ""
+        }`}>
           {roleBadgeLabels[user?.role] || "User"}
         </Badge>
 
