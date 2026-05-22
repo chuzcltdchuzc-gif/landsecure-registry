@@ -1,11 +1,35 @@
 import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import StatusBadge from "../shared/StatusBadge";
+import FraudRiskPanel from "../fraud/FraudRiskPanel";
 import { MapPin, User, Ruler, FileText, Calendar } from "lucide-react";
 import { format } from "date-fns";
 
 export default function LandDetailModal({ parcel, onClose }) {
+  const { data: allParcels = [] } = useQuery({
+    queryKey: ["all-parcels-risk"],
+    queryFn: () => base44.entities.LandParcel.list("-created_date", 1000),
+    enabled: !!parcel,
+  });
+  const { data: allAlerts = [] } = useQuery({
+    queryKey: ["all-alerts-risk"],
+    queryFn: () => base44.entities.FraudAlert.list("-created_date", 500),
+    enabled: !!parcel,
+  });
+  const { data: ownershipHistory = [] } = useQuery({
+    queryKey: ["ownership-risk"],
+    queryFn: () => base44.entities.OwnershipHistory.filter({ parcel_id: parcel?.id }, "-created_date", 50),
+    enabled: !!parcel?.id,
+  });
+  const { data: disputes = [] } = useQuery({
+    queryKey: ["disputes-risk"],
+    queryFn: () => base44.entities.Dispute.filter({ parcel_id: parcel?.id }, "-created_date", 50),
+    enabled: !!parcel?.id,
+  });
+
   if (!parcel) return null;
 
   return (
@@ -64,6 +88,14 @@ export default function LandDetailModal({ parcel, onClose }) {
               <p className="text-sm">{parcel.notes}</p>
             </div>
           )}
+
+          <FraudRiskPanel
+            parcel={parcel}
+            allParcels={allParcels}
+            allAlerts={allAlerts}
+            ownershipHistory={ownershipHistory}
+            disputes={disputes}
+          />
         </div>
       </DialogContent>
     </Dialog>

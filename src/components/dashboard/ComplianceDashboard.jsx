@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
 import {
   ShieldCheck, AlertTriangle, Lock, FileText, Eye,
-  TrendingUp, Scale, Map, ClipboardList,
+  TrendingUp, Scale, Map, ClipboardList, Activity,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import StatCard from "@/components/shared/StatCard";
@@ -240,10 +240,10 @@ export default function ComplianceDashboard({ user }) {
       {/* Quick Actions */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
+          { label: "Pilot Ops", path: "/gov/pilot-dashboard", icon: TrendingUp, color: "bg-blue-50 text-blue-700 border-blue-200" },
           { label: "Pending Approvals", path: "/gov/pending-approvals", icon: ClipboardList, color: "bg-amber-50 text-amber-700 border-amber-200" },
           { label: "Fraud Alerts", path: "/gov/fraud-alerts", icon: AlertTriangle, color: "bg-red-50 text-red-700 border-red-200" },
-          { label: "Freeze Parcels", path: "/gov/parcel-freeze", icon: Lock, color: "bg-orange-50 text-orange-700 border-orange-200" },
-          { label: "Reports", path: "/gov/compliance-reports", icon: FileText, color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+          { label: "Audit Reports", path: "/gov/audit-reports", icon: FileText, color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
         ].map(action => (
           <Link key={action.path} to={action.path}>
             <Card className={`border cursor-pointer hover:shadow-md transition-shadow ${action.color}`}>

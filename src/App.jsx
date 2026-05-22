@@ -32,6 +32,9 @@ import FraudAlerts from './pages/gov/FraudAlerts';
 import GlobalAudit from './pages/gov/GlobalAudit';
 import ComplianceReports from './pages/gov/ComplianceReports';
 import PendingApprovals from './pages/gov/PendingApprovals';
+import BulkImport from './pages/gov/BulkImport';
+import PilotDashboard from './pages/gov/PilotDashboard';
+import AuditReports from './pages/gov/AuditReports';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkUserAuth } = useAuth();
@@ -87,6 +90,9 @@ const AuthenticatedApp = () => {
         <Route path="/gov/global-audit" element={<GlobalAudit />} />
         <Route path="/gov/compliance-reports" element={<ComplianceReports />} />
         <Route path="/gov/pending-approvals" element={<PendingApprovals />} />
+        <Route path="/gov/bulk-import" element={<BulkImport />} />
+        <Route path="/gov/pilot-dashboard" element={<PilotDashboard />} />
+        <Route path="/gov/audit-reports" element={<AuditReports />} />
       </Route>
       <Route path="/demo" element={<DemoAccess />} />
       <Route path="*" element={<PageNotFound />} />

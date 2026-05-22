@@ -46,6 +46,50 @@
       "type": "string",
       "description": "JSON string of boundary polygon coordinates"
     },
+    "parcel_boundary": {
+      "type": "string",
+      "description": "GeoJSON polygon string for the parcel boundary"
+    },
+    "boundary_area": {
+      "type": "number",
+      "description": "Calculated boundary area in sqm"
+    },
+    "boundary_perimeter": {
+      "type": "number",
+      "description": "Calculated boundary perimeter in meters"
+    },
+    "boundary_source": {
+      "type": "string",
+      "enum": [
+        "manual_entry",
+        "gps_capture",
+        "survey_plan",
+        "cad_import",
+        "legacy_import"
+      ],
+      "description": "How the boundary was captured"
+    },
+    "boundary_capture_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "spatial_validation_status": {
+      "type": "string",
+      "enum": [
+        "not_validated",
+        "valid",
+        "overlap_warning",
+        "duplicate_warning",
+        "invalid_geometry",
+        "conflict_blocked"
+      ],
+      "default": "not_validated",
+      "description": "Result of spatial validation engine"
+    },
+    "spatial_conflict_notes": {
+      "type": "string",
+      "description": "Details of any spatial conflicts found"
+    },
     "land_use": {
       "type": "string",
       "enum": [
@@ -65,7 +109,10 @@
         "approved",
         "rejected",
         "disputed",
-        "transferred"
+        "transferred",
+        "approved_locked",
+        "frozen",
+        "archived"
       ],
       "default": "pending",
       "description": "Registration status"
@@ -81,64 +128,55 @@
       "default": "unverified",
       "description": "Verification level"
     },
-    "frozen": {
-      "type": "boolean",
-      "default": false,
-      "description": "Whether the parcel is frozen/locked by governance"
-    },
-    "frozen_by": {
-      "type": "string",
-      "description": "Email of the officer who froze the parcel"
-    },
-    "frozen_reason": {
-      "type": "string",
-      "description": "Reason for freezing the parcel"
-    },
-    "frozen_at": {
-      "type": "string",
-      "format": "date-time",
-      "description": "Timestamp when frozen"
-    },
-    "fraud_flagged": {
-      "type": "boolean",
-      "default": false,
-      "description": "Whether this parcel has an active fraud flag"
-    },
     "survey_plan_url": {
-      "type": "string",
-      "description": "Uploaded survey plan file URL"
+      "type": "string"
     },
     "cad_file_url": {
-      "type": "string",
-      "description": "CAD/PDF file URL"
+      "type": "string"
     },
     "photos": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Array of photo URLs"
+      }
     },
     "registered_by": {
-      "type": "string",
-      "description": "Email of the surveyor who registered"
+      "type": "string"
     },
     "approved_by": {
-      "type": "string",
-      "description": "Email of the officer who approved"
+      "type": "string"
     },
     "approval_date": {
       "type": "string",
-      "format": "date",
-      "description": "Date of approval"
+      "format": "date"
     },
     "rejection_reason": {
-      "type": "string",
-      "description": "Reason for rejection if rejected"
+      "type": "string"
     },
     "notes": {
+      "type": "string"
+    },
+    "import_source": {
       "type": "string",
-      "description": "Additional notes"
+      "description": "ImportHistory ID if imported from bulk"
+    },
+    "fraud_risk_score": {
+      "type": "number",
+      "description": "Automated fraud risk score 0-100"
+    },
+    "fraud_risk_level": {
+      "type": "string",
+      "enum": [
+        "none",
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "none"
+    },
+    "fraud_risk_reasons": {
+      "type": "string",
+      "description": "JSON array of risk reason strings"
     }
   },
   "required": [

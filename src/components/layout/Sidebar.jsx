@@ -22,6 +22,7 @@ import {
   ShieldAlert,
   ShieldCheck,
   Activity,
+  Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
@@ -61,22 +62,26 @@ const roleMenus = {
   ],
   super_admin: [
     { label: "Dashboard", icon: LayoutDashboard, path: "/" },
+    { label: "Pilot Operations", icon: Activity, path: "/gov/pilot-dashboard" },
     { label: "User Management", icon: Users, path: "/gov/user-management" },
+    { label: "Bulk Import", icon: Upload, path: "/gov/bulk-import" },
     { label: "Freeze Parcels", icon: Lock, path: "/gov/parcel-freeze" },
     { label: "Fraud Alerts", icon: AlertTriangle, path: "/gov/fraud-alerts" },
-    { label: "Global Audit", icon: Activity, path: "/gov/global-audit" },
+    { label: "Audit Reports", icon: FileText, path: "/gov/audit-reports" },
+    { label: "Global Audit", icon: History, path: "/gov/global-audit" },
     { label: "Land Registry", icon: Map, path: "/lands" },
     { label: "Disputes", icon: ShieldAlert, path: "/disputes" },
-    { label: "Audit Logs", icon: History, path: "/audit-logs" },
     { label: "Notifications", icon: Bell, path: "/notifications" },
   ],
   compliance_officer: [
     { label: "Dashboard", icon: LayoutDashboard, path: "/" },
+    { label: "Pilot Operations", icon: Activity, path: "/gov/pilot-dashboard" },
     { label: "Pending Approvals", icon: ClipboardList, path: "/gov/pending-approvals" },
     { label: "Fraud Alerts", icon: AlertTriangle, path: "/gov/fraud-alerts" },
     { label: "Freeze Parcels", icon: Lock, path: "/gov/parcel-freeze" },
-    { label: "Compliance Reports", icon: FileText, path: "/gov/compliance-reports" },
-    { label: "Global Audit", icon: Activity, path: "/gov/global-audit" },
+    { label: "Audit Reports", icon: FileText, path: "/gov/audit-reports" },
+    { label: "Compliance Reports", icon: ShieldCheck, path: "/gov/compliance-reports" },
+    { label: "Global Audit", icon: History, path: "/gov/global-audit" },
     { label: "All Parcels", icon: Map, path: "/lands" },
     { label: "Disputes", icon: ShieldAlert, path: "/disputes" },
     { label: "Notifications", icon: Bell, path: "/notifications" },

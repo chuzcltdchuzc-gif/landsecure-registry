@@ -1,0 +1,64 @@
+{
+  "name": "ImportHistory",
+  "type": "object",
+  "properties": {
+    "uploaded_by": {
+      "type": "string",
+      "description": "Email of the uploader"
+    },
+    "uploaded_by_name": {
+      "type": "string"
+    },
+    "file_name": {
+      "type": "string"
+    },
+    "file_url": {
+      "type": "string"
+    },
+    "import_type": {
+      "type": "string",
+      "enum": [
+        "csv",
+        "xlsx"
+      ],
+      "description": "File type"
+    },
+    "records_processed": {
+      "type": "number",
+      "default": 0
+    },
+    "records_imported": {
+      "type": "number",
+      "default": 0
+    },
+    "records_failed": {
+      "type": "number",
+      "default": 0
+    },
+    "records_duplicate": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "processing",
+        "completed",
+        "failed",
+        "partial"
+      ],
+      "default": "processing"
+    },
+    "validation_report": {
+      "type": "string",
+      "description": "JSON string of validation errors"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "uploaded_by",
+    "file_name"
+  ]
+}

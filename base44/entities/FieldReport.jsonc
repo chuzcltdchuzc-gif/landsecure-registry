@@ -3,20 +3,16 @@
   "type": "object",
   "properties": {
     "parcel_id": {
-      "type": "string",
-      "description": "Reference to land parcel ID"
+      "type": "string"
     },
     "parcel_number": {
-      "type": "string",
-      "description": "Parcel number"
+      "type": "string"
     },
     "agent_email": {
-      "type": "string",
-      "description": "Field agent who created the report"
+      "type": "string"
     },
     "agent_name": {
-      "type": "string",
-      "description": "Agent full name"
+      "type": "string"
     },
     "report_type": {
       "type": "string",
@@ -27,40 +23,80 @@
         "drone_survey",
         "site_inspection",
         "verification"
-      ],
-      "description": "Type of field report"
+      ]
     },
     "latitude": {
-      "type": "number",
-      "description": "GPS latitude captured"
+      "type": "number"
     },
     "longitude": {
+      "type": "number"
+    },
+    "gps_accuracy": {
       "type": "number",
-      "description": "GPS longitude captured"
+      "description": "GPS accuracy in meters (lower is better)"
+    },
+    "capture_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Exact device capture time"
+    },
+    "device_identifier": {
+      "type": "string",
+      "description": "Device ID or model"
+    },
+    "network_status": {
+      "type": "string",
+      "enum": [
+        "online",
+        "offline",
+        "synced_offline"
+      ],
+      "default": "online"
+    },
+    "capture_method": {
+      "type": "string",
+      "enum": [
+        "manual_entry",
+        "gps_auto",
+        "imported"
+      ],
+      "default": "manual_entry"
     },
     "photos": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Photo URLs"
+      }
     },
     "description": {
-      "type": "string",
-      "description": "Report description and findings"
+      "type": "string"
     },
     "boundary_valid": {
-      "type": "boolean",
-      "description": "Whether boundary matched records"
+      "type": "boolean"
     },
     "status": {
       "type": "string",
       "enum": [
         "draft",
         "submitted",
-        "reviewed"
+        "reviewed",
+        "flagged"
       ],
       "default": "draft"
+    },
+    "quality_flag": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "warn",
+        "fail"
+      ],
+      "default": "pass",
+      "description": "Automated quality check result"
+    },
+    "quality_notes": {
+      "type": "string",
+      "description": "Automated quality check notes"
     }
   },
   "required": [

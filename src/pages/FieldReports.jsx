@@ -28,6 +28,10 @@ export default function FieldReports() {
     latitude: "",
     longitude: "",
     boundary_valid: false,
+    gps_accuracy: "",
+    device_identifier: "",
+    network_status: navigator.onLine ? "online" : "offline",
+    capture_method: "manual_entry",
   });
   const [photos, setPhotos] = useState([]);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
@@ -44,7 +48,10 @@ export default function FieldReports() {
         (pos) => {
           set("latitude", pos.coords.latitude.toString());
           set("longitude", pos.coords.longitude.toString());
-          toast.success("GPS coordinates captured");
+          set("gps_accuracy", pos.coords.accuracy?.toFixed(1) || "");
+          set("capture_method", "gps_auto");
+          set("capture_timestamp", new Date().toISOString());
+          toast.success(`GPS captured (accuracy: ${pos.coords.accuracy?.toFixed(1)}m)`);
         },
         () => toast.error("Could not get GPS location")
       );
@@ -58,15 +65,27 @@ export default function FieldReports() {
         const { file_url } = await base44.integrations.Core.UploadFile({ file: photo });
         photoUrls.push(file_url);
       }
+      // Automated quality check
+      const qualityIssues = [];
+      if (!form.latitude || !form.longitude) qualityIssues.push("Missing GPS coordinates");
+      if (photos.length < 1) qualityIssues.push("No photographs attached");
+      if (!form.description.trim()) qualityIssues.push("Missing field notes");
+      if (form.gps_accuracy && parseFloat(form.gps_accuracy) > 20) qualityIssues.push(`GPS accuracy poor (${form.gps_accuracy}m > 20m threshold)`);
+      const qualityFlag = qualityIssues.length === 0 ? "pass" : qualityIssues.length === 1 ? "warn" : "fail";
+
       await base44.entities.FieldReport.create({
         ...form,
         parcel_id: "",
         latitude: form.latitude ? parseFloat(form.latitude) : undefined,
         longitude: form.longitude ? parseFloat(form.longitude) : undefined,
+        gps_accuracy: form.gps_accuracy ? parseFloat(form.gps_accuracy) : undefined,
+        capture_timestamp: form.capture_timestamp || new Date().toISOString(),
         photos: photoUrls,
         agent_email: user?.email,
         agent_name: user?.full_name,
         status: "submitted",
+        quality_flag: qualityFlag,
+        quality_notes: qualityIssues.join("; ") || "All checks passed",
       });
     },
     onSuccess: () => {
@@ -160,10 +179,16 @@ export default function FieldReports() {
                     <p className="text-sm font-medium">{r.report_type?.replace(/_/g, " ")}</p>
                     <p className="text-xs text-muted-foreground">Parcel: {r.parcel_number || "N/A"}</p>
                     <p className="text-xs text-muted-foreground line-clamp-1">{r.description}</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">{format(new Date(r.created_date), "MMM d, yyyy")}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                      {format(new Date(r.created_date), "MMM d, yyyy")}
+                      {r.gps_accuracy != null && ` · GPS: ${r.gps_accuracy}m`}
+                    </p>
                   </div>
                 </div>
-                <StatusBadge status={r.status} />
+                <div className="flex flex-col items-end gap-1">
+                  <StatusBadge status={r.status} />
+                  {r.quality_flag && r.quality_flag !== "pass" && <StatusBadge status={r.quality_flag === "fail" ? "rejected" : "pending"} />}
+                </div>
               </CardContent>
             </Card>
           ))}
