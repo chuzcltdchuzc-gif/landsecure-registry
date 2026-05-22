@@ -9,10 +9,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Camera, Plus, MapPin } from "lucide-react";
+import { Camera, Plus, MapPin, WifiOff } from "lucide-react";
 import StatusBadge from "../components/shared/StatusBadge";
 import EmptyState from "../components/shared/EmptyState";
 import LoadingSpinner from "../components/shared/LoadingSpinner";
+import OfflineSyncManager, { useOfflineQueue } from "@/components/field/OfflineSyncManager";
 import { useOutletContext } from "react-router-dom";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -34,6 +35,8 @@ export default function FieldReports() {
     capture_method: "manual_entry",
   });
   const [photos, setPhotos] = useState([]);
+  const [isOnline] = useState(navigator.onLine);
+  const { enqueue } = useOfflineQueue();
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   const { data: reports = [], isLoading } = useQuery({
@@ -60,6 +63,20 @@ export default function FieldReports() {
 
   const createMutation = useMutation({
     mutationFn: async () => {
+      // Priority 4: If offline, queue locally
+      if (!navigator.onLine) {
+        const payload = {
+          ...form,
+          latitude: form.latitude ? parseFloat(form.latitude) : undefined,
+          longitude: form.longitude ? parseFloat(form.longitude) : undefined,
+          gps_accuracy: form.gps_accuracy ? parseFloat(form.gps_accuracy) : undefined,
+          parcel_id: "",
+          status: "submitted",
+        };
+        enqueue({ operation_type: "field_report", payload });
+        return { offline: true };
+      }
+
       const photoUrls = [];
       for (const photo of photos) {
         const { file_url } = await base44.integrations.Core.UploadFile({ file: photo });
@@ -88,10 +105,17 @@ export default function FieldReports() {
         quality_notes: qualityIssues.join("; ") || "All checks passed",
       });
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
+      if (result?.offline) {
+        setOpen(false);
+        setForm({ parcel_number: "", report_type: "", description: "", latitude: "", longitude: "", boundary_valid: false, gps_accuracy: "", device_identifier: "", network_status: "offline", capture_method: "manual_entry" });
+        setPhotos([]);
+        toast.warning("Offline — report saved to local queue. Sync when connected.");
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ["field-reports"] });
       setOpen(false);
-      setForm({ parcel_number: "", report_type: "", description: "", latitude: "", longitude: "", boundary_valid: false });
+      setForm({ parcel_number: "", report_type: "", description: "", latitude: "", longitude: "", boundary_valid: false, gps_accuracy: "", device_identifier: "", network_status: navigator.onLine ? "online" : "offline", capture_method: "manual_entry" });
       setPhotos([]);
       toast.success("Report submitted");
     },
@@ -103,7 +127,10 @@ export default function FieldReports() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Field Reports</h1>
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            Field Reports
+            {!isOnline && <WifiOff className="w-5 h-5 text-amber-500" />}
+          </h1>
           <p className="text-sm text-muted-foreground mt-1">{reports.length} reports</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
@@ -163,6 +190,8 @@ export default function FieldReports() {
           </DialogContent>
         </Dialog>
       </div>
+
+      <OfflineSyncManager user={user} />
 
       {reports.length === 0 ? (
         <EmptyState icon={Camera} title="No reports" description="Create your first field report" />

@@ -1,0 +1,59 @@
+{
+  "name": "OfflineQueue",
+  "type": "object",
+  "properties": {
+    "agent_email": {
+      "type": "string"
+    },
+    "agent_name": {
+      "type": "string"
+    },
+    "operation_type": {
+      "type": "string",
+      "enum": [
+        "field_report",
+        "parcel_registration",
+        "photo_upload"
+      ],
+      "description": "Type of queued operation"
+    },
+    "payload": {
+      "type": "string",
+      "description": "JSON string of the queued data"
+    },
+    "photo_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Already-uploaded photo URLs"
+    },
+    "captured_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When data was captured offline"
+    },
+    "sync_status": {
+      "type": "string",
+      "enum": [
+        "queued",
+        "syncing",
+        "synced",
+        "failed"
+      ],
+      "default": "queued"
+    },
+    "sync_error": {
+      "type": "string"
+    },
+    "synced_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "agent_email",
+    "operation_type",
+    "payload"
+  ]
+}

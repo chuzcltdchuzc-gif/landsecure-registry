@@ -3,23 +3,31 @@ import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import {
   FileText, Search, MapPin, User, Calendar, ExternalLink, Filter,
-  CheckCircle2, Clock, AlertTriangle,
+  CheckCircle2, Clock, AlertTriangle, GitBranch, ShieldAlert,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import LoadingSpinner from "@/components/shared/LoadingSpinner";
 import StatusBadge from "@/components/shared/StatusBadge";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { useOutletContext } from "react-router-dom";
 import { format } from "date-fns";
 
 export default function PendingApprovals() {
+  const { user } = useOutletContext();
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [landUseFilter, setLandUseFilter] = useState("all");
   const [verificationFilter, setVerificationFilter] = useState("all");
+  const [activeTab, setActiveTab] = useState("registrations"); // registrations | revisions
 
   const { data: parcels = [], isLoading } = useQuery({
     queryKey: ["pending-parcels-approval"],
@@ -29,6 +37,34 @@ export default function PendingApprovals() {
   const { data: surveyDocs = [] } = useQuery({
     queryKey: ["survey-docs-pending"],
     queryFn: () => base44.entities.SurveyDocument.filter({ review_status: "pending" }, "-created_date", 200),
+  });
+
+  const { data: revisionRequests = [] } = useQuery({
+    queryKey: ["revision-requests-pending"],
+    queryFn: () => base44.entities.ParcelRevision.filter({ status: "pending" }, "-created_date", 100),
+  });
+
+  const reviewRevisionMutation = useMutation({
+    mutationFn: async ({ revision, decision, notes }) => {
+      await base44.entities.ParcelRevision.update(revision.id, {
+        status: decision,
+        reviewed_by: user?.email,
+        review_notes: notes,
+        reviewed_date: new Date().toISOString(),
+      });
+      await base44.entities.AuditLog.create({
+        user_email: user?.email,
+        user_name: user?.full_name,
+        action: `${decision === "approved" ? "Approved" : "Rejected"} revision request for parcel ${revision.parcel_number}`,
+        entity_type: "ParcelRevision",
+        entity_id: revision.id,
+        details: notes,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["revision-requests-pending"] });
+      toast.success("Revision request reviewed");
+    },
   });
 
   if (isLoading) return <LoadingSpinner text="Loading pending approvals..." />;
@@ -75,6 +111,24 @@ export default function PendingApprovals() {
           <Clock className="w-4 h-4 text-amber-600" />
           <span className="text-amber-700 font-medium">{filtered.length} pending</span>
         </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-2 border-b border-border pb-1">
+        <button
+          onClick={() => setActiveTab("registrations")}
+          className={`text-sm font-medium pb-2 px-1 border-b-2 transition-colors ${activeTab === "registrations" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+        >
+          Registrations ({filtered?.length || 0})
+        </button>
+        <button
+          onClick={() => setActiveTab("revisions")}
+          className={`text-sm font-medium pb-2 px-1 border-b-2 transition-colors flex items-center gap-1.5 ${activeTab === "revisions" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+        >
+          <GitBranch className="w-3.5 h-3.5" />
+          Revision Requests ({revisionRequests.length})
+          {revisionRequests.length > 0 && <span className="w-4 h-4 rounded-full bg-amber-500 text-white text-[9px] flex items-center justify-center">{revisionRequests.length}</span>}
+        </button>
       </div>
 
       {/* Summary Cards */}
@@ -129,8 +183,8 @@ export default function PendingApprovals() {
         </Card>
       </div>
 
-      {/* Filters */}
-      <Card>
+      {/* Filters — registration tab only */}
+      {activeTab === "registrations" && <Card>
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
@@ -171,10 +225,10 @@ export default function PendingApprovals() {
             </Select>
           </div>
         </CardContent>
-      </Card>
+      </Card>}
 
       {/* Ready for Approval (has pending survey docs) */}
-      {withDocs.length > 0 && (
+      {activeTab === "registrations" && withDocs.length > 0 && (
         <div>
           <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
             <FileText className="w-4 h-4 text-blue-600" />
@@ -196,7 +250,7 @@ export default function PendingApprovals() {
       )}
 
       {/* Awaiting Documentation */}
-      {withoutDocs.length > 0 && (
+      {activeTab === "registrations" && withoutDocs.length > 0 && (
         <div>
           <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
             <Clock className="w-4 h-4 text-amber-600" />
@@ -217,7 +271,7 @@ export default function PendingApprovals() {
         </div>
       )}
 
-      {filtered.length === 0 && (
+      {activeTab === "registrations" && filtered.length === 0 && (
         <Card>
           <CardContent className="py-16 text-center">
             <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto mb-3" />
@@ -226,7 +280,85 @@ export default function PendingApprovals() {
           </CardContent>
         </Card>
       )}
+
+      {/* Revision Requests Tab */}
+      {activeTab === "revisions" && (
+        <div className="space-y-3">
+          {revisionRequests.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <GitBranch className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+                <p className="text-sm font-medium text-foreground">No pending revision requests</p>
+              </CardContent>
+            </Card>
+          ) : (
+            revisionRequests.map((r) => (
+              <RevisionRow key={r.id} revision={r} onReview={reviewRevisionMutation.mutate} isLoading={reviewRevisionMutation.isPending} />
+            ))
+          )}
+        </div>
+      )}
     </div>
+  );
+}
+
+function RevisionRow({ revision, onReview, isLoading }) {
+  const [notes, setNotes] = useState("");
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <Card className="border-amber-200">
+      <CardContent className="p-4 space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm font-semibold font-mono">#{revision.parcel_number}</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 capitalize">
+                {revision.revision_type?.replace(/_/g, " ")}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground">Requested by: {revision.requested_by_name || revision.requested_by}</p>
+            <p className="text-xs text-foreground mt-1">{revision.justification}</p>
+            <p className="text-[10px] text-muted-foreground">{format(new Date(revision.created_date), "MMM d, yyyy")}</p>
+          </div>
+          <Button size="sm" variant="ghost" className="text-xs h-7" onClick={() => setExpanded(!expanded)}>
+            {expanded ? "Collapse" : "Review"}
+          </Button>
+        </div>
+        {expanded && (
+          <div className="pt-3 border-t border-border space-y-3">
+            <div>
+              <Label className="text-xs">Review Notes</Label>
+              <Textarea
+                placeholder="Add review notes..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={2}
+                className="mt-1"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
+                onClick={() => onReview({ revision, decision: "approved", notes })}
+                disabled={isLoading}
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" /> Approve
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => onReview({ revision, decision: "rejected", notes })}
+                disabled={isLoading}
+              >
+                Reject
+              </Button>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 

@@ -1,0 +1,66 @@
+{
+  "name": "ParcelRevision",
+  "type": "object",
+  "properties": {
+    "parcel_id": {
+      "type": "string",
+      "description": "Approved/locked parcel requesting revision"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "requested_by": {
+      "type": "string",
+      "description": "Email of requester"
+    },
+    "requested_by_name": {
+      "type": "string"
+    },
+    "revision_type": {
+      "type": "string",
+      "enum": [
+        "boundary_correction",
+        "ownership_update",
+        "address_correction",
+        "land_use_change",
+        "documentation_update",
+        "other"
+      ],
+      "description": "Type of change requested"
+    },
+    "justification": {
+      "type": "string",
+      "description": "Reason for the revision request"
+    },
+    "proposed_changes": {
+      "type": "string",
+      "description": "JSON string of proposed field changes"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "withdrawn"
+      ],
+      "default": "pending"
+    },
+    "reviewed_by": {
+      "type": "string"
+    },
+    "review_notes": {
+      "type": "string"
+    },
+    "reviewed_date": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "parcel_id",
+    "requested_by",
+    "revision_type",
+    "justification"
+  ]
+}

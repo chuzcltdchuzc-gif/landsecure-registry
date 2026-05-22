@@ -5,7 +5,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import StatusBadge from "../shared/StatusBadge";
 import FraudRiskPanel from "../fraud/FraudRiskPanel";
-import { MapPin, User, Ruler, FileText, Calendar } from "lucide-react";
+import ParcelRevisionRequest from "./ParcelRevisionRequest";
+import { MapPin, User, Ruler, FileText, Calendar, ShieldCheck } from "lucide-react";
 import { format } from "date-fns";
 
 export default function LandDetailModal({ parcel, onClose }) {
@@ -89,6 +90,30 @@ export default function LandDetailModal({ parcel, onClose }) {
             </div>
           )}
 
+          {/* Spatial validation summary */}
+          {parcel.spatial_validation_status && parcel.spatial_validation_status !== "not_validated" && (
+            <div className={`p-3 rounded-lg border text-xs ${
+              parcel.spatial_validation_status === "valid"
+                ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                : "bg-amber-50 border-amber-200 text-amber-800"
+            }`}>
+              <p className="font-semibold flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                Spatial Validation: {parcel.spatial_validation_status.replace(/_/g, " ")}
+              </p>
+              {parcel.spatial_conflict_notes && (
+                <p className="mt-1 opacity-80">
+                  {(() => { try { return JSON.parse(parcel.spatial_conflict_notes).join(" · "); } catch { return parcel.spatial_conflict_notes; } })()}
+                </p>
+              )}
+              {parcel.boundary_area && (
+                <p className="mt-1 opacity-80">
+                  Area: {(parcel.boundary_area / 10000).toFixed(4)} ha · Perimeter: {parcel.boundary_perimeter?.toFixed(0)} m
+                </p>
+              )}
+            </div>
+          )}
+
           <FraudRiskPanel
             parcel={parcel}
             allParcels={allParcels}
@@ -96,6 +121,8 @@ export default function LandDetailModal({ parcel, onClose }) {
             ownershipHistory={ownershipHistory}
             disputes={disputes}
           />
+
+          <ParcelRevisionRequest parcel={parcel} user={null} />
         </div>
       </DialogContent>
     </Dialog>

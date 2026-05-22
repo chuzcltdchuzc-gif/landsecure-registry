@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polygon } from "react-leaflet";
+import { parseGeoJSON, outerRing } from "@/lib/spatialValidation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import StatusBadge from "../components/shared/StatusBadge";
 import LoadingSpinner from "../components/shared/LoadingSpinner";
@@ -51,21 +52,51 @@ export default function GISMap() {
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
-                {mappableParcels.map((parcel) => (
-                  <Marker
-                    key={parcel.id}
-                    position={[parcel.latitude, parcel.longitude]}
-                    eventHandlers={{ click: () => setSelectedParcel(parcel) }}
-                  >
-                    <Popup>
-                      <div className="text-sm">
-                        <p className="font-semibold">{parcel.parcel_number}</p>
-                        <p className="text-xs">{parcel.owner_name}</p>
-                        <p className="text-xs text-gray-500">{parcel.address}</p>
-                      </div>
-                    </Popup>
-                  </Marker>
-                ))}
+                {parcels.map((parcel) => {
+                  const geom = parseGeoJSON(parcel.parcel_boundary);
+                  const ring = outerRing(geom);
+                  const hasPolygon = ring.length >= 3;
+                  const polygonPositions = hasPolygon ? ring.map(([lng, lat]) => [lat, lng]) : [];
+
+                  const conflictColor = {
+                    valid: "#16a34a",
+                    overlap_warning: "#d97706",
+                    duplicate_warning: "#ea580c",
+                    invalid_geometry: "#dc2626",
+                    conflict_blocked: "#dc2626",
+                  }[parcel.spatial_validation_status] || "#3b82f6";
+
+                  return (
+                    <React.Fragment key={parcel.id}>
+                      {hasPolygon && (
+                        <Polygon
+                          positions={polygonPositions}
+                          pathOptions={{ color: conflictColor, fillOpacity: 0.12, weight: 2 }}
+                          eventHandlers={{ click: () => setSelectedParcel(parcel) }}
+                        />
+                      )}
+                      {parcel.latitude && parcel.longitude && (
+                        <Marker
+                          position={[parcel.latitude, parcel.longitude]}
+                          eventHandlers={{ click: () => setSelectedParcel(parcel) }}
+                        >
+                          <Popup>
+                            <div className="text-sm">
+                              <p className="font-semibold">{parcel.parcel_number}</p>
+                              <p className="text-xs">{parcel.owner_name}</p>
+                              <p className="text-xs text-gray-500">{parcel.address}</p>
+                              {parcel.spatial_validation_status && parcel.spatial_validation_status !== "not_validated" && (
+                                <p className="text-xs font-medium mt-1" style={{ color: conflictColor }}>
+                                  ⬡ {parcel.spatial_validation_status.replace(/_/g, " ")}
+                                </p>
+                              )}
+                            </div>
+                          </Popup>
+                        </Marker>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
               </MapContainer>
             </div>
           </Card>

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { MapPin, Upload, Save } from "lucide-react";
+import { MapPin, Upload, Save, AlertTriangle } from "lucide-react";
+import ParcelPolygonEditor from "@/components/gis/ParcelPolygonEditor";
 
 export default function RegisterLand() {
   const { user } = useOutletContext();
@@ -31,6 +32,12 @@ export default function RegisterLand() {
   const [surveyFile, setSurveyFile] = useState(null);
   const [cadFile, setCadFile] = useState(null);
   const [photos, setPhotos] = useState([]);
+  const [polygonData, setPolygonData] = useState({ geojsonStr: null, areaSqm: null, perimeterM: null, validationStatus: "not_validated", issues: [] });
+
+  const { data: allParcels = [] } = useQuery({
+    queryKey: ["all-parcels-for-validation"],
+    queryFn: () => base44.entities.LandParcel.list("-created_date", 500),
+  });
 
   const set = (key, val) => setForm((f) => ({ ...f, [key]: val }));
 
@@ -64,6 +71,13 @@ export default function RegisterLand() {
         registered_by: user?.email,
         status: "pending",
         verification_status: "unverified",
+        parcel_boundary: polygonData.geojsonStr || undefined,
+        boundary_area: polygonData.areaSqm || undefined,
+        boundary_perimeter: polygonData.perimeterM || undefined,
+        boundary_source: polygonData.geojsonStr ? "manual_entry" : undefined,
+        boundary_capture_date: polygonData.geojsonStr ? new Date().toISOString().split("T")[0] : undefined,
+        spatial_validation_status: polygonData.validationStatus,
+        spatial_conflict_notes: polygonData.issues?.length > 0 ? JSON.stringify(polygonData.issues) : undefined,
       });
 
       await base44.entities.AuditLog.create({
@@ -161,6 +175,34 @@ export default function RegisterLand() {
             <Label>Notes</Label>
             <Textarea value={form.notes} onChange={(e) => set("notes", e.target.value)} placeholder="Additional notes..." />
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Polygon Editor */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-primary" /> Parcel Boundary (GIS Polygon)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-xs text-muted-foreground">
+            Draw the parcel boundary on the map. Click vertices to define the polygon shape. Area and perimeter are calculated automatically.
+          </p>
+          {polygonData.validationStatus === "conflict_blocked" || polygonData.validationStatus === "invalid_geometry" ? (
+            <div className="flex items-center gap-2 p-2 rounded bg-red-50 border border-red-200">
+              <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0" />
+              <p className="text-xs text-red-800 font-medium">Spatial conflicts detected — submission may be reviewed more carefully</p>
+            </div>
+          ) : null}
+          <ParcelPolygonEditor
+            value={polygonData.geojsonStr}
+            onChange={(geojsonStr, areaSqm, perimeterM, validationStatus, issues) =>
+              setPolygonData({ geojsonStr, areaSqm, perimeterM, validationStatus: validationStatus || "not_validated", issues: issues || [] })
+            }
+            allParcels={allParcels}
+            parcel={{ parcel_number: form.parcel_number }}
+          />
         </CardContent>
       </Card>
 

@@ -4,7 +4,8 @@ import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle, XCircle, MapPin, Eye } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle, XCircle, MapPin, Eye, AlertTriangle, Lock, ShieldAlert } from "lucide-react";
 import StatusBadge from "../components/shared/StatusBadge";
 import LoadingSpinner from "../components/shared/LoadingSpinner";
 import EmptyState from "../components/shared/EmptyState";
@@ -26,8 +27,14 @@ export default function Approvals() {
 
   const approveMutation = useMutation({
     mutationFn: async (parcel) => {
+      // Priority 2: Block approvals when spatial conflict exists
+      const blockedStatuses = ["conflict_blocked", "invalid_geometry", "overlap_warning", "duplicate_warning"];
+      if (blockedStatuses.includes(parcel.spatial_validation_status)) {
+        throw new Error(`Cannot approve: spatial validation status is '${parcel.spatial_validation_status}'. Resolve conflicts first.`);
+      }
+
       await base44.entities.LandParcel.update(parcel.id, {
-        status: "approved",
+        status: "approved_locked", // Priority 3: lock on approval
         approved_by: user?.email,
         approval_date: new Date().toISOString().split("T")[0],
       });
@@ -103,12 +110,31 @@ export default function Approvals() {
                     <div>
                       <p className="font-semibold">{parcel.parcel_number}</p>
                       <p className="text-sm text-muted-foreground">{parcel.owner_name} — {parcel.address}</p>
-                      <div className="flex gap-2 mt-2">
+                      <div className="flex gap-2 mt-2 flex-wrap">
                         <StatusBadge status={parcel.verification_status} />
                         {parcel.land_use && (
                           <span className="text-xs text-muted-foreground">{parcel.land_use.replace(/_/g, " ")}</span>
                         )}
+                        {/* Spatial conflict indicator */}
+                        {parcel.spatial_validation_status && parcel.spatial_validation_status !== "not_validated" && parcel.spatial_validation_status !== "valid" && (
+                          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 text-[10px] gap-1">
+                            <ShieldAlert className="w-3 h-3" />
+                            {parcel.spatial_validation_status.replace(/_/g, " ")}
+                          </Badge>
+                        )}
+                        {parcel.spatial_validation_status === "valid" && (
+                          <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px] gap-1">
+                            <CheckCircle className="w-3 h-3" /> Spatial OK
+                          </Badge>
+                        )}
                       </div>
+                      {/* Spatial conflict warning */}
+                      {["conflict_blocked","invalid_geometry","overlap_warning","duplicate_warning"].includes(parcel.spatial_validation_status) && (
+                        <div className="flex items-center gap-1.5 mt-2 p-2 rounded bg-red-50 border border-red-200">
+                          <AlertTriangle className="w-3.5 h-3.5 text-red-600 flex-shrink-0" />
+                          <p className="text-xs text-red-800">Spatial conflicts detected — approval blocked until resolved</p>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -118,11 +144,15 @@ export default function Approvals() {
                     </Button>
                     <Button
                       size="sm"
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
                       onClick={() => approveMutation.mutate(parcel)}
-                      disabled={approveMutation.isPending}
+                      disabled={
+                        approveMutation.isPending ||
+                        ["conflict_blocked","invalid_geometry"].includes(parcel.spatial_validation_status)
+                      }
+                      title={["conflict_blocked","invalid_geometry"].includes(parcel.spatial_validation_status) ? "Blocked: resolve spatial conflicts first" : undefined}
                     >
-                      <CheckCircle className="w-4 h-4 mr-1" /> Approve
+                      <CheckCircle className="w-4 h-4 mr-1" /> Approve & Lock
                     </Button>
                     <Button
                       size="sm"

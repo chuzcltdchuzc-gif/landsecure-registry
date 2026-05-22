@@ -1,0 +1,57 @@
+{
+  "name": "DocVersion",
+  "type": "object",
+  "properties": {
+    "document_id": {
+      "type": "string",
+      "description": "Parent SurveyDocument ID"
+    },
+    "parcel_id": {
+      "type": "string"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "version_number": {
+      "type": "number",
+      "description": "Sequential version number"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "Archived file URL for this version"
+    },
+    "document_type": {
+      "type": "string"
+    },
+    "uploaded_by": {
+      "type": "string"
+    },
+    "uploaded_by_name": {
+      "type": "string"
+    },
+    "change_notes": {
+      "type": "string",
+      "description": "What changed in this version"
+    },
+    "lifecycle_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "superseded",
+        "archived",
+        "withdrawn"
+      ],
+      "default": "active"
+    },
+    "checksum": {
+      "type": "string",
+      "description": "File integrity checksum"
+    }
+  },
+  "required": [
+    "document_id",
+    "version_number",
+    "file_url",
+    "uploaded_by"
+  ]
+}
