@@ -1,15 +1,19 @@
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import StatusBadge from "../shared/StatusBadge";
 import FraudRiskPanel from "../fraud/FraudRiskPanel";
 import ParcelRevisionRequest from "./ParcelRevisionRequest";
-import { MapPin, User, Ruler, FileText, Calendar, ShieldCheck } from "lucide-react";
+import FamilyOwnershipDialog from "../ownership/FamilyOwnershipDialog";
+import FamilyOwnershipPanel from "../ownership/FamilyOwnershipPanel";
+import { MapPin, User, Ruler, FileText, Calendar, ShieldCheck, Users } from "lucide-react";
 import { format } from "date-fns";
 
-export default function LandDetailModal({ parcel, onClose }) {
+export default function LandDetailModal({ parcel, onClose, user }) {
+  const [showFamilyDialog, setShowFamilyDialog] = useState(false);
   const { data: allParcels = [] } = useQuery({
     queryKey: ["all-parcels-risk"],
     queryFn: () => base44.entities.LandParcel.list("-created_date", 1000),
@@ -114,6 +118,25 @@ export default function LandDetailModal({ parcel, onClose }) {
             </div>
           )}
 
+          {/* Family Ownership Section */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-emerald-600" />
+                Family Ownership
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 text-xs gap-1.5"
+                onClick={() => setShowFamilyDialog(true)}
+              >
+                <Users className="w-3 h-3" /> Register Family
+              </Button>
+            </div>
+            <FamilyOwnershipPanel parcel={parcel} user={user} />
+          </div>
+
           <FraudRiskPanel
             parcel={parcel}
             allParcels={allParcels}
@@ -122,7 +145,16 @@ export default function LandDetailModal({ parcel, onClose }) {
             disputes={disputes}
           />
 
-          <ParcelRevisionRequest parcel={parcel} user={null} />
+          <ParcelRevisionRequest parcel={parcel} user={user} />
+
+          {showFamilyDialog && (
+            <FamilyOwnershipDialog
+              parcel={parcel}
+              user={user}
+              open={showFamilyDialog}
+              onClose={() => setShowFamilyDialog(false)}
+            />
+          )}
         </div>
       </DialogContent>
     </Dialog>

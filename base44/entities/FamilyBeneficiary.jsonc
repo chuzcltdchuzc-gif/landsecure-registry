@@ -1,0 +1,67 @@
+{
+  "name": "FamilyBeneficiary",
+  "type": "object",
+  "properties": {
+    "family_ownership_id": {
+      "type": "string",
+      "description": "Reference to FamilyOwnership ID"
+    },
+    "parcel_id": {
+      "type": "string"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "inheritance_rank": {
+      "type": "number",
+      "description": "Priority rank in inheritance order (1 = highest)"
+    },
+    "full_name": {
+      "type": "string"
+    },
+    "relationship": {
+      "type": "string",
+      "enum": [
+        "son",
+        "daughter",
+        "grandson",
+        "granddaughter",
+        "nephew",
+        "niece",
+        "brother",
+        "sister",
+        "cousin",
+        "spouse",
+        "other"
+      ]
+    },
+    "percentage_share": {
+      "type": "number",
+      "description": "Ownership percentage (0\u2013100)"
+    },
+    "allocated_plot": {
+      "type": "string",
+      "description": "Specific plot or portion allocated (e.g. Plot A, North section)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deceased",
+        "transferred",
+        "disputed",
+        "minor"
+      ],
+      "default": "active"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "family_ownership_id",
+    "full_name",
+    "relationship",
+    "percentage_share"
+  ]
+}

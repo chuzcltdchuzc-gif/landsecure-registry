@@ -1,0 +1,78 @@
+{
+  "name": "FamilyOwnership",
+  "type": "object",
+  "properties": {
+    "parcel_id": {
+      "type": "string",
+      "description": "Reference to LandParcel ID"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "family_name": {
+      "type": "string",
+      "description": "Name of the family (e.g. Adeyemi Family)"
+    },
+    "family_head": {
+      "type": "string",
+      "description": "Name of the family head"
+    },
+    "family_representative": {
+      "type": "string",
+      "description": "Appointed family representative"
+    },
+    "family_lineage": {
+      "type": "string",
+      "enum": [
+        "patrilineal",
+        "matrilineal",
+        "bilateral",
+        "other"
+      ],
+      "description": "Customary lineage system"
+    },
+    "family_notes": {
+      "type": "string",
+      "description": "Additional customary notes or agreements"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "in_transfer",
+        "disputed",
+        "archived"
+      ],
+      "default": "active"
+    },
+    "registered_by": {
+      "type": "string",
+      "description": "Email of officer who registered this"
+    },
+    "fruit_trees": {
+      "type": "number",
+      "default": 0
+    },
+    "buildings": {
+      "type": "number",
+      "default": 0
+    },
+    "boreholes": {
+      "type": "number",
+      "default": 0
+    },
+    "economic_trees": {
+      "type": "number",
+      "default": 0
+    },
+    "other_improvements": {
+      "type": "string",
+      "description": "Description of other improvements / assets"
+    }
+  },
+  "required": [
+    "parcel_id",
+    "family_name",
+    "family_head"
+  ]
+}

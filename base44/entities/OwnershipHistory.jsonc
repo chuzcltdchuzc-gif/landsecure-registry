@@ -26,7 +26,10 @@
         "government_allocation",
         "reallocation",
         "gift",
-        "court_order"
+        "court_order",
+        "family_inheritance",
+        "customary_allocation",
+        "family_partition"
       ],
       "description": "Type of ownership transfer"
     },
@@ -51,6 +54,14 @@
     "approved_by": {
       "type": "string",
       "description": "Approving officer email"
+    },
+    "family_ownership_id": {
+      "type": "string",
+      "description": "Linked FamilyOwnership record if applicable"
+    },
+    "beneficiary_id": {
+      "type": "string",
+      "description": "Linked FamilyBeneficiary if inheritance transfer"
     },
     "notes": {
       "type": "string"
