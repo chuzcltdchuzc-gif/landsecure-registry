@@ -1,0 +1,80 @@
+{
+  "name": "EvidenceChain",
+  "type": "object",
+  "properties": {
+    "document_id": {
+      "type": "string",
+      "description": "ID of linked document (any entity)"
+    },
+    "document_type": {
+      "type": "string",
+      "description": "Entity type: InheritanceDocument, SurveyDocument, etc."
+    },
+    "parcel_id": {
+      "type": "string"
+    },
+    "inheritance_case_id": {
+      "type": "string"
+    },
+    "file_url": {
+      "type": "string"
+    },
+    "file_name": {
+      "type": "string"
+    },
+    "upload_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "uploaded_by": {
+      "type": "string"
+    },
+    "uploaded_by_name": {
+      "type": "string"
+    },
+    "hash_fingerprint": {
+      "type": "string",
+      "description": "SHA-256 hash of file for integrity verification"
+    },
+    "version_number": {
+      "type": "number",
+      "default": 1
+    },
+    "previous_version_id": {
+      "type": "string",
+      "description": "EvidenceChain ID of prior version"
+    },
+    "approval_history": {
+      "type": "string",
+      "description": "JSON array of approval events with timestamps and actors"
+    },
+    "access_history": {
+      "type": "string",
+      "description": "JSON array of access events"
+    },
+    "lifecycle_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "superseded",
+        "archived",
+        "withdrawn"
+      ],
+      "default": "active"
+    },
+    "replacement_blocked": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once approved \u2014 prevents silent replacement"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "document_id",
+    "document_type",
+    "file_url",
+    "uploaded_by"
+  ]
+}

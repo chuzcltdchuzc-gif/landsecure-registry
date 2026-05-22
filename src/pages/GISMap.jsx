@@ -9,6 +9,9 @@ import LoadingSpinner from "../components/shared/LoadingSpinner";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useOutletContext } from "react-router-dom";
+import FamilyLineageOverlay from "@/components/gis/FamilyLineageOverlay";
+import { Button } from "@/components/ui/button";
+import { GitBranch } from "lucide-react";
 
 // Fix default marker icons in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -21,6 +24,7 @@ L.Icon.Default.mergeOptions({
 export default function GISMap() {
   const { user } = useOutletContext();
   const [selectedParcel, setSelectedParcel] = useState(null);
+  const [showLineageOverlay, setShowLineageOverlay] = useState(false);
 
   const { data: parcels = [], isLoading } = useQuery({
     queryKey: ["gis-parcels"],
@@ -46,7 +50,7 @@ export default function GISMap() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-3">
           <Card className="overflow-hidden">
-            <div style={{ height: "calc(100vh - 240px)", minHeight: "400px" }}>
+            <div style={{ height: "calc(100vh - 240px)", minHeight: "400px" }} className="relative">
               <MapContainer center={center} zoom={6} style={{ height: "100%", width: "100%" }} scrollWheelZoom>
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -98,6 +102,13 @@ export default function GISMap() {
                   );
                 })}
               </MapContainer>
+              {/* Family Lineage Overlay — appears when a parcel is selected and overlay is toggled */}
+              {showLineageOverlay && selectedParcel && (
+                <FamilyLineageOverlay
+                  parcel={selectedParcel}
+                  onClose={() => setShowLineageOverlay(false)}
+                />
+              )}
             </div>
           </Card>
         </div>
@@ -138,6 +149,15 @@ export default function GISMap() {
                       <p className="text-sm">{selectedParcel.size_hectares} hectares</p>
                     </div>
                   )}
+                  <Button
+                    size="sm"
+                    variant={showLineageOverlay ? "default" : "outline"}
+                    className="w-full gap-1.5 mt-2"
+                    onClick={() => setShowLineageOverlay(v => !v)}
+                  >
+                    <GitBranch className="w-3.5 h-3.5" />
+                    {showLineageOverlay ? "Hide" : "Show"} Family Lineage
+                  </Button>
                 </div>
               ) : (
                 <div className="text-center py-6">

@@ -24,6 +24,7 @@ import {
   Activity,
   Upload,
   GitBranch,
+  Landmark,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
@@ -41,6 +42,7 @@ const roleMenus = {
     { label: "Approvals", icon: Shield, path: "/approvals" },
     { label: "Land Registry", icon: Map, path: "/lands" },
     { label: "Inheritance Mgmt", icon: GitBranch, path: "/inheritance" },
+    { label: "Customary Governance", icon: Landmark, path: "/gov/customary-governance" },
     { label: "Survey Reviews", icon: Compass, path: "/survey-reviews" },
     { label: "Disputes", icon: AlertTriangle, path: "/disputes" },
     { label: "GIS Map", icon: Map, path: "/gis-map" },
@@ -66,6 +68,7 @@ const roleMenus = {
   super_admin: [
     { label: "Dashboard", icon: LayoutDashboard, path: "/" },
     { label: "Pilot Operations", icon: Activity, path: "/gov/pilot-dashboard" },
+    { label: "Customary Governance", icon: Landmark, path: "/gov/customary-governance" },
     { label: "Inheritance Mgmt", icon: GitBranch, path: "/inheritance" },
     { label: "User Management", icon: Users, path: "/gov/user-management" },
     { label: "Bulk Import", icon: Upload, path: "/gov/bulk-import" },
@@ -80,6 +83,7 @@ const roleMenus = {
   compliance_officer: [
     { label: "Dashboard", icon: LayoutDashboard, path: "/" },
     { label: "Pilot Operations", icon: Activity, path: "/gov/pilot-dashboard" },
+    { label: "Customary Governance", icon: Landmark, path: "/gov/customary-governance" },
     { label: "Pending Approvals", icon: ClipboardList, path: "/gov/pending-approvals" },
     { label: "Inheritance Mgmt", icon: GitBranch, path: "/inheritance" },
     { label: "Fraud Alerts", icon: AlertTriangle, path: "/gov/fraud-alerts" },

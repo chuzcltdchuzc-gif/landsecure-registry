@@ -1,0 +1,156 @@
+{
+  "name": "CommunityValidation",
+  "type": "object",
+  "properties": {
+    "parcel_id": {
+      "type": "string"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "family_ownership_id": {
+      "type": "string"
+    },
+    "inheritance_case_id": {
+      "type": "string"
+    },
+    "community_name": {
+      "type": "string"
+    },
+    "village_name": {
+      "type": "string"
+    },
+    "ward": {
+      "type": "string"
+    },
+    "district": {
+      "type": "string"
+    },
+    "lga": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "validation_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "validation_notes": {
+      "type": "string"
+    },
+    "family_representative": {
+      "type": "string"
+    },
+    "community_elder": {
+      "type": "string"
+    },
+    "village_head": {
+      "type": "string"
+    },
+    "ward_head": {
+      "type": "string"
+    },
+    "traditional_ruler": {
+      "type": "string"
+    },
+    "cdc_chairman": {
+      "type": "string",
+      "description": "Community Development Chairman"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "submitted",
+        "community_review",
+        "village_head_validation",
+        "traditional_authority_validation",
+        "compliance_review",
+        "surveyor_general_review",
+        "approved",
+        "rejected",
+        "clarification_requested"
+      ],
+      "default": "submitted"
+    },
+    "community_review_by": {
+      "type": "string"
+    },
+    "community_review_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "community_review_notes": {
+      "type": "string"
+    },
+    "village_head_validated_by": {
+      "type": "string"
+    },
+    "village_head_validation_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "village_head_notes": {
+      "type": "string"
+    },
+    "trad_authority_validated_by": {
+      "type": "string"
+    },
+    "trad_authority_validation_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trad_authority_notes": {
+      "type": "string"
+    },
+    "compliance_reviewed_by": {
+      "type": "string"
+    },
+    "compliance_review_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "compliance_notes": {
+      "type": "string"
+    },
+    "sg_reviewed_by": {
+      "type": "string"
+    },
+    "sg_review_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sg_notes": {
+      "type": "string"
+    },
+    "final_approved_by": {
+      "type": "string"
+    },
+    "final_approved_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "rejection_reason": {
+      "type": "string"
+    },
+    "clarification_request": {
+      "type": "string"
+    },
+    "submitted_by": {
+      "type": "string"
+    },
+    "submitted_by_name": {
+      "type": "string"
+    },
+    "is_deleted": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "community_name",
+    "lga",
+    "state",
+    "submitted_by"
+  ]
+}

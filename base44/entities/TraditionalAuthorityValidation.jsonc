@@ -1,0 +1,80 @@
+{
+  "name": "TraditionalAuthorityValidation",
+  "type": "object",
+  "properties": {
+    "parcel_id": {
+      "type": "string"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "family_ownership_id": {
+      "type": "string"
+    },
+    "inheritance_case_id": {
+      "type": "string"
+    },
+    "community_validation_id": {
+      "type": "string"
+    },
+    "traditional_institution": {
+      "type": "string",
+      "description": "e.g. Obi of Onitsha, Eze Nri"
+    },
+    "traditional_ruler_name": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string",
+      "description": "e.g. His Royal Highness, Chief"
+    },
+    "validation_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "conditionally_approved"
+      ],
+      "default": "pending"
+    },
+    "validation_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "comments": {
+      "type": "string"
+    },
+    "conditions": {
+      "type": "string",
+      "description": "Conditions if conditionally approved"
+    },
+    "digital_signature_url": {
+      "type": "string"
+    },
+    "seal_url": {
+      "type": "string"
+    },
+    "supporting_doc_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "submitted_by": {
+      "type": "string"
+    },
+    "submitted_by_name": {
+      "type": "string"
+    },
+    "is_deleted": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "traditional_ruler_name",
+    "traditional_institution",
+    "submitted_by"
+  ]
+}

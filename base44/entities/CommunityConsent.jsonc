@@ -1,0 +1,91 @@
+{
+  "name": "CommunityConsent",
+  "type": "object",
+  "properties": {
+    "parcel_id": {
+      "type": "string"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "family_ownership_id": {
+      "type": "string"
+    },
+    "inheritance_case_id": {
+      "type": "string"
+    },
+    "community_name": {
+      "type": "string"
+    },
+    "consent_type": {
+      "type": "string",
+      "enum": [
+        "individual",
+        "family",
+        "community",
+        "traditional_authority"
+      ],
+      "description": "Type of consent"
+    },
+    "representatives": {
+      "type": "string",
+      "description": "JSON array of representative names and roles"
+    },
+    "date_granted": {
+      "type": "string",
+      "format": "date"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "consent_notes": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "granted",
+        "revoked",
+        "expired"
+      ],
+      "default": "pending"
+    },
+    "supporting_doc_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "revoked_by": {
+      "type": "string"
+    },
+    "revocation_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "revocation_reason": {
+      "type": "string"
+    },
+    "approval_history": {
+      "type": "string",
+      "description": "JSON array of approval events"
+    },
+    "submitted_by": {
+      "type": "string"
+    },
+    "submitted_by_name": {
+      "type": "string"
+    },
+    "is_deleted": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "community_name",
+    "consent_type",
+    "submitted_by"
+  ]
+}

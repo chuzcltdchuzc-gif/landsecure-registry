@@ -1,0 +1,128 @@
+{
+  "name": "InheritanceDispute",
+  "type": "object",
+  "properties": {
+    "case_number": {
+      "type": "string",
+      "description": "Unique dispute case number"
+    },
+    "parcel_id": {
+      "type": "string"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "family_ownership_id": {
+      "type": "string"
+    },
+    "inheritance_case_id": {
+      "type": "string"
+    },
+    "beneficiary_id": {
+      "type": "string",
+      "description": "Linked beneficiary if relevant"
+    },
+    "dispute_type": {
+      "type": "string",
+      "enum": [
+        "beneficiary_allocation",
+        "share_percentage",
+        "boundary",
+        "lineage",
+        "successor",
+        "asset_ownership",
+        "witness_objection",
+        "community_objection",
+        "traditional_authority_objection"
+      ],
+      "description": "Type of inheritance dispute"
+    },
+    "complainant_name": {
+      "type": "string"
+    },
+    "complainant_email": {
+      "type": "string"
+    },
+    "complainant_relationship": {
+      "type": "string"
+    },
+    "respondent_name": {
+      "type": "string"
+    },
+    "respondent_email": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "evidence_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "hearing_dates": {
+      "type": "string",
+      "description": "JSON array of scheduled hearing dates"
+    },
+    "resolution_notes": {
+      "type": "string"
+    },
+    "decision_outcome": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "under_investigation",
+        "mediation",
+        "hearing",
+        "resolved",
+        "appealed",
+        "closed"
+      ],
+      "default": "open"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "medium"
+    },
+    "assigned_to": {
+      "type": "string"
+    },
+    "assigned_to_name": {
+      "type": "string"
+    },
+    "timeline": {
+      "type": "string",
+      "description": "JSON array of timeline events"
+    },
+    "filed_by": {
+      "type": "string"
+    },
+    "filed_by_name": {
+      "type": "string"
+    },
+    "resolved_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "is_deleted": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "dispute_type",
+    "complainant_name",
+    "description",
+    "filed_by"
+  ]
+}

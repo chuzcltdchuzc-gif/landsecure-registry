@@ -17,12 +17,26 @@ import SubdivisionPlanner from "./SubdivisionPlanner";
 import InheritanceCaseWorkflow from "./InheritanceCaseWorkflow";
 import CertificateGenerator from "./CertificateGenerator";
 import BeneficiaryManager from "./BeneficiaryManager";
+import FamilyMeetingResolutionManager from "@/components/customary/FamilyMeetingResolutionManager";
+import CommunityValidationWorkflow from "@/components/customary/CommunityValidationWorkflow";
+import TraditionalAuthorityPanel from "@/components/customary/TraditionalAuthorityPanel";
+import InheritanceDisputeManager from "@/components/customary/InheritanceDisputeManager";
+import DeathVerificationPanel from "@/components/customary/DeathVerificationPanel";
+import CommunityConsentManager from "@/components/customary/CommunityConsentManager";
+import EvidenceChainViewer from "@/components/customary/EvidenceChainViewer";
 
 const TABS = [
   { key: "overview", label: "Overview", icon: GitBranch },
   { key: "beneficiaries", label: "Beneficiaries", icon: Users },
   { key: "witnesses", label: "Witnesses", icon: UserCheck },
   { key: "documents", label: "Documents", icon: FileText },
+  { key: "resolutions", label: "Resolutions", icon: FileText },
+  { key: "community", label: "Community", icon: Users },
+  { key: "trad_authority", label: "Trad. Authority", icon: Award },
+  { key: "death_verif", label: "Death Verif.", icon: AlertTriangle },
+  { key: "disputes", label: "Disputes", icon: AlertCircle },
+  { key: "consents", label: "Consents", icon: UserCheck },
+  { key: "evidence", label: "Evidence Chain", icon: FileText },
   { key: "allocations", label: "Plot Allocation", icon: Map },
   { key: "subdivision", label: "Subdivision", icon: Map },
   { key: "certificate", label: "Certificate", icon: Award },
@@ -162,6 +176,27 @@ export default function InheritanceCaseDetail({ caseRecord, familyOwnership, use
       )}
       {activeTab === "documents" && (
         <InheritanceDocManager caseData={caseData} user={user} />
+      )}
+      {activeTab === "resolutions" && (
+        <FamilyMeetingResolutionManager caseData={caseData} familyOwnership={familyOwnership} user={user} />
+      )}
+      {activeTab === "community" && (
+        <CommunityValidationWorkflow caseData={caseData} familyOwnership={familyOwnership} user={user} />
+      )}
+      {activeTab === "trad_authority" && (
+        <TraditionalAuthorityPanel caseData={caseData} familyOwnership={familyOwnership} user={user} />
+      )}
+      {activeTab === "death_verif" && (
+        <DeathVerificationPanel caseData={caseData} familyOwnership={familyOwnership} user={user} />
+      )}
+      {activeTab === "disputes" && (
+        <InheritanceDisputeManager caseData={caseData} familyOwnership={familyOwnership} user={user} />
+      )}
+      {activeTab === "consents" && (
+        <CommunityConsentManager caseData={caseData} familyOwnership={familyOwnership} user={user} />
+      )}
+      {activeTab === "evidence" && (
+        <EvidenceChainViewer caseData={caseData} user={user} />
       )}
       {activeTab === "allocations" && (
         <PlotAllocationManager caseData={caseData} familyOwnership={familyOwnership} user={user} />

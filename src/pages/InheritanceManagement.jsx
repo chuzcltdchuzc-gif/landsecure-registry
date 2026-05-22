@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useOutletContext } from "react-router-dom";
 import {
   Users, GitBranch, FileText, ClipboardCheck, Map, Award,
-  Plus, Search, Filter, ChevronDown, ChevronUp,
+  Plus, Search, Filter, ChevronDown, ChevronUp, Landmark,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import InheritanceCaseDialog from "@/components/inheritance/InheritanceCaseDialo
 import InheritanceCaseDetail from "@/components/inheritance/InheritanceCaseDetail";
 import FamilyLineagePanel from "@/components/inheritance/FamilyLineagePanel";
 import InheritanceDashboardStats from "@/components/inheritance/InheritanceDashboardStats";
+import CustomaryGovernanceDashboard from "@/pages/gov/CustomaryGovernanceDashboard";
 import { format } from "date-fns";
 
 const WORKFLOW_STAGES = [
@@ -75,6 +76,7 @@ export default function InheritanceManagement() {
     { key: "cases", label: "Inheritance Cases", icon: GitBranch, count: cases.length },
     { key: "families", label: "Family Records", icon: Users, count: familyOwnerships.length },
     { key: "dashboard", label: "Analytics", icon: ClipboardCheck },
+    { key: "governance", label: "Governance", icon: Landmark },
   ];
 
   if (selectedCase) {
@@ -134,6 +136,11 @@ export default function InheritanceManagement() {
       {/* Dashboard Tab */}
       {activeTab === "dashboard" && (
         <InheritanceDashboardStats cases={cases} familyOwnerships={familyOwnerships} parcels={parcels} />
+      )}
+
+      {/* Governance Tab */}
+      {activeTab === "governance" && (
+        <CustomaryGovernanceDashboard />
       )}
 
       {/* Cases Tab */}

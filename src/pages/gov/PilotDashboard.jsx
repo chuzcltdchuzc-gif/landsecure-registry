@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { Link } from "react-router-dom";
 import {
   Activity, Map, CheckCircle2, Clock, AlertTriangle, Lock,
   Camera, FileText, Upload, TrendingUp, Download, Users,
-  BarChart2, RefreshCw,
+  BarChart2, RefreshCw, Landmark,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -74,6 +75,22 @@ export default function PilotDashboard() {
   const { data: familyOwnerships = [] } = useQuery({
     queryKey: ["pilot-family"],
     queryFn: () => base44.entities.FamilyOwnership.list("-created_date", 500),
+  });
+  const { data: communityValidations = [] } = useQuery({
+    queryKey: ["pilot-comm-validations"],
+    queryFn: () => base44.entities.CommunityValidation.filter({ is_deleted: false }, "-created_date", 500),
+  });
+  const { data: deathVerifs = [] } = useQuery({
+    queryKey: ["pilot-death-verifs"],
+    queryFn: () => base44.entities.DeathVerification.filter({ is_deleted: false }, "-created_date", 500),
+  });
+  const { data: inheritanceDisputes = [] } = useQuery({
+    queryKey: ["pilot-inheritance-disputes"],
+    queryFn: () => base44.entities.InheritanceDispute.filter({ is_deleted: false }, "-created_date", 500),
+  });
+  const { data: communityConsents = [] } = useQuery({
+    queryKey: ["pilot-consents"],
+    queryFn: () => base44.entities.CommunityConsent.filter({ is_deleted: false }, "-created_date", 500),
   });
 
   if (lp || ld || la) return <LoadingSpinner text="Loading Pilot Operations Dashboard..." />;
@@ -175,10 +192,17 @@ export default function PilotDashboard() {
             Real-time overview of the LGA pilot deployment
           </p>
         </div>
-        <Button variant="outline" onClick={exportCSV} disabled={exporting} className="gap-2 flex-shrink-0">
-          <Download className="w-4 h-4" />
-          {exporting ? "Exporting..." : "Export CSV"}
-        </Button>
+        <div className="flex gap-2">
+          <Link to="/gov/customary-governance">
+            <Button variant="outline" className="gap-2 flex-shrink-0">
+              <Landmark className="w-4 h-4" /> Customary Governance
+            </Button>
+          </Link>
+          <Button variant="outline" onClick={exportCSV} disabled={exporting} className="gap-2 flex-shrink-0">
+            <Download className="w-4 h-4" />
+            {exporting ? "Exporting..." : "Export CSV"}
+          </Button>
+        </div>
       </div>
 
       {/* Primary KPIs */}
@@ -203,6 +227,14 @@ export default function PilotDashboard() {
         <StatBox label="Inheritance Cases" value={inheritanceCases.length} icon={BarChart2} color="text-blue-600" bg="bg-blue-50" />
         <StatBox label="Pending Inheritance" value={inheritanceCases.filter(c => ["submitted","surveyor_review","compliance_review","surveyor_general_review"].includes(c.status)).length} icon={Clock} color="text-amber-600" bg="bg-amber-50" />
         <StatBox label="Approved Inheritances" value={inheritanceCases.filter(c => c.status === "approved").length} icon={CheckCircle2} color="text-emerald-600" bg="bg-emerald-50" />
+      </div>
+
+      {/* Customary Governance KPIs */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatBox label="Pending Community Reviews" value={communityValidations.filter(v => ["submitted","community_review","village_head_validation","traditional_authority_validation"].includes(v.status)).length} icon={Users} color="text-blue-600" bg="bg-blue-50" />
+        <StatBox label="Pending Death Verifications" value={deathVerifs.filter(v => v.verification_status === "pending").length} icon={Clock} color="text-red-600" bg="bg-red-50" />
+        <StatBox label="Active Inheritance Disputes" value={inheritanceDisputes.filter(d => !["resolved","closed"].includes(d.status)).length} icon={AlertTriangle} color="text-orange-600" bg="bg-orange-50" />
+        <StatBox label="Pending Consents" value={communityConsents.filter(c => c.status === "pending").length} icon={CheckCircle2} color="text-purple-600" bg="bg-purple-50" />
       </div>
 
       {/* Upload Velocity */}

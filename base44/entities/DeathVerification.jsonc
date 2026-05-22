@@ -1,0 +1,125 @@
+{
+  "name": "DeathVerification",
+  "type": "object",
+  "properties": {
+    "inheritance_case_id": {
+      "type": "string"
+    },
+    "family_ownership_id": {
+      "type": "string"
+    },
+    "parcel_id": {
+      "type": "string"
+    },
+    "deceased_name": {
+      "type": "string"
+    },
+    "date_of_death": {
+      "type": "string",
+      "format": "date"
+    },
+    "place_of_death": {
+      "type": "string"
+    },
+    "family_confirmation": {
+      "type": "boolean",
+      "default": false
+    },
+    "family_confirmed_by": {
+      "type": "string"
+    },
+    "family_confirmation_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "community_confirmation": {
+      "type": "boolean",
+      "default": false
+    },
+    "community_confirmed_by": {
+      "type": "string"
+    },
+    "community_confirmation_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "lg_confirmation": {
+      "type": "boolean",
+      "default": false
+    },
+    "lg_confirmed_by": {
+      "type": "string"
+    },
+    "lg_confirmation_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "court_confirmation": {
+      "type": "boolean",
+      "default": false
+    },
+    "court_confirmed_by": {
+      "type": "string"
+    },
+    "court_confirmation_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "death_certificate_url": {
+      "type": "string"
+    },
+    "court_declaration_url": {
+      "type": "string"
+    },
+    "probate_url": {
+      "type": "string"
+    },
+    "additional_evidence_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "verified",
+        "rejected",
+        "escalated"
+      ],
+      "default": "pending"
+    },
+    "verified_by": {
+      "type": "string"
+    },
+    "verified_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "rejection_reason": {
+      "type": "string"
+    },
+    "escalation_reason": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "submitted_by": {
+      "type": "string"
+    },
+    "submitted_by_name": {
+      "type": "string"
+    },
+    "is_deleted": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "deceased_name",
+    "date_of_death",
+    "submitted_by"
+  ]
+}
