@@ -23,6 +23,7 @@ import {
   ShieldCheck,
   Activity,
   Upload,
+  GitBranch,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
@@ -39,6 +40,7 @@ const roleMenus = {
     { label: "Dashboard", icon: LayoutDashboard, path: "/" },
     { label: "Approvals", icon: Shield, path: "/approvals" },
     { label: "Land Registry", icon: Map, path: "/lands" },
+    { label: "Inheritance Mgmt", icon: GitBranch, path: "/gov/inheritance" },
     { label: "Survey Reviews", icon: Compass, path: "/survey-reviews" },
     { label: "Disputes", icon: AlertTriangle, path: "/disputes" },
     { label: "GIS Map", icon: Map, path: "/gis-map" },
@@ -77,6 +79,7 @@ const roleMenus = {
     { label: "Dashboard", icon: LayoutDashboard, path: "/" },
     { label: "Pilot Operations", icon: Activity, path: "/gov/pilot-dashboard" },
     { label: "Pending Approvals", icon: ClipboardList, path: "/gov/pending-approvals" },
+    { label: "Inheritance Mgmt", icon: GitBranch, path: "/gov/inheritance" },
     { label: "Fraud Alerts", icon: AlertTriangle, path: "/gov/fraud-alerts" },
     { label: "Freeze Parcels", icon: Lock, path: "/gov/parcel-freeze" },
     { label: "Audit Reports", icon: FileText, path: "/gov/audit-reports" },

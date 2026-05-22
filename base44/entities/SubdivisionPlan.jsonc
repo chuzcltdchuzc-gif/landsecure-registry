@@ -1,0 +1,75 @@
+{
+  "name": "SubdivisionPlan",
+  "type": "object",
+  "properties": {
+    "inheritance_case_id": {
+      "type": "string"
+    },
+    "parent_parcel_id": {
+      "type": "string"
+    },
+    "parent_parcel_number": {
+      "type": "string"
+    },
+    "family_ownership_id": {
+      "type": "string"
+    },
+    "subdivision_version": {
+      "type": "number",
+      "default": 1,
+      "description": "Version of this subdivision plan"
+    },
+    "survey_reference": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "child_parcels": {
+      "type": "string",
+      "description": "JSON array of planned child parcel definitions"
+    },
+    "total_child_parcels": {
+      "type": "number"
+    },
+    "total_allocated_area_sqm": {
+      "type": "number"
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "submitted",
+        "approved",
+        "rejected",
+        "superseded"
+      ],
+      "default": "draft"
+    },
+    "approved_by": {
+      "type": "string"
+    },
+    "approved_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "created_by": {
+      "type": "string"
+    },
+    "is_deleted": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "parent_parcel_id",
+    "family_ownership_id",
+    "title"
+  ]
+}

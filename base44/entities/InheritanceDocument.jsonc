@@ -1,0 +1,83 @@
+{
+  "name": "InheritanceDocument",
+  "type": "object",
+  "properties": {
+    "inheritance_case_id": {
+      "type": "string"
+    },
+    "parcel_id": {
+      "type": "string"
+    },
+    "family_ownership_id": {
+      "type": "string"
+    },
+    "document_type": {
+      "type": "string",
+      "enum": [
+        "family_agreement",
+        "probate_document",
+        "court_order",
+        "consent_letter",
+        "customary_declaration",
+        "survey_plan",
+        "traditional_ruler_certification",
+        "other"
+      ]
+    },
+    "title": {
+      "type": "string"
+    },
+    "file_url": {
+      "type": "string"
+    },
+    "version_number": {
+      "type": "number",
+      "default": 1
+    },
+    "uploaded_by": {
+      "type": "string"
+    },
+    "uploaded_by_name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "lifecycle_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "superseded",
+        "archived",
+        "withdrawn"
+      ],
+      "default": "active"
+    },
+    "review_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending"
+    },
+    "reviewed_by": {
+      "type": "string"
+    },
+    "review_notes": {
+      "type": "string"
+    },
+    "is_deleted": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "inheritance_case_id",
+    "document_type",
+    "title",
+    "file_url",
+    "uploaded_by"
+  ]
+}

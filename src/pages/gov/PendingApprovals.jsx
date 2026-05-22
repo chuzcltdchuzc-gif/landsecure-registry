@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import {
@@ -27,7 +28,7 @@ export default function PendingApprovals() {
   const [search, setSearch] = useState("");
   const [landUseFilter, setLandUseFilter] = useState("all");
   const [verificationFilter, setVerificationFilter] = useState("all");
-  const [activeTab, setActiveTab] = useState("registrations"); // registrations | revisions
+  const [activeTab, setActiveTab] = useState("registrations"); // registrations | revisions | inheritance
 
   const { data: parcels = [], isLoading } = useQuery({
     queryKey: ["pending-parcels-approval"],
@@ -43,6 +44,14 @@ export default function PendingApprovals() {
     queryKey: ["revision-requests-pending"],
     queryFn: () => base44.entities.ParcelRevision.filter({ status: "pending" }, "-created_date", 100),
   });
+
+  const { data: inheritanceCasesPending = [] } = useQuery({
+    queryKey: ["inheritance-cases-pending"],
+    queryFn: () => base44.entities.InheritanceCase.filter({ is_deleted: false }, "-created_date", 200),
+  });
+  const pendingInheritance = inheritanceCasesPending.filter((c) =>
+    ["submitted", "surveyor_review", "compliance_review", "surveyor_general_review"].includes(c.status)
+  );
 
   const reviewRevisionMutation = useMutation({
     mutationFn: async ({ revision, decision, notes }) => {
@@ -128,6 +137,14 @@ export default function PendingApprovals() {
           <GitBranch className="w-3.5 h-3.5" />
           Revision Requests ({revisionRequests.length})
           {revisionRequests.length > 0 && <span className="w-4 h-4 rounded-full bg-amber-500 text-white text-[9px] flex items-center justify-center">{revisionRequests.length}</span>}
+        </button>
+        <button
+          onClick={() => setActiveTab("inheritance")}
+          className={`text-sm font-medium pb-2 px-1 border-b-2 transition-colors flex items-center gap-1.5 ${activeTab === "inheritance" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+        >
+          <ShieldAlert className="w-3.5 h-3.5" />
+          Inheritance Cases ({pendingInheritance.length})
+          {pendingInheritance.length > 0 && <span className="w-4 h-4 rounded-full bg-purple-500 text-white text-[9px] flex items-center justify-center">{pendingInheritance.length}</span>}
         </button>
       </div>
 
@@ -279,6 +296,52 @@ export default function PendingApprovals() {
             <p className="text-xs text-muted-foreground mt-1">All land registrations are up to date</p>
           </CardContent>
         </Card>
+      )}
+
+      {/* Inheritance Cases Tab */}
+      {activeTab === "inheritance" && (
+        <div className="space-y-3">
+          {pendingInheritance.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <ShieldAlert className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+                <p className="text-sm font-medium text-foreground">No pending inheritance cases</p>
+                <p className="text-xs text-muted-foreground mt-1">All cases are up to date</p>
+              </CardContent>
+            </Card>
+          ) : (
+            pendingInheritance.map((ic) => (
+              <Card key={ic.id} className="border-purple-200">
+                <CardContent className="p-4 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-semibold font-mono">{ic.case_reference}</span>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 capitalize">
+                          {ic.case_type?.replace(/_/g, " ")}
+                        </span>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 capitalize">
+                          {ic.status?.replace(/_/g, " ")}
+                        </span>
+                      </div>
+                      <p className="text-xs text-foreground truncate">{ic.case_title}</p>
+                      <p className="text-xs text-muted-foreground">Family: {ic.family_name} · Parcel: {ic.parcel_number}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        Initiated by {ic.initiated_by_name || ic.initiated_by}
+                        {ic.created_date && ` · ${format(new Date(ic.created_date), "MMM d, yyyy")}`}
+                      </p>
+                    </div>
+                    <Link to="/gov/inheritance">
+                      <Button size="sm" variant="outline" className="h-7 text-xs flex-shrink-0">
+                        Review
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
       )}
 
       {/* Revision Requests Tab */}

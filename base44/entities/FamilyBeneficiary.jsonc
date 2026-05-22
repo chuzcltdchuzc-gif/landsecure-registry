@@ -12,9 +12,21 @@
     "parcel_number": {
       "type": "string"
     },
+    "parent_beneficiary_id": {
+      "type": "string",
+      "description": "ID of parent beneficiary (for successor chains)"
+    },
     "inheritance_rank": {
       "type": "number",
-      "description": "Priority rank in inheritance order (1 = highest)"
+      "description": "Priority rank (1 = highest)"
+    },
+    "generation_level": {
+      "type": "number",
+      "description": "Generation level from family head"
+    },
+    "family_branch": {
+      "type": "string",
+      "description": "Which branch of the family"
     },
     "full_name": {
       "type": "string"
@@ -37,25 +49,57 @@
     },
     "percentage_share": {
       "type": "number",
-      "description": "Ownership percentage (0\u2013100)"
+      "description": "Ownership percentage (0-100)"
     },
     "allocated_plot": {
-      "type": "string",
-      "description": "Specific plot or portion allocated (e.g. Plot A, North section)"
+      "type": "string"
     },
     "status": {
       "type": "string",
       "enum": [
         "active",
         "deceased",
+        "missing",
         "transferred",
         "disputed",
+        "under_verification",
         "minor"
       ],
       "default": "active"
     },
+    "date_added": {
+      "type": "string",
+      "format": "date"
+    },
+    "date_of_death": {
+      "type": "string",
+      "format": "date"
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "unverified",
+        "pending",
+        "verified",
+        "rejected"
+      ],
+      "default": "unverified"
+    },
+    "national_id": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
     "notes": {
       "type": "string"
+    },
+    "is_deleted": {
+      "type": "boolean",
+      "default": false
     }
   },
   "required": [

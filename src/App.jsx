@@ -35,6 +35,7 @@ import PendingApprovals from './pages/gov/PendingApprovals';
 import BulkImport from './pages/gov/BulkImport';
 import PilotDashboard from './pages/gov/PilotDashboard';
 import AuditReports from './pages/gov/AuditReports';
+import InheritanceManagement from './pages/gov/InheritanceManagement';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkUserAuth } = useAuth();
@@ -93,6 +94,7 @@ const AuthenticatedApp = () => {
         <Route path="/gov/bulk-import" element={<BulkImport />} />
         <Route path="/gov/pilot-dashboard" element={<PilotDashboard />} />
         <Route path="/gov/audit-reports" element={<AuditReports />} />
+        <Route path="/gov/inheritance" element={<InheritanceManagement />} />
       </Route>
       <Route path="/demo" element={<DemoAccess />} />
       <Route path="*" element={<PageNotFound />} />

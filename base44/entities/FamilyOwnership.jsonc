@@ -11,15 +11,46 @@
     },
     "family_name": {
       "type": "string",
-      "description": "Name of the family (e.g. Adeyemi Family)"
+      "description": "Name of the family"
     },
     "family_head": {
       "type": "string",
       "description": "Name of the family head"
     },
-    "family_representative": {
+    "parent_name": {
       "type": "string",
-      "description": "Appointed family representative"
+      "description": "Name of the founding ancestor/parent"
+    },
+    "family_branch": {
+      "type": "string",
+      "description": "Branch name within the family (e.g. Adeola Branch)"
+    },
+    "generation_level": {
+      "type": "number",
+      "description": "Generation number from founding ancestor (1 = founding)"
+    },
+    "clan_name": {
+      "type": "string"
+    },
+    "village": {
+      "type": "string"
+    },
+    "community": {
+      "type": "string"
+    },
+    "lga": {
+      "type": "string",
+      "description": "Local Government Area"
+    },
+    "state": {
+      "type": "string"
+    },
+    "wife_lineage_group": {
+      "type": "string",
+      "description": "Wife or lineage group (e.g. Wife Group A \u2014 Mama Tunde)"
+    },
+    "family_representative": {
+      "type": "string"
     },
     "family_lineage": {
       "type": "string",
@@ -32,8 +63,7 @@
       "description": "Customary lineage system"
     },
     "family_notes": {
-      "type": "string",
-      "description": "Additional customary notes or agreements"
+      "type": "string"
     },
     "status": {
       "type": "string",
@@ -46,8 +76,7 @@
       "default": "active"
     },
     "registered_by": {
-      "type": "string",
-      "description": "Email of officer who registered this"
+      "type": "string"
     },
     "fruit_trees": {
       "type": "number",
@@ -66,8 +95,7 @@
       "default": 0
     },
     "other_improvements": {
-      "type": "string",
-      "description": "Description of other improvements / assets"
+      "type": "string"
     }
   },
   "required": [

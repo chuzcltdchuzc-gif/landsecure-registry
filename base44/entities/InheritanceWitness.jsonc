@@ -1,0 +1,64 @@
+{
+  "name": "InheritanceWitness",
+  "type": "object",
+  "properties": {
+    "inheritance_case_id": {
+      "type": "string"
+    },
+    "parcel_id": {
+      "type": "string"
+    },
+    "full_name": {
+      "type": "string"
+    },
+    "witness_role": {
+      "type": "string",
+      "enum": [
+        "family_witness",
+        "community_witness",
+        "traditional_ruler",
+        "religious_witness",
+        "government_witness"
+      ],
+      "description": "Type/role of witness"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
+    "identification": {
+      "type": "string",
+      "description": "NIN, Passport, Voter Card number"
+    },
+    "witness_statement": {
+      "type": "string"
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "verified",
+        "rejected"
+      ],
+      "default": "pending"
+    },
+    "verified_by": {
+      "type": "string"
+    },
+    "verified_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "is_deleted": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "inheritance_case_id",
+    "full_name",
+    "witness_role"
+  ]
+}
