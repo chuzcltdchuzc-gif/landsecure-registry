@@ -4,11 +4,18 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Plus, ExternalLink, Archive, CheckCircle2 } from "lucide-react";
-import { format } from "date-fns";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from "@/components/ui/dialog";
+import { Plus, FileText, ExternalLink, Archive, CheckCircle2, XCircle, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { format } from "date-fns";
 
 const DOC_TYPES = [
   { value: "family_agreement", label: "Family Agreement" },
@@ -28,46 +35,54 @@ const LIFECYCLE_COLORS = {
   withdrawn: "bg-red-100 text-red-700",
 };
 
-export default function InheritanceDocManager({ caseId, parcelId, familyOwnershipId, user, readOnly = false }) {
+const REVIEW_COLORS = {
+  pending: "bg-amber-50 text-amber-700",
+  approved: "bg-emerald-50 text-emerald-700",
+  rejected: "bg-red-50 text-red-700",
+};
+
+export default function InheritanceDocManager({ caseData, user }) {
   const queryClient = useQueryClient();
-  const [adding, setAdding] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [form, setForm] = useState({ document_type: "family_agreement", title: "", description: "" });
-  const [file, setFile] = useState(null);
+  const [form, setForm] = useState({ document_type: "family_agreement", title: "", description: "", file: null });
+  const setField = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   const { data: documents = [] } = useQuery({
-    queryKey: ["inheritance-docs", caseId],
-    queryFn: () => base44.entities.InheritanceDocument.filter({ inheritance_case_id: caseId, is_deleted: false }, "-created_date", 50),
-    enabled: !!caseId,
+    queryKey: ["inheritance-docs", caseData.id],
+    queryFn: () => base44.entities.InheritanceDocument.filter({ inheritance_case_id: caseData.id, is_deleted: false }, "-created_date", 50),
+    enabled: !!caseData.id,
   });
 
-  const addMutation = useMutation({
+  const activeDocCount = documents.filter(d => d.lifecycle_status === "active").length;
+
+  const uploadMutation = useMutation({
     mutationFn: async () => {
+      if (!form.title || !form.file) throw new Error("Title and file are required");
       setUploading(true);
-      let fileUrl = "";
-      if (file) {
-        const res = await base44.integrations.Core.UploadFile({ file });
-        fileUrl = res.file_url;
-      }
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: form.file });
       setUploading(false);
 
-      // Supersede previous versions of same type
-      const existing = documents.filter((d) => d.document_type === form.document_type && d.lifecycle_status === "active");
-      await Promise.all(existing.map((d) =>
+      // Get current version number for this doc type
+      const existingOfType = documents.filter(d => d.document_type === form.document_type && d.lifecycle_status === "active");
+      const versionNumber = existingOfType.length + 1;
+
+      // Supersede previous active docs of same type
+      await Promise.all(existingOfType.map(d =>
         base44.entities.InheritanceDocument.update(d.id, { lifecycle_status: "superseded" })
       ));
 
-      const newVersion = Math.max(0, ...documents.filter(d => d.document_type === form.document_type).map(d => d.version_number || 0)) + 1;
-
-      const doc = await base44.entities.InheritanceDocument.create({
-        ...form,
-        inheritance_case_id: caseId,
-        parcel_id: parcelId,
-        family_ownership_id: familyOwnershipId,
-        file_url: fileUrl,
-        version_number: newVersion,
+      const created = await base44.entities.InheritanceDocument.create({
+        inheritance_case_id: caseData.id,
+        parcel_id: caseData.parcel_id,
+        family_ownership_id: caseData.family_ownership_id,
+        document_type: form.document_type,
+        title: form.title,
+        file_url,
+        version_number: versionNumber,
         uploaded_by: user?.email,
         uploaded_by_name: user?.full_name,
+        description: form.description,
         lifecycle_status: "active",
         review_status: "pending",
         is_deleted: false,
@@ -76,145 +91,231 @@ export default function InheritanceDocManager({ caseId, parcelId, familyOwnershi
       await base44.entities.AuditLog.create({
         user_email: user?.email,
         user_name: user?.full_name,
-        action: `Uploaded inheritance document: ${form.title} (v${newVersion})`,
+        action: `Uploaded document: ${form.title} (v${versionNumber})`,
         entity_type: "InheritanceDocument",
-        entity_id: doc.id,
-        details: `Type: ${form.document_type}`,
+        entity_id: created.id,
+        details: `Case: ${caseData.case_reference}, Type: ${form.document_type}`,
       });
+
+      return created;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["inheritance-docs", caseId] });
-      toast.success("Document uploaded");
-      setForm({ document_type: "family_agreement", title: "", description: "" });
-      setFile(null);
-      setAdding(false);
+      queryClient.invalidateQueries({ queryKey: ["inheritance-docs", caseData.id] });
+      setShowForm(false);
+      setForm({ document_type: "family_agreement", title: "", description: "", file: null });
+      toast.success("Document uploaded successfully");
     },
     onError: () => setUploading(false),
   });
 
-  const archiveMutation = useMutation({
-    mutationFn: async (docId) => {
-      await base44.entities.InheritanceDocument.update(docId, { lifecycle_status: "archived" });
+  const reviewMutation = useMutation({
+    mutationFn: async ({ id, status, notes }) => {
+      await base44.entities.InheritanceDocument.update(id, {
+        review_status: status,
+        reviewed_by: user?.email,
+        review_notes: notes || null,
+      });
       await base44.entities.AuditLog.create({
         user_email: user?.email,
         user_name: user?.full_name,
-        action: "Archived inheritance document",
+        action: `${status === "approved" ? "Approved" : "Rejected"} document`,
         entity_type: "InheritanceDocument",
-        entity_id: docId,
+        entity_id: id,
+        details: `Case: ${caseData.case_reference}`,
       });
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["inheritance-docs", caseId] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["inheritance-docs", caseData.id] }),
   });
 
-  const approveMutation = useMutation({
-    mutationFn: async (docId) => {
-      await base44.entities.InheritanceDocument.update(docId, {
-        review_status: "approved",
-        reviewed_by: user?.email,
-      });
+  const archiveMutation = useMutation({
+    mutationFn: async (doc) => {
+      await base44.entities.InheritanceDocument.update(doc.id, { lifecycle_status: "archived" });
       await base44.entities.AuditLog.create({
         user_email: user?.email,
         user_name: user?.full_name,
-        action: "Approved inheritance document",
+        action: `Archived document: ${doc.title}`,
         entity_type: "InheritanceDocument",
-        entity_id: docId,
+        entity_id: doc.id,
+        details: `Case: ${caseData.case_reference}`,
       });
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["inheritance-docs", caseId] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["inheritance-docs", caseData.id] }),
   });
+
+  const withdrawMutation = useMutation({
+    mutationFn: async (doc) => {
+      await base44.entities.InheritanceDocument.update(doc.id, { lifecycle_status: "withdrawn" });
+      await base44.entities.AuditLog.create({
+        user_email: user?.email,
+        user_name: user?.full_name,
+        action: `Withdrawn document: ${doc.title}`,
+        entity_type: "InheritanceDocument",
+        entity_id: doc.id,
+        details: `Case: ${caseData.case_reference}`,
+      });
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["inheritance-docs", caseData.id] }),
+  });
+
+  const activeDocuments = documents.filter(d => d.lifecycle_status === "active");
+  const otherDocuments = documents.filter(d => d.lifecycle_status !== "active");
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <FileText className="w-4 h-4 text-primary" />
-          <span className="text-sm font-semibold">Documents ({documents.length})</span>
-        </div>
-        {!readOnly && (
-          <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => setAdding(!adding)}>
-            <Plus className="w-3.5 h-3.5" /> Upload
-          </Button>
-        )}
+    <div className="space-y-4">
+      <div className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg border ${
+        activeDocCount > 0 ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "bg-amber-50 border-amber-200 text-amber-700"
+      }`}>
+        <FileText className="w-3.5 h-3.5" />
+        {activeDocCount} active document{activeDocCount !== 1 ? "s" : ""} — all uploads are version-controlled and immutable
       </div>
 
-      {adding && (
-        <div className="p-3 border border-border rounded-lg space-y-2 bg-muted/20">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <div className="space-y-1">
-              <Label className="text-xs">Document Type *</Label>
-              <Select value={form.document_type} onValueChange={(v) => setForm(f => ({ ...f, document_type: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {DOC_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-semibold">Documents ({documents.length})</p>
+        <Button size="sm" onClick={() => setShowForm(true)} className="gap-1.5">
+          <Plus className="w-3.5 h-3.5" /> Upload Document
+        </Button>
+      </div>
+
+      {documents.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <FileText className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">No documents uploaded yet</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {activeDocuments.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-emerald-700 mb-2">Active Documents</p>
+              <div className="space-y-2">
+                {activeDocuments.map(doc => (
+                  <DocRow key={doc.id} doc={doc} user={user} onReview={reviewMutation.mutate} onArchive={() => archiveMutation.mutate(doc)} onWithdraw={() => withdrawMutation.mutate(doc)} />
+                ))}
+              </div>
             </div>
-            <div className="space-y-1">
-              <Label className="text-xs">Title *</Label>
-              <Input placeholder="Document title" value={form.title} onChange={(e) => setForm(f => ({ ...f, title: e.target.value }))} />
+          )}
+          {otherDocuments.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground mb-2">Historical / Archived</p>
+              <div className="space-y-2">
+                {otherDocuments.map(doc => (
+                  <DocRow key={doc.id} doc={doc} user={user} onReview={reviewMutation.mutate} readonly />
+                ))}
+              </div>
             </div>
-            <div className="sm:col-span-2 space-y-1">
-              <Label className="text-xs">File *</Label>
-              <Input type="file" onChange={(e) => setFile(e.target.files[0])} />
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <Button size="sm" className="h-7 text-xs" onClick={() => addMutation.mutate()} disabled={!form.title || !file || addMutation.isPending || uploading}>
-              {uploading ? "Uploading..." : addMutation.isPending ? "Saving..." : "Upload Document"}
-            </Button>
-            <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setAdding(false)}>Cancel</Button>
-          </div>
+          )}
         </div>
       )}
 
-      <div className="space-y-2">
-        {documents.map((d) => (
-          <div key={d.id} className="flex items-start justify-between gap-2 p-2.5 bg-card rounded-lg border border-border">
-            <div className="space-y-0.5 flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-semibold truncate">{d.title}</span>
-                <Badge className={`text-[9px] py-0 px-1.5 ${LIFECYCLE_COLORS[d.lifecycle_status] || ""}`}>
-                  {d.lifecycle_status}
-                </Badge>
-                {d.review_status === "approved" && (
-                  <span className="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
-                    <CheckCircle2 className="w-2.5 h-2.5" /> Approved
-                  </span>
-                )}
-                {d.version_number > 1 && <span className="text-[9px] text-muted-foreground">v{d.version_number}</span>}
+      {showForm && (
+        <Dialog open={showForm} onOpenChange={() => setShowForm(false)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="w-4 h-4" /> Upload Inheritance Document
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Document Type *</Label>
+                <Select value={form.document_type} onValueChange={v => setField("document_type", v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {DOC_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
-              <p className="text-[10px] text-muted-foreground capitalize">{d.document_type?.replace(/_/g, " ")}</p>
-              {d.created_date && (
-                <p className="text-[10px] text-muted-foreground">
-                  {d.uploaded_by_name || d.uploaded_by} · {format(new Date(d.created_date), "MMM d, yyyy")}
-                </p>
-              )}
+              <div className="space-y-1">
+                <Label className="text-xs">Title *</Label>
+                <Input placeholder="Document title" value={form.title} onChange={e => setField("title", e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Description</Label>
+                <Textarea rows={2} value={form.description} onChange={e => setField("description", e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">File *</Label>
+                <Input type="file" onChange={e => setField("file", e.target.files?.[0])} />
+              </div>
             </div>
-            <div className="flex gap-1 flex-shrink-0">
-              {d.file_url && (
-                <a href={d.file_url} target="_blank" rel="noopener noreferrer">
-                  <Button size="icon" variant="ghost" className="h-6 w-6">
-                    <ExternalLink className="w-3 h-3" />
-                  </Button>
-                </a>
-              )}
-              {!readOnly && d.review_status !== "approved" && d.lifecycle_status === "active" && (
-                <Button size="sm" variant="ghost" className="h-6 text-[10px] text-emerald-600 px-1.5" onClick={() => approveMutation.mutate(d.id)}>
-                  Approve
-                </Button>
-              )}
-              {!readOnly && d.lifecycle_status === "active" && (
-                <Button size="icon" variant="ghost" className="h-6 w-6 text-muted-foreground" onClick={() => archiveMutation.mutate(d.id)}>
-                  <Archive className="w-3 h-3" />
-                </Button>
-              )}
-            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
+              <Button onClick={() => uploadMutation.mutate()} disabled={uploadMutation.isPending || uploading}>
+                {uploading ? "Uploading..." : uploadMutation.isPending ? "Saving..." : "Upload"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
+  );
+}
+
+function DocRow({ doc, user, onReview, onArchive, onWithdraw, readonly }) {
+  const [reviewNotes, setReviewNotes] = useState("");
+  const [showReview, setShowReview] = useState(false);
+  const canReview = !readonly && (user?.role === "surveyor_general" || user?.role === "compliance_officer" || user?.role === "super_admin");
+
+  return (
+    <div className="p-3 bg-white rounded-lg border border-border space-y-2">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex-1 min-w-0 space-y-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-sm font-semibold">{doc.title}</span>
+            <Badge className={`text-[10px] ${LIFECYCLE_COLORS[doc.lifecycle_status] || "bg-gray-100"}`}>
+              {doc.lifecycle_status}
+            </Badge>
+            <Badge className={`text-[10px] ${REVIEW_COLORS[doc.review_status] || "bg-gray-50"}`}>
+              {doc.review_status}
+            </Badge>
+            <span className="text-[10px] text-muted-foreground">v{doc.version_number}</span>
           </div>
-        ))}
-        {documents.length === 0 && (
-          <p className="text-xs text-muted-foreground italic">No documents uploaded</p>
-        )}
+          <div className="text-xs text-muted-foreground">
+            {doc.document_type?.replace(/_/g, " ")} · {doc.uploaded_by_name || doc.uploaded_by}
+            {doc.created_date && ` · ${format(new Date(doc.created_date), "MMM d, yyyy")}`}
+          </div>
+          {doc.description && <p className="text-xs text-muted-foreground italic">{doc.description}</p>}
+        </div>
+        <div className="flex items-center gap-1 flex-shrink-0">
+          {doc.file_url && (
+            <a href={doc.file_url} target="_blank" rel="noopener noreferrer">
+              <Button size="icon" variant="ghost" className="h-6 w-6">
+                <ExternalLink className="w-3 h-3" />
+              </Button>
+            </a>
+          )}
+          {!readonly && doc.lifecycle_status === "active" && (
+            <>
+              <Button size="icon" variant="ghost" className="h-6 w-6 text-muted-foreground" title="Archive" onClick={onArchive}>
+                <Archive className="w-3 h-3" />
+              </Button>
+            </>
+          )}
+        </div>
       </div>
+      {canReview && doc.review_status === "pending" && (
+        <div>
+          {!showReview ? (
+            <Button size="sm" variant="outline" className="h-6 text-xs gap-1" onClick={() => setShowReview(true)}>
+              Review Document
+            </Button>
+          ) : (
+            <div className="space-y-2">
+              <Input className="h-7 text-xs" placeholder="Review notes (optional)" value={reviewNotes} onChange={e => setReviewNotes(e.target.value)} />
+              <div className="flex gap-2">
+                <Button size="sm" className="h-6 text-xs bg-emerald-600 hover:bg-emerald-700 text-white gap-1" onClick={() => { onReview({ id: doc.id, status: "approved", notes: reviewNotes }); setShowReview(false); }}>
+                  <CheckCircle2 className="w-3 h-3" /> Approve
+                </Button>
+                <Button size="sm" variant="outline" className="h-6 text-xs text-red-600 border-red-200" onClick={() => { onReview({ id: doc.id, status: "rejected", notes: reviewNotes }); setShowReview(false); }}>
+                  <XCircle className="w-3 h-3 mr-0.5" /> Reject
+                </Button>
+                <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => setShowReview(false)}>Cancel</Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -67,6 +67,14 @@ export default function PilotDashboard() {
     queryKey: ["pilot-users"],
     queryFn: () => base44.entities.User.list("-created_date", 500),
   });
+  const { data: inheritanceCases = [] } = useQuery({
+    queryKey: ["pilot-inheritance"],
+    queryFn: () => base44.entities.InheritanceCase.filter({ is_deleted: false }, "-created_date", 500),
+  });
+  const { data: familyOwnerships = [] } = useQuery({
+    queryKey: ["pilot-family"],
+    queryFn: () => base44.entities.FamilyOwnership.list("-created_date", 500),
+  });
 
   if (lp || ld || la) return <LoadingSpinner text="Loading Pilot Operations Dashboard..." />;
 
@@ -187,6 +195,14 @@ export default function PilotDashboard() {
         <StatBox label="Frozen Parcels" value={activeFreezes} icon={Lock} color="text-purple-600" bg="bg-purple-50" />
         <StatBox label="Field Reports" value={fieldReports.length} icon={Camera} color="text-blue-600" bg="bg-blue-50" />
         <StatBox label="Survey Docs" value={surveyDocs.length} icon={FileText} color="text-indigo-600" bg="bg-indigo-50" />
+      </div>
+
+      {/* Inheritance KPIs */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatBox label="Family Parcels" value={familyOwnerships.length} icon={Users} color="text-emerald-600" bg="bg-emerald-50" />
+        <StatBox label="Inheritance Cases" value={inheritanceCases.length} icon={BarChart2} color="text-blue-600" bg="bg-blue-50" />
+        <StatBox label="Pending Inheritance" value={inheritanceCases.filter(c => ["submitted","surveyor_review","compliance_review","surveyor_general_review"].includes(c.status)).length} icon={Clock} color="text-amber-600" bg="bg-amber-50" />
+        <StatBox label="Approved Inheritances" value={inheritanceCases.filter(c => c.status === "approved").length} icon={CheckCircle2} color="text-emerald-600" bg="bg-emerald-50" />
       </div>
 
       {/* Upload Velocity */}

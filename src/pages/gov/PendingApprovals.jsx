@@ -44,12 +44,11 @@ export default function PendingApprovals() {
     queryKey: ["revision-requests-pending"],
     queryFn: () => base44.entities.ParcelRevision.filter({ status: "pending" }, "-created_date", 100),
   });
-
-  const { data: inheritanceCasesPending = [] } = useQuery({
+  const { data: inheritanceCases = [] } = useQuery({
     queryKey: ["inheritance-cases-pending"],
-    queryFn: () => base44.entities.InheritanceCase.filter({ is_deleted: false }, "-created_date", 200),
+    queryFn: () => base44.entities.InheritanceCase.filter({ is_deleted: false }, "-created_date", 100),
   });
-  const pendingInheritance = inheritanceCasesPending.filter((c) =>
+  const pendingInheritanceCases = inheritanceCases.filter(c =>
     ["submitted", "surveyor_review", "compliance_review", "surveyor_general_review"].includes(c.status)
   );
 
@@ -142,9 +141,9 @@ export default function PendingApprovals() {
           onClick={() => setActiveTab("inheritance")}
           className={`text-sm font-medium pb-2 px-1 border-b-2 transition-colors flex items-center gap-1.5 ${activeTab === "inheritance" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
         >
-          <ShieldAlert className="w-3.5 h-3.5" />
-          Inheritance Cases ({pendingInheritance.length})
-          {pendingInheritance.length > 0 && <span className="w-4 h-4 rounded-full bg-purple-500 text-white text-[9px] flex items-center justify-center">{pendingInheritance.length}</span>}
+          <GitBranch className="w-3.5 h-3.5 text-emerald-600" />
+          Inheritance Cases ({pendingInheritanceCases.length})
+          {pendingInheritanceCases.length > 0 && <span className="w-4 h-4 rounded-full bg-emerald-500 text-white text-[9px] flex items-center justify-center">{pendingInheritanceCases.length}</span>}
         </button>
       </div>
 
@@ -298,52 +297,6 @@ export default function PendingApprovals() {
         </Card>
       )}
 
-      {/* Inheritance Cases Tab */}
-      {activeTab === "inheritance" && (
-        <div className="space-y-3">
-          {pendingInheritance.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <ShieldAlert className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-                <p className="text-sm font-medium text-foreground">No pending inheritance cases</p>
-                <p className="text-xs text-muted-foreground mt-1">All cases are up to date</p>
-              </CardContent>
-            </Card>
-          ) : (
-            pendingInheritance.map((ic) => (
-              <Card key={ic.id} className="border-purple-200">
-                <CardContent className="p-4 space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="space-y-1 flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs font-semibold font-mono">{ic.case_reference}</span>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 capitalize">
-                          {ic.case_type?.replace(/_/g, " ")}
-                        </span>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 capitalize">
-                          {ic.status?.replace(/_/g, " ")}
-                        </span>
-                      </div>
-                      <p className="text-xs text-foreground truncate">{ic.case_title}</p>
-                      <p className="text-xs text-muted-foreground">Family: {ic.family_name} · Parcel: {ic.parcel_number}</p>
-                      <p className="text-[10px] text-muted-foreground">
-                        Initiated by {ic.initiated_by_name || ic.initiated_by}
-                        {ic.created_date && ` · ${format(new Date(ic.created_date), "MMM d, yyyy")}`}
-                      </p>
-                    </div>
-                    <Link to="/gov/inheritance">
-                      <Button size="sm" variant="outline" className="h-7 text-xs flex-shrink-0">
-                        Review
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          )}
-        </div>
-      )}
-
       {/* Revision Requests Tab */}
       {activeTab === "revisions" && (
         <div className="space-y-3">
@@ -357,6 +310,57 @@ export default function PendingApprovals() {
           ) : (
             revisionRequests.map((r) => (
               <RevisionRow key={r.id} revision={r} onReview={reviewRevisionMutation.mutate} isLoading={reviewRevisionMutation.isPending} />
+            ))
+          )}
+        </div>
+      )}
+
+      {activeTab === "inheritance" && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">{pendingInheritanceCases.length} inheritance cases awaiting review</p>
+            <Link to="/inheritance">
+              <Button size="sm" variant="outline" className="gap-1.5">
+                <GitBranch className="w-3.5 h-3.5" /> Open Inheritance Management
+              </Button>
+            </Link>
+          </div>
+          {pendingInheritanceCases.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto mb-3" />
+                <p className="text-sm font-medium text-foreground">No pending inheritance cases</p>
+              </CardContent>
+            </Card>
+          ) : (
+            pendingInheritanceCases.map(c => (
+              <Card key={c.id} className="border-emerald-200">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-mono text-sm font-bold text-primary">{c.case_reference}</span>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full capitalize ${
+                          c.status === "submitted" ? "bg-blue-100 text-blue-700" :
+                          c.status === "surveyor_review" ? "bg-amber-100 text-amber-700" :
+                          c.status === "compliance_review" ? "bg-orange-100 text-orange-700" :
+                          "bg-purple-100 text-purple-700"
+                        }`}>
+                          {c.status?.replace(/_/g, " ")}
+                        </span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 capitalize">
+                          {c.case_type?.replace(/_/g, " ")}
+                        </span>
+                      </div>
+                      <p className="text-sm font-medium">{c.case_title || c.family_name}</p>
+                      <p className="text-xs text-muted-foreground">Parcel #{c.parcel_number} · {c.initiated_by_name || c.initiated_by}</p>
+                    </div>
+                    <Link to="/inheritance">
+                      <Button size="sm" variant="outline" className="text-xs h-7">Review</Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
             ))
           )}
         </div>

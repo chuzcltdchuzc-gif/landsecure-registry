@@ -22,7 +22,7 @@ const RELATIONSHIPS = [
   "brother", "sister", "cousin", "spouse", "other",
 ];
 
-const BENEFICIARY_STATUSES = ["active", "deceased", "missing", "transferred", "disputed", "under_verification", "minor"];
+const BENEFICIARY_STATUSES = ["active", "deceased", "transferred", "disputed", "minor"];
 
 function emptyBeneficiary() {
   return {
@@ -31,10 +31,6 @@ function emptyBeneficiary() {
     percentage_share: "",
     allocated_plot: "",
     inheritance_rank: "",
-    generation_level: "",
-    family_branch: "",
-    national_id: "",
-    phone: "",
     status: "active",
     notes: "",
   };
@@ -48,7 +44,7 @@ export default function FamilyOwnershipDialog({ parcel, user, open, onClose }) {
     family_head: "",
     parent_name: "",
     family_branch: "",
-    generation_level: "1",
+    generation_level: "",
     clan_name: "",
     village: "",
     community: "",
@@ -93,7 +89,7 @@ export default function FamilyOwnershipDialog({ parcel, user, open, onClose }) {
         family_head: form.family_head,
         parent_name: form.parent_name,
         family_branch: form.family_branch,
-        generation_level: parseInt(form.generation_level) || 1,
+        generation_level: parseInt(form.generation_level) || null,
         clan_name: form.clan_name,
         village: form.village,
         community: form.community,
@@ -116,23 +112,16 @@ export default function FamilyOwnershipDialog({ parcel, user, open, onClose }) {
       await Promise.all(
         beneficiaries.map((b, i) =>
           base44.entities.FamilyBeneficiary.create({
-          family_ownership_id: fo.id,
-          parcel_id: parcel.id,
-          parcel_number: parcel.parcel_number,
-          inheritance_rank: parseInt(b.inheritance_rank) || i + 1,
-          generation_level: parseInt(b.generation_level) || undefined,
-          family_branch: b.family_branch,
-          full_name: b.full_name,
-          relationship: b.relationship,
-          percentage_share: parseFloat(b.percentage_share) || 0,
-          allocated_plot: b.allocated_plot,
-          national_id: b.national_id,
-          phone: b.phone,
-          status: b.status,
-          date_added: new Date().toISOString().split("T")[0],
-          verification_status: "unverified",
-          notes: b.notes,
-          is_deleted: false,
+            family_ownership_id: fo.id,
+            parcel_id: parcel.id,
+            parcel_number: parcel.parcel_number,
+            inheritance_rank: parseInt(b.inheritance_rank) || i + 1,
+            full_name: b.full_name,
+            relationship: b.relationship,
+            percentage_share: parseFloat(b.percentage_share) || 0,
+            allocated_plot: b.allocated_plot,
+            status: b.status,
+            notes: b.notes,
           })
         )
       );
@@ -209,42 +198,6 @@ export default function FamilyOwnershipDialog({ parcel, user, open, onClose }) {
                 <Input placeholder="Full name of family head" value={form.family_head} onChange={(e) => setField("family_head", e.target.value)} />
               </div>
               <div className="space-y-1">
-                <Label className="text-xs">Founding Ancestor / Parent Name</Label>
-                <Input placeholder="Name of founding ancestor" value={form.parent_name} onChange={(e) => setField("parent_name", e.target.value)} />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Family Branch</Label>
-                <Input placeholder="e.g. Adeola Branch" value={form.family_branch} onChange={(e) => setField("family_branch", e.target.value)} />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Generation Level</Label>
-                <Input type="number" min="1" placeholder="1" value={form.generation_level} onChange={(e) => setField("generation_level", e.target.value)} />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Clan Name</Label>
-                <Input placeholder="Clan / Kindred name" value={form.clan_name} onChange={(e) => setField("clan_name", e.target.value)} />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Village</Label>
-                <Input placeholder="Village" value={form.village} onChange={(e) => setField("village", e.target.value)} />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Community</Label>
-                <Input placeholder="Community" value={form.community} onChange={(e) => setField("community", e.target.value)} />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">LGA</Label>
-                <Input placeholder="Local Government Area" value={form.lga} onChange={(e) => setField("lga", e.target.value)} />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">State</Label>
-                <Input placeholder="State" value={form.state} onChange={(e) => setField("state", e.target.value)} />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Wife / Lineage Group</Label>
-                <Input placeholder="e.g. Wife Group A — Mama Tunde" value={form.wife_lineage_group} onChange={(e) => setField("wife_lineage_group", e.target.value)} />
-              </div>
-              <div className="space-y-1">
                 <Label className="text-xs">Family Representative</Label>
                 <Input placeholder="Appointed representative" value={form.family_representative} onChange={(e) => setField("family_representative", e.target.value)} />
               </div>
@@ -259,6 +212,42 @@ export default function FamilyOwnershipDialog({ parcel, user, open, onClose }) {
                     <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="sm:col-span-2 space-y-1">
+                <Label className="text-xs">Founding Ancestor / Parent Name</Label>
+                <Input placeholder="Original land owner / founding ancestor" value={form.parent_name} onChange={(e) => setField("parent_name", e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Family Branch</Label>
+                <Input placeholder="e.g. Adeola Branch" value={form.family_branch} onChange={(e) => setField("family_branch", e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Generation Level</Label>
+                <Input type="number" min="1" placeholder="e.g. 3" value={form.generation_level} onChange={(e) => setField("generation_level", e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Clan Name</Label>
+                <Input placeholder="Clan or extended family name" value={form.clan_name} onChange={(e) => setField("clan_name", e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Wife / Lineage Group</Label>
+                <Input placeholder="e.g. Wife Group A — Mama Tunde" value={form.wife_lineage_group} onChange={(e) => setField("wife_lineage_group", e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Village</Label>
+                <Input value={form.village} onChange={(e) => setField("village", e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Community</Label>
+                <Input value={form.community} onChange={(e) => setField("community", e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">LGA</Label>
+                <Input placeholder="Local Government Area" value={form.lga} onChange={(e) => setField("lga", e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">State</Label>
+                <Input value={form.state} onChange={(e) => setField("state", e.target.value)} />
               </div>
               <div className="sm:col-span-2 space-y-1">
                 <Label className="text-xs">Family Notes</Label>
@@ -371,22 +360,6 @@ export default function FamilyOwnershipDialog({ parcel, user, open, onClose }) {
                     <div className="space-y-1">
                       <Label className="text-xs">Allocated Plot</Label>
                       <Input placeholder="e.g. Plot A" value={b.allocated_plot} onChange={(e) => updateBeneficiary(idx, "allocated_plot", e.target.value)} />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">Generation Level</Label>
-                      <Input type="number" min="1" placeholder="1" value={b.generation_level} onChange={(e) => updateBeneficiary(idx, "generation_level", e.target.value)} />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">Family Branch</Label>
-                      <Input placeholder="e.g. Adeola Branch" value={b.family_branch} onChange={(e) => updateBeneficiary(idx, "family_branch", e.target.value)} />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">National ID (NIN)</Label>
-                      <Input placeholder="NIN / ID Number" value={b.national_id} onChange={(e) => updateBeneficiary(idx, "national_id", e.target.value)} />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">Phone</Label>
-                      <Input placeholder="+234..." value={b.phone} onChange={(e) => updateBeneficiary(idx, "phone", e.target.value)} />
                     </div>
                     <div className="sm:col-span-3 space-y-1">
                       <Label className="text-xs">Notes</Label>

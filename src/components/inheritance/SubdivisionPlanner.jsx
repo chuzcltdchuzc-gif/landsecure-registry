@@ -6,9 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Layers, CheckCircle2, AlertCircle } from "lucide-react";
-import { format } from "date-fns";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from "@/components/ui/dialog";
+import { Plus, Layers, AlertCircle, CheckCircle2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { format } from "date-fns";
 
 const STATUS_COLORS = {
   draft: "bg-gray-100 text-gray-600",
@@ -18,54 +22,55 @@ const STATUS_COLORS = {
   superseded: "bg-amber-100 text-amber-700",
 };
 
-function emptyChild() {
-  return { plot_number: "", area_sqm: "", beneficiary_name: "", description: "" };
-}
-
-export default function SubdivisionPlanner({ caseId, parcelId, parcelNumber, familyOwnershipId, parcelSizeHa, user, readOnly = false }) {
+export default function SubdivisionPlanner({ caseData, familyOwnership, user }) {
   const queryClient = useQueryClient();
-  const [creating, setCreating] = useState(false);
-  const [form, setForm] = useState({ title: "", survey_reference: "", description: "", children: [emptyChild()] });
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ title: "", description: "", survey_reference: "", child_parcels_text: "", notes: "" });
+  const setField = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   const { data: plans = [] } = useQuery({
-    queryKey: ["subdivision-plans", parcelId],
-    queryFn: () => base44.entities.SubdivisionPlan.filter({ parent_parcel_id: parcelId, is_deleted: false }, "-created_date", 20),
-    enabled: !!parcelId,
+    queryKey: ["subdivision-plans", caseData.id],
+    queryFn: () => base44.entities.SubdivisionPlan.filter({ inheritance_case_id: caseData.id, is_deleted: false }, "-created_date", 20),
+    enabled: !!caseData.id,
   });
 
-  const addChild = () => setForm(f => ({ ...f, children: [...f.children, emptyChild()] }));
-  const removeChild = (idx) => setForm(f => ({ ...f, children: f.children.filter((_, i) => i !== idx) }));
-  const updateChild = (idx, key, val) => setForm(f => ({
-    ...f,
-    children: f.children.map((c, i) => i === idx ? { ...c, [key]: val } : c),
-  }));
-
-  const totalChildArea = form.children.reduce((s, c) => s + (parseFloat(c.area_sqm) || 0), 0);
-  const parcelAreaSqm = parcelSizeHa ? parcelSizeHa * 10000 : null;
-  const areaValid = parcelAreaSqm ? totalChildArea <= parcelAreaSqm + 1 : true;
+  const canManage = user?.role === "surveyor_general" || user?.role === "compliance_officer" || user?.role === "super_admin" || user?.role === "surveyor";
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      // Supersede existing draft plans
-      const existing = plans.filter((p) => p.approval_status === "draft");
-      await Promise.all(existing.map((p) =>
+      if (!form.title) throw new Error("Title is required");
+
+      let childParcels = [];
+      try {
+        if (form.child_parcels_text.trim()) {
+          childParcels = form.child_parcels_text.split("\n").filter(Boolean).map((line, i) => ({
+            plot_id: `${caseData.parcel_number}-${String.fromCharCode(65 + i)}`,
+            description: line.trim(),
+          }));
+        }
+      } catch (e) {
+        throw new Error("Invalid child parcel definitions");
+      }
+
+      const version = plans.length + 1;
+      // Supersede previous plans
+      await Promise.all(plans.filter(p => p.approval_status === "draft" || p.approval_status === "submitted").map(p =>
         base44.entities.SubdivisionPlan.update(p.id, { approval_status: "superseded" })
       ));
-      const newVersion = (Math.max(0, ...plans.map((p) => p.subdivision_version || 0))) + 1;
 
-      const plan = await base44.entities.SubdivisionPlan.create({
-        inheritance_case_id: caseId,
-        parent_parcel_id: parcelId,
-        parent_parcel_number: parcelNumber,
-        family_ownership_id: familyOwnershipId,
+      const created = await base44.entities.SubdivisionPlan.create({
+        inheritance_case_id: caseData.id,
+        parent_parcel_id: caseData.parcel_id,
+        parent_parcel_number: caseData.parcel_number,
+        family_ownership_id: caseData.family_ownership_id,
         title: form.title,
-        survey_reference: form.survey_reference,
         description: form.description,
-        child_parcels: JSON.stringify(form.children),
-        total_child_parcels: form.children.length,
-        total_allocated_area_sqm: totalChildArea,
-        subdivision_version: newVersion,
+        survey_reference: form.survey_reference,
+        child_parcels: JSON.stringify(childParcels),
+        total_child_parcels: childParcels.length,
+        subdivision_version: version,
         approval_status: "draft",
+        notes: form.notes,
         created_by: user?.email,
         is_deleted: false,
       });
@@ -73,153 +78,189 @@ export default function SubdivisionPlanner({ caseId, parcelId, parcelNumber, fam
       await base44.entities.AuditLog.create({
         user_email: user?.email,
         user_name: user?.full_name,
-        action: `Created subdivision plan v${newVersion} for parcel ${parcelNumber}`,
+        action: `Created subdivision plan v${version}: ${form.title}`,
         entity_type: "SubdivisionPlan",
-        entity_id: plan.id,
-        details: `${form.children.length} child parcels, ${totalChildArea.toLocaleString()} sqm total`,
+        entity_id: created.id,
+        details: `Case: ${caseData.case_reference}, ${childParcels.length} planned child parcels`,
       });
+
+      return created;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["subdivision-plans", parcelId] });
-      toast.success("Subdivision plan saved");
-      setForm({ title: "", survey_reference: "", description: "", children: [emptyChild()] });
-      setCreating(false);
+      queryClient.invalidateQueries({ queryKey: ["subdivision-plans", caseData.id] });
+      setShowForm(false);
+      setForm({ title: "", description: "", survey_reference: "", child_parcels_text: "", notes: "" });
+      toast.success("Subdivision plan created (draft)");
     },
   });
 
-  const submitMutation = useMutation({
-    mutationFn: async (planId) => {
-      await base44.entities.SubdivisionPlan.update(planId, { approval_status: "submitted" });
+  const advancePlanMutation = useMutation({
+    mutationFn: async ({ id, status }) => {
+      const updates = { approval_status: status };
+      if (status === "approved") {
+        updates.approved_by = user?.email;
+        updates.approved_date = new Date().toISOString();
+      }
+      await base44.entities.SubdivisionPlan.update(id, updates);
       await base44.entities.AuditLog.create({
-        user_email: user?.email, user_name: user?.full_name,
-        action: "Submitted subdivision plan for approval", entity_type: "SubdivisionPlan", entity_id: planId,
+        user_email: user?.email,
+        user_name: user?.full_name,
+        action: `${status} subdivision plan`,
+        entity_type: "SubdivisionPlan",
+        entity_id: id,
+        details: `Case: ${caseData.case_reference}`,
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["subdivision-plans", parcelId] });
-      toast.success("Plan submitted for approval");
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["subdivision-plans", caseData.id] }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      await base44.entities.SubdivisionPlan.update(id, { is_deleted: true });
     },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["subdivision-plans", caseData.id] }),
   });
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 text-xs px-3 py-2 rounded-lg bg-blue-50 border border-blue-200 text-blue-700">
+        <AlertCircle className="w-3.5 h-3.5" />
+        Subdivision plans are preparatory only — no actual parcels are created until final approval and execution.
+      </div>
+
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-primary" />
-          <span className="text-sm font-semibold">Subdivision Plans ({plans.length})</span>
-        </div>
-        {!readOnly && (
-          <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => setCreating(!creating)}>
+        <p className="text-sm font-semibold">Subdivision Plans ({plans.length})</p>
+        {canManage && (
+          <Button size="sm" onClick={() => setShowForm(true)} className="gap-1.5">
             <Plus className="w-3.5 h-3.5" /> New Plan
           </Button>
         )}
       </div>
 
-      {creating && (
-        <div className="p-3 border border-border rounded-lg space-y-3 bg-muted/20">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <div className="space-y-1">
-              <Label className="text-xs">Plan Title *</Label>
-              <Input placeholder="e.g. Family Partition Plan 2024" value={form.title} onChange={(e) => setForm(f => ({ ...f, title: e.target.value }))} />
-            </div>
-            <div className="space-y-1">
-              <Label className="text-xs">Survey Reference</Label>
-              <Input placeholder="Survey plan reference" value={form.survey_reference} onChange={(e) => setForm(f => ({ ...f, survey_reference: e.target.value }))} />
-            </div>
-            <div className="sm:col-span-2 space-y-1">
-              <Label className="text-xs">Description</Label>
-              <Textarea placeholder="Describe the subdivision intent..." rows={2} value={form.description} onChange={(e) => setForm(f => ({ ...f, description: e.target.value }))} />
-            </div>
-          </div>
+      {plans.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <Layers className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">No subdivision plans created yet</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {plans.map(plan => {
+            let childParcels = [];
+            try { childParcels = JSON.parse(plan.child_parcels || "[]"); } catch {}
+            return (
+              <div key={plan.id} className="p-4 bg-white rounded-lg border border-border space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-semibold">{plan.title}</span>
+                      <Badge className={`text-[10px] ${STATUS_COLORS[plan.approval_status] || "bg-gray-100"}`}>
+                        {plan.approval_status}
+                      </Badge>
+                      <span className="text-[10px] text-muted-foreground">v{plan.subdivision_version}</span>
+                    </div>
+                    {plan.description && <p className="text-xs text-muted-foreground">{plan.description}</p>}
+                    {plan.survey_reference && <p className="text-xs text-muted-foreground">Survey Ref: {plan.survey_reference}</p>}
+                    <p className="text-xs text-muted-foreground">
+                      Parent: #{plan.parent_parcel_number} · {plan.total_child_parcels || childParcels.length} planned child parcels
+                    </p>
+                    {plan.created_date && <p className="text-[10px] text-muted-foreground">{format(new Date(plan.created_date), "MMM d, yyyy")}</p>}
+                  </div>
+                  {canManage && plan.approval_status === "draft" && (
+                    <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive" onClick={() => deleteMutation.mutate(plan.id)}>
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  )}
+                </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs font-semibold">Planned Child Parcels</Label>
-              <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={addChild}>
-                <Plus className="w-3 h-3 mr-0.5" /> Add
-              </Button>
-            </div>
-            {parcelAreaSqm && (
-              <div className={`flex items-center gap-1.5 text-[10px] px-2 py-1 rounded ${areaValid ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"}`}>
-                {areaValid ? <CheckCircle2 className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
-                Total child area: {totalChildArea.toLocaleString()} sqm / {parcelAreaSqm.toLocaleString()} sqm
-              </div>
-            )}
-            {form.children.map((c, idx) => (
-              <div key={idx} className="grid grid-cols-4 gap-2 items-end p-2 bg-card rounded border border-border">
-                <div className="space-y-1">
-                  <Label className="text-[10px]">Plot No.</Label>
-                  <Input placeholder="A1" className="h-7 text-xs" value={c.plot_number} onChange={(e) => updateChild(idx, "plot_number", e.target.value)} />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px]">Area (sqm)</Label>
-                  <Input type="number" placeholder="0" className="h-7 text-xs" value={c.area_sqm} onChange={(e) => updateChild(idx, "area_sqm", e.target.value)} />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px]">Beneficiary</Label>
-                  <Input placeholder="Name" className="h-7 text-xs" value={c.beneficiary_name} onChange={(e) => updateChild(idx, "beneficiary_name", e.target.value)} />
-                </div>
-                <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive/50" onClick={() => removeChild(idx)} disabled={form.children.length === 1}>
-                  <Trash2 className="w-3 h-3" />
-                </Button>
-              </div>
-            ))}
-          </div>
+                {childParcels.length > 0 && (
+                  <div className="space-y-1">
+                    <p className="text-xs font-semibold text-muted-foreground">Planned Child Parcels:</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                      {childParcels.map((cp, i) => (
+                        <div key={i} className="text-xs p-2 bg-muted/30 rounded border border-border">
+                          <span className="font-mono font-semibold text-primary">{cp.plot_id}</span>
+                          <p className="text-muted-foreground text-[10px] mt-0.5">{cp.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-          <div className="flex gap-2">
-            <Button size="sm" className="h-7 text-xs" onClick={() => saveMutation.mutate()} disabled={!form.title || saveMutation.isPending}>
-              {saveMutation.isPending ? "Saving..." : "Save Draft Plan"}
-            </Button>
-            <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setCreating(false)}>Cancel</Button>
-          </div>
+                {canManage && (
+                  <div className="flex gap-2">
+                    {plan.approval_status === "draft" && (
+                      <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => advancePlanMutation.mutate({ id: plan.id, status: "submitted" })}>
+                        Submit for Review
+                      </Button>
+                    )}
+                    {plan.approval_status === "submitted" && (user?.role === "surveyor_general" || user?.role === "super_admin") && (
+                      <>
+                        <Button size="sm" className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white gap-1" onClick={() => advancePlanMutation.mutate({ id: plan.id, status: "approved" })}>
+                          <CheckCircle2 className="w-3 h-3" /> Approve Plan
+                        </Button>
+                        <Button size="sm" variant="outline" className="h-7 text-xs text-red-600 border-red-200" onClick={() => advancePlanMutation.mutate({ id: plan.id, status: "rejected" })}>
+                          Reject
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 
-      <div className="space-y-2">
-        {plans.map((p) => {
-          let children = [];
-          try { children = JSON.parse(p.child_parcels || "[]"); } catch {}
-          return (
-            <div key={p.id} className="p-3 bg-card rounded-lg border border-border space-y-2">
-              <div className="flex items-start justify-between gap-2">
-                <div className="space-y-0.5">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs font-semibold">{p.title}</span>
-                    <Badge className={`text-[9px] py-0 px-1.5 ${STATUS_COLORS[p.approval_status] || ""}`}>
-                      {p.approval_status}
-                    </Badge>
-                    <span className="text-[9px] text-muted-foreground">v{p.subdivision_version}</span>
-                  </div>
-                  <p className="text-[10px] text-muted-foreground">
-                    {p.total_child_parcels} parcels · {p.total_allocated_area_sqm?.toLocaleString()} sqm
-                    {p.survey_reference && ` · Ref: ${p.survey_reference}`}
-                  </p>
-                  {p.created_date && <p className="text-[10px] text-muted-foreground">{format(new Date(p.created_date), "MMM d, yyyy")}</p>}
-                </div>
-                {!readOnly && p.approval_status === "draft" && (
-                  <Button size="sm" className="h-6 text-[10px] text-xs" onClick={() => submitMutation.mutate(p.id)} disabled={submitMutation.isPending}>
-                    Submit
-                  </Button>
-                )}
+      {showForm && (
+        <Dialog open={showForm} onOpenChange={() => setShowForm(false)}>
+          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Layers className="w-4 h-4" /> New Subdivision Plan
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div className="text-xs p-2 bg-blue-50 border border-blue-200 rounded text-blue-700">
+                This creates a preparatory plan only. Actual parcels will not be created until approved and executed.
               </div>
-              {children.length > 0 && (
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
-                  {children.map((c, i) => (
-                    <div key={i} className="text-[10px] p-1.5 bg-muted rounded border border-border text-center">
-                      <p className="font-semibold">{c.plot_number || `Plot ${i + 1}`}</p>
-                      {c.area_sqm && <p className="text-muted-foreground">{parseFloat(c.area_sqm).toLocaleString()} sqm</p>}
-                      {c.beneficiary_name && <p className="text-muted-foreground truncate">{c.beneficiary_name}</p>}
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div className="space-y-1">
+                <Label className="text-xs">Plan Title *</Label>
+                <Input placeholder="e.g. Adeyemi Family Land Division v1" value={form.title} onChange={e => setField("title", e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Survey Reference</Label>
+                <Input placeholder="Survey plan reference number" value={form.survey_reference} onChange={e => setField("survey_reference", e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Description</Label>
+                <Textarea rows={2} value={form.description} onChange={e => setField("description", e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Planned Child Parcels (one per line)</Label>
+                <Textarea
+                  rows={4}
+                  placeholder="North portion — Akin's plot (approx 500 sqm)&#10;South portion — Tunde's plot (approx 400 sqm)&#10;East strip — Shared access road"
+                  value={form.child_parcels_text}
+                  onChange={e => setField("child_parcels_text", e.target.value)}
+                />
+                <p className="text-[10px] text-muted-foreground">Each line = one planned child parcel. Will auto-assign plot IDs.</p>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Notes</Label>
+                <Input placeholder="Additional notes" value={form.notes} onChange={e => setField("notes", e.target.value)} />
+              </div>
             </div>
-          );
-        })}
-        {plans.length === 0 && (
-          <p className="text-xs text-muted-foreground italic">No subdivision plans created</p>
-        )}
-      </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
+              <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+                {saveMutation.isPending ? "Creating..." : "Create Draft Plan"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
