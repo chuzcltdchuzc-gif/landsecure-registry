@@ -41,6 +41,8 @@ import ExecutiveDashboard from './pages/gov/ExecutiveDashboard';
 import DemoGuide from './pages/DemoGuide';
 import DemoDataSeed from './pages/gov/DemoDataSeed';
 import PilotReports from './pages/gov/PilotReports';
+import DataIntegrityReport from './pages/gov/DataIntegrityReport';
+import DemoReadinessReport from './pages/gov/DemoReadinessReport';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkUserAuth } = useAuth();
@@ -104,6 +106,8 @@ const AuthenticatedApp = () => {
         <Route path="/gov/executive-dashboard" element={<ExecutiveDashboard />} />
         <Route path="/gov/demo-seed" element={<DemoDataSeed />} />
         <Route path="/gov/pilot-reports" element={<PilotReports />} />
+        <Route path="/gov/data-integrity" element={<DataIntegrityReport />} />
+        <Route path="/gov/demo-readiness" element={<DemoReadinessReport />} />
         <Route path="/demo-guide" element={<DemoGuide />} />
       </Route>
       <Route path="/demo" element={<DemoAccess />} />
