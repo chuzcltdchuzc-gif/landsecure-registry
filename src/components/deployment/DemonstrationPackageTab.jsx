@@ -1,268 +1,321 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PlayCircle, ChevronDown, ChevronRight, Download, CheckCircle2, AlertTriangle, Clock, Users, Map, Shield, FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { PlayCircle, CheckCircle2, Clock, AlertTriangle, Download, ChevronDown, ChevronRight, BarChart2, List } from "lucide-react";
 
-function DemoStep({ step, index, isActive, onClick }) {
-  return (
-    <div
-      className={`border rounded-lg cursor-pointer transition-all ${isActive ? "border-blue-400 bg-blue-50" : "border-gray-200 bg-white hover:bg-gray-50"}`}
-      onClick={onClick}
-    >
-      <div className="flex items-center gap-3 p-3">
-        <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${isActive ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"}`}>
-          {index + 1}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-semibold text-gray-800">{step.title}</p>
-            <Badge variant="outline" className="text-[10px] h-4 shrink-0">{step.duration}</Badge>
-          </div>
-          <p className="text-xs text-muted-foreground truncate">{step.objective}</p>
-        </div>
-        {isActive ? <ChevronDown className="w-4 h-4 text-blue-500 shrink-0" /> : <ChevronRight className="w-4 h-4 text-gray-400 shrink-0" />}
-      </div>
-      {isActive && (
-        <div className="px-4 pb-4 pt-0 border-t border-blue-200 mt-0">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-            <div>
-              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-1">Navigate To</p>
-              <code className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded block">{step.route}</code>
-            </div>
-            <div>
-              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-1">Talking Point</p>
-              <p className="text-xs text-gray-700">{step.talkingPoint}</p>
-            </div>
-          </div>
-          <div className="mt-3">
-            <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-1">Live Data to Show</p>
-            <p className="text-xs text-gray-700 italic">{step.liveData}</p>
-          </div>
-          <div className="mt-3">
-            <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-1">Key Message</p>
-            <p className="text-xs font-medium text-blue-800 bg-blue-100 px-2 py-1 rounded">{step.keyMessage}</p>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+const DEMO_SCRIPT = [
+  { time: "0:00–2:00", segment: "Opening — Platform Overview", speaker: "Presenter", actions: ["Open Executive Dashboard", "Show headline KPIs: total parcels, approved, GFL coverage", "Show pilot scope: Greenfield LGA, 1,000-parcel target"], talking_points: ["LandSecure Registry is a comprehensive digital land administration platform", "Purpose-built for customary land tenure in Nigeria", "Today we demonstrate operational readiness for the Greenfield LGA pilot"], nav: "/gov/executive-dashboard" },
+  { time: "2:00–4:30", segment: "Land Parcel Registration", speaker: "Registry Officer Demo", actions: ["Navigate to Land Registry", "Show existing GFL parcels", "Open an approved parcel — highlight fields: parcel_number, owner_name, LGA, status, approval_date, approved_by"], talking_points: ["Full chain of custody: who registered, who approved, when", "Every action is time-stamped and audit-logged", "Status workflow: pending → approved / rejected"], nav: "/lands" },
+  { time: "4:30–7:00", segment: "GIS Mapping & Spatial Validation", speaker: "Technical Lead Demo", actions: ["Navigate to GIS Map", "Pan to Greenfield LGA parcels", "Click a parcel to show boundary polygon and details panel", "Show spatial_validation_status: valid, overlap_warning"], talking_points: ["GPS-captured boundaries stored as GeoJSON", "Automated spatial conflict detection prevents duplicate registrations", "Field agents capture boundaries on mobile devices, synced to map in real time"], nav: "/gis-map" },
+  { time: "7:00–10:00", segment: "Customary Inheritance Processing", speaker: "Customary Law Specialist Demo", actions: ["Navigate to Inheritance Management", "Open an approved inheritance case", "Show: case_type, beneficiaries with percentage_share totalling 100%", "Show certificate_generated = true, certificate_url"], talking_points: ["Supports Yoruba, Igbo, Hausa customary inheritance norms", "Multi-stage approval: Surveyor → Compliance → Surveyor General", "Family meeting resolutions, witness verification, plot allocation all recorded", "Digital certificate issued on final approval"], nav: "/inheritance" },
+  { time: "10:00–12:30", segment: "Community & Traditional Authority Validation", speaker: "Community Liaison Demo", actions: ["Open Inheritance Management → Community Validation tab", "Show a fully approved community validation with all stages completed", "Navigate to Traditional Authority Validations", "Show a trad. ruler endorsement with traditional_institution and validation_date"], talking_points: ["Validation chain: Community → Village Head → Traditional Authority → Compliance → Surveyor General", "Traditional rulers' endorsements digitally recorded and time-stamped", "Eliminates paper-based processes prone to fraud and loss"], nav: "/gov/customary-governance" },
+  { time: "12:30–15:00", segment: "Fraud Detection & Compliance", speaker: "Compliance Officer Demo", actions: ["Navigate to Governance → Fraud Alerts", "Show a critical fraud alert with investigation_notes and resolved status", "Navigate to Disputes — show resolved dispute with resolution_notes", "Navigate to Global Audit — show audit log breadth"], talking_points: ["Automated fraud risk scoring on every parcel", "Compliance officer triage and investigation workflow", "Full audit trail — every action by every user, immutable", "Real-time fraud alert notifications"], nav: "/gov/fraud-alerts" },
+  { time: "15:00–17:00", segment: "Field Operations", speaker: "Field Agent Demo", actions: ["Navigate to Field Reports", "Show a GPS-captured report with quality_flag = pass and gps_accuracy", "Show network_status = synced_offline — offline capability demonstrated", "Open a photo-rich report"], talking_points: ["Field agents work offline — reports queue and sync when connected", "GPS accuracy automatically quality-graded", "Photo evidence attached at point of capture", "Device ID tracked for chain of custody"], nav: "/field-reports" },
+  { time: "17:00–19:00", segment: "Governance & Administration", speaker: "Super Admin Demo", actions: ["Navigate to Pending Approvals", "Navigate to Pilot Dashboard — show operational metrics", "Navigate to Data Integrity Report — show health checks"], talking_points: ["Centralised approval queue for all pending registrations", "Real-time operational dashboard for pilot managers", "Automated data integrity verification — catches errors before they propagate"], nav: "/gov/pilot-dashboard" },
+  { time: "19:00–20:00", segment: "Closing — Go-Live Readiness", speaker: "Presenter", actions: ["Navigate to Pilot Validation Framework — show acceptance test summary", "Show Pilot Readiness score"], talking_points: ["All 11 acceptance test domains verified against live data", "Platform is operational and ready for 1,000-parcel controlled pilot", "Post-pilot: scale to full LGA and neighbouring states"], nav: "/gov/pilot-validation" },
+];
 
-function SlideCard({ slide, index }) {
-  return (
-    <Card className="overflow-hidden">
-      <div className="bg-gradient-to-r from-blue-700 to-blue-900 px-4 py-2 flex items-center justify-between">
-        <span className="text-white text-[11px] font-bold">SLIDE {index + 1}</span>
-        <span className="text-blue-200 text-[11px]">{slide.type}</span>
-      </div>
-      <CardContent className="p-4">
-        <h4 className="text-sm font-bold text-gray-800 mb-1">{slide.title}</h4>
-        <p className="text-xs text-muted-foreground mb-2">{slide.subtitle}</p>
-        <ul className="space-y-1">
-          {slide.bullets.map((b, i) => (
-            <li key={i} className="flex gap-2 text-xs text-gray-700">
-              <span className="text-blue-500 shrink-0">▸</span>
-              <span>{b}</span>
-            </li>
-          ))}
-        </ul>
-      </CardContent>
-    </Card>
-  );
-}
+const EXEC_SLIDES = [
+  { slide: 1, title: "LandSecure Registry", subtitle: "Greenfield LGA — Pilot Deployment Readiness", type: "cover", bullets: ["Controlled pilot: 1,000 parcels · Greenfield Local Government Area", "End-to-end digital land administration platform", "Customary tenure + statutory framework supported"] },
+  { slide: 2, title: "The Problem We Solve", subtitle: "Land Administration Challenges in Nigeria", type: "problem", bullets: ["Fragmented paper records: multiple competing title documents for same parcel", "Customary inheritance disputes: no authoritative digital record of family land decisions", "Fraud vulnerability: manual processes enable boundary manipulation and double registration", "Slow registration: average 2–5 years for formal title under legacy system"] },
+  { slide: 3, title: "Platform Capabilities", subtitle: "Comprehensive Digital Land Registry", type: "capabilities", bullets: ["Parcel Registration: full lifecycle from submission to certified title", "GIS Mapping: GPS-captured boundaries, spatial conflict detection, Leaflet map", "Customary Inheritance: multi-stage family workflow with traditional authority endorsement", "Fraud Detection: automated risk scoring, alert management, compliance investigation", "Field Operations: mobile capture, offline sync, GPS quality grading", "Audit Trail: immutable log of every action by every user"] },
+  { slide: 4, title: "Pilot Data Summary", subtitle: "Live Platform Statistics — Greenfield LGA", type: "data", dynamic: true },
+  { slide: 5, title: "Workflow Validation", subtitle: "End-to-End Process Demonstration", type: "workflow", bullets: ["Registration workflow: Submit → Review → Approve (with audit trail)", "Inheritance workflow: 7-stage approval chain (Surveyor → Compliance → SG → Certificate)", "Community validation: 6-stage endorsement (Community → Village Head → Trad. Authority → SG)", "Dispute resolution: Open → Investigate → Resolve (linked to parcel and audit log)", "Fraud investigation: Alert → Assign → Investigate → Resolve / Dismiss"] },
+  { slide: 6, title: "Security & Compliance", subtitle: "Role-Based Access and Audit Protection", type: "security", bullets: ["6 user roles with distinct permission sets", "Immutable audit log — every action recorded with user email, timestamp, entity ID", "Parcel freeze capability for high-risk or disputed records", "Admin-invite-only access — no open self-registration", "All critical workflows require named approvers at each stage"] },
+  { slide: 7, title: "Pilot Readiness Assessment", subtitle: "Acceptance Testing Framework Results", type: "readiness", dynamic: true },
+  { slide: 8, title: "Go-Live Recommendation", subtitle: "Deployment Decision", type: "golive", dynamic: true },
+  { slide: 9, title: "Post-Pilot Roadmap", subtitle: "Scale & Expansion", type: "roadmap", bullets: ["Pilot evaluation: 3 months · target 1,000 parcels fully registered", "Phase 2: expand to 5 LGAs in state", "Phase 3: statewide rollout with inter-LGA transfer capability", "Phase 4: national registry integration", "Ongoing: mobile app hardening, offline sync optimisation, training expansion"] },
+];
 
-function ChecklistSection({ title, items, data }) {
-  const evaluated = items.map(item => ({
-    ...item,
-    status: typeof item.check === 'function' ? item.check(data) : item.status,
-  }));
-  const passed = evaluated.filter(i => i.status === true).length;
-  const warned = evaluated.filter(i => i.status === "warn").length;
-  const failed = evaluated.filter(i => i.status === false).length;
+const CHECKLIST = [
+  { category: "Data Readiness", items: [
+    { label: "≥ 100 GFL parcels registered in Greenfield LGA", check: (d) => { const gfl=d.parcels.filter(p=>p.lga==="Greenfield Local Government"); return { pass: gfl.length>=100, value: gfl.length }; } },
+    { label: "≥ 50 parcels approved", check: (d) => { const gfl=d.parcels.filter(p=>p.lga==="Greenfield Local Government"); const n=gfl.filter(p=>p.status==="approved").length; return { pass: n>=50, value: n }; } },
+    { label: "Family ownership records present", check: (d) => ({ pass: d.families.length>=10, value: d.families.length }) },
+    { label: "Beneficiary records with share totals", check: (d) => ({ pass: d.beneficiaries.length>=20, value: d.beneficiaries.length }) },
+    { label: "Ownership history chain present", check: (d) => ({ pass: d.ownershipHistory.length>=10, value: d.ownershipHistory.length }) },
+  ]},
+  { category: "Workflow Readiness", items: [
+    { label: "Inheritance case approved end-to-end", check: (d) => ({ pass: d.cases.filter(c=>c.status==="approved").length>0, value: `${d.cases.filter(c=>c.status==="approved").length} approved` }) },
+    { label: "Inheritance certificate issued", check: (d) => ({ pass: d.cases.filter(c=>c.certificate_generated).length>0, value: `${d.cases.filter(c=>c.certificate_generated).length} certs` }) },
+    { label: "Dispute resolved end-to-end", check: (d) => ({ pass: d.disputes.filter(d2=>d2.status==="resolved").length>0, value: `${d.disputes.filter(d2=>d2.status==="resolved").length} resolved` }) },
+    { label: "Fraud alert investigated and resolved", check: (d) => ({ pass: d.fraud.filter(f=>f.status==="resolved").length>0, value: `${d.fraud.filter(f=>f.status==="resolved").length} resolved` }) },
+    { label: "Community validation fully approved", check: (d) => ({ pass: d.communityVal.filter(c=>c.status==="approved").length>0, value: `${d.communityVal.filter(c=>c.status==="approved").length} approved` }) },
+    { label: "Traditional authority endorsement recorded", check: (d) => ({ pass: d.tradVal.filter(t=>t.validation_status==="approved").length>0, value: `${d.tradVal.filter(t=>t.validation_status==="approved").length} approved` }) },
+  ]},
+  { category: "Field & GIS Readiness", items: [
+    { label: "GIS boundary coverage ≥ 70%", check: (d) => { const gfl=d.parcels.filter(p=>p.lga==="Greenfield Local Government"); const pct=Math.round(gfl.filter(p=>p.parcel_boundary&&p.parcel_boundary!=="null").length/Math.max(gfl.length,1)*100); return { pass: pct>=70, value: `${pct}%` }; } },
+    { label: "GPS coordinate coverage ≥ 70%", check: (d) => { const gfl=d.parcels.filter(p=>p.lga==="Greenfield Local Government"); const pct=Math.round(gfl.filter(p=>p.latitude&&p.longitude).length/Math.max(gfl.length,1)*100); return { pass: pct>=70, value: `${pct}%` }; } },
+    { label: "≥ 50 field reports submitted", check: (d) => ({ pass: d.fieldReports.length>=50, value: d.fieldReports.length }) },
+    { label: "Field reports with GPS present", check: (d) => ({ pass: d.fieldReports.filter(r=>r.latitude&&r.longitude).length>0, value: `${d.fieldReports.filter(r=>r.latitude&&r.longitude).length} geolocated` }) },
+    { label: "Offline sync reports present", check: (d) => ({ pass: d.fieldReports.filter(r=>r.network_status==="synced_offline").length>0, value: `${d.fieldReports.filter(r=>r.network_status==="synced_offline").length} synced` }) },
+    { label: "Spatial conflicts < 20 in GFL", check: (d) => { const gfl=d.parcels.filter(p=>p.lga==="Greenfield Local Government"); const n=gfl.filter(p=>["overlap_warning","conflict_blocked"].includes(p.spatial_validation_status)).length; return { pass: n<20, value: n }; } },
+  ]},
+  { category: "Governance & Audit Readiness", items: [
+    { label: "Audit log ≥ 100 entries", check: (d) => ({ pass: d.audits.length>=100, value: d.audits.length }) },
+    { label: "Audit entries fully linked (user + entity)", check: (d) => { const ok=d.audits.filter(a=>a.user_email&&a.entity_id&&a.action).length; return { pass: ok/Math.max(d.audits.length,1)>=0.9, value: `${ok}/${d.audits.length}` }; } },
+    { label: "Survey documents reviewed/approved", check: (d) => ({ pass: d.surveyDocs.filter(s=>["reviewed","approved"].includes(s.review_status)).length>0, value: `${d.surveyDocs.filter(s=>s.review_status==="approved").length} approved` }) },
+    { label: "No duplicate parcel numbers", check: (d) => { const m={}; d.parcels.forEach(p=>{m[p.parcel_number]=(m[p.parcel_number]||0)+1;}); const dups=Object.values(m).filter(v=>v>1).length; return { pass: dups===0, value: dups===0?"Clean":""+dups+" duplicates" }; } },
+  ]},
+];
 
-  return (
-    <Card className="overflow-hidden">
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-bold">{title}</CardTitle>
-          <div className="flex gap-1">
-            {passed > 0 && <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">{passed}✓</span>}
-            {warned > 0 && <span className="text-[11px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">{warned}⚠</span>}
-            {failed > 0 && <span className="text-[11px] font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-full">{failed}✗</span>}
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="p-0">
-        <div className="divide-y divide-gray-100">
-          {evaluated.map((item, i) => (
-            <div key={i} className={`flex items-start gap-3 px-4 py-2.5 text-xs ${item.status === false ? "bg-red-50" : item.status === "warn" ? "bg-amber-50" : ""}`}>
-              <div className="shrink-0 mt-0.5">
-                {item.status === true
-                  ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                  : item.status === "warn"
-                  ? <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-                  : <AlertTriangle className="w-3.5 h-3.5 text-red-500" />}
-              </div>
-              <div className="flex-1">
-                <p className="font-medium text-gray-800">{item.label}</p>
-                {item.detail && <p className="text-[11px] text-gray-500 italic mt-0.5">{item.detail}</p>}
-              </div>
-              {item.owner && <span className="text-[11px] text-gray-400 shrink-0">{item.owner}</span>}
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  );
+function ProgressBar({ pct, color }) {
+  return <div className="h-2 bg-gray-200 rounded-full overflow-hidden"><div className={`h-2 ${color} rounded-full transition-all`} style={{ width: `${pct}%` }} /></div>;
 }
 
 export default function DemonstrationPackageTab({ data }) {
-  const [activeStep, setActiveStep] = useState(0);
+  const [activeSection, setActiveSection] = useState("script");
+  const [expandedSlide, setExpandedSlide] = useState(null);
+  const [expandedStep, setExpandedStep] = useState(null);
 
-  const { parcels, families, cases, disputes, fraud, audits,
-          fieldReports, surveyDocs, communityVal, tradVal, plotAllocations } = data;
-  const gfl = parcels.filter(p => p.lga === "Greenfield Local Government");
-  const approvedParcels = gfl.filter(p => p.status === "approved");
-  const certCases = cases.filter(c => c.certificate_generated);
+  const gfl = data.parcels.filter(p => p.lga === "Greenfield Local Government");
+  const checkResults = CHECKLIST.flatMap(cat => cat.items.map(item => item.check(data)));
+  const passed = checkResults.filter(r => r.pass).length;
+  const total = checkResults.length;
+  const score = Math.round(passed / total * 100);
+  const verdict = score >= 85 ? "GO-LIVE APPROVED" : score >= 65 ? "CONDITIONAL APPROVAL" : "NOT READY";
+  const verdictColor = score >= 85 ? "bg-emerald-100 text-emerald-800 border-emerald-300" : score >= 65 ? "bg-amber-100 text-amber-800 border-amber-300" : "bg-red-100 text-red-800 border-red-300";
 
-  const demoScript = [
-    { title: "Welcome & Platform Overview", duration: "2 min", objective: "Orient stakeholders to the platform purpose", route: "/gov/executive-dashboard", talkingPoint: "LandSecure Registry digitalises the entire land registration, inheritance, and dispute workflow for the Greenfield LGA pilot — replacing paper-based processes.", liveData: `Show: ${gfl.length} registered parcels, ${approvedParcels.length} approved, ${cases.length} inheritance cases`, keyMessage: "From registration to certificate — a fully digital, auditable land registry." },
-    { title: "Land Registration Workflow", duration: "3 min", objective: "Show end-to-end parcel registration", route: "/lands", talkingPoint: "Any land owner can register a parcel. The system captures GPS coordinates, boundary polygon, owner details, and automatically runs spatial validation to detect overlaps.", liveData: `Show: ${gfl.length} GFL parcels. Click an approved parcel to show all fields, approval date, and audit trail.`, keyMessage: "Registration to approval in minutes — fully traceable, no paper forms." },
-    { title: "GIS Boundary Map", duration: "2 min", objective: "Demonstrate spatial intelligence", route: "/gis-map", talkingPoint: "Every parcel has a GeoJSON boundary polygon. The system automatically detects overlapping parcels and flags them for human review — preventing double-registration fraud.", liveData: `Show: ${gfl.filter(p=>p.parcel_boundary&&p.parcel_boundary!=="null").length} polygon boundaries on map. Highlight overlap warnings if any.`, keyMessage: "No more boundary disputes from manual measurement — spatial validation is automatic." },
-    { title: "Inheritance & Customary Ownership", duration: "4 min", objective: "Show family land succession workflow", route: "/inheritance", talkingPoint: "Customary land succession is the most complex challenge. The platform handles multi-generational family trees, beneficiary share allocation, witness verification, and a 5-stage approval chain.", liveData: `Show: ${cases.length} cases, ${families.length} family ownerships, ${certCases.length} issued certificates. Open one approved case.`, keyMessage: "Family inheritance is handled systematically — no more lost claims or succession disputes." },
-    { title: "Community Validation Chain", duration: "2 min", objective: "Show traditional governance integration", route: "/gov/customary-governance", talkingPoint: "The platform integrates traditional authority sign-off — village head, traditional ruler, community elder — as formal digital approvals in the inheritance chain.", liveData: `Show: ${communityVal.length} community validations; ${communityVal.filter(c=>c.status==="approved").length} fully approved. ${tradVal.length} traditional authority validations.`, keyMessage: "Traditional leaders are formal participants in the digital process — culture preserved." },
-    { title: "Fraud Detection & Alerts", duration: "2 min", objective: "Demonstrate anti-fraud capability", route: "/gov/fraud-alerts", talkingPoint: "The system automatically scores every parcel for fraud risk. Field officers and compliance officers can flag suspicious registrations — each alert is investigated and logged.", liveData: `Show: ${fraud.length} total alerts; ${fraud.filter(f=>f.severity==="critical").length} critical; ${fraud.filter(f=>["resolved","dismissed"].includes(f.status)).length} resolved.`, keyMessage: "Fraud is detectable before it becomes a legal dispute — proactive, not reactive." },
-    { title: "Dispute Management", duration: "2 min", objective: "Show dispute resolution workflow", route: "/disputes", talkingPoint: "Citizens can file disputes online. Cases are assigned to compliance officers, tracked through resolution stages, and all actions are permanently logged for accountability.", liveData: `Show: ${disputes.length} disputes; ${disputes.filter(d=>d.status==="resolved").length} resolved. Open one resolved dispute to show full trail.`, keyMessage: "Every dispute is documented, assigned, and resolved — no more 'lost' cases." },
-    { title: "Audit Trail & Accountability", duration: "1 min", objective: "Demonstrate immutable audit logging", route: "/gov/global-audit", talkingPoint: "Every action by every user — approvals, rejections, transfers, fraud flags — is written to an immutable audit log with user, timestamp, and entity reference.", liveData: `Show: ${audits.length} audit entries; ${new Set(audits.map(a=>a.user_email).filter(Boolean)).size} distinct users; ${new Set(audits.map(a=>a.action).filter(Boolean)).size} action types.`, keyMessage: "Complete accountability — who did what, to which record, at what time." },
-    { title: "Pilot Readiness Validation", duration: "1 min", objective: "Show the automated validation framework", route: "/gov/pilot-validation", talkingPoint: "The platform includes a built-in Pilot Acceptance Testing Framework that runs 11 automated checks against live data — from database integrity to fraud simulation.", liveData: `Show: Pilot Validation page loading all tabs. Highlight Acceptance Report tab with overall verdict.`, keyMessage: "Platform validates itself — automated readiness checks before every go-live." },
-    { title: "Q&A & Next Steps", duration: "1 min", objective: "Close and capture actions", route: "/gov/demo-readiness", talkingPoint: "The platform is production-ready for the Greenfield LGA pilot. Next steps: finalise user invitations, complete field training, and set go-live date.", liveData: `Show: Demo Readiness Report summary page with completion metrics.`, keyMessage: "Ready to go live. What questions do you have?" },
-  ];
-
-  const totalDemoMins = demoScript.reduce((a, s) => a + parseInt(s.duration), 0);
-
-  const execSlides = [
-    { type: "Title Slide", title: "LandSecure Registry", subtitle: "Greenfield LGA Pilot — Stakeholder Briefing", bullets: ["Controlled pilot: 1,000 parcels, Greenfield LGA", "Full end-to-end digital land administration", `Platform status: ${gfl.length} parcels registered`, "Today: live platform demonstration"] },
-    { type: "Problem Statement", title: "The Challenge", subtitle: "Current state of land administration", bullets: ["Paper-based registration is slow, error-prone, and untraceable", "Boundary disputes caused by manual measurement inconsistencies", "Inheritance succession lacks formal documentation — leads to disputes", "No real-time visibility for government oversight"] },
-    { type: "Solution Overview", title: "LandSecure Registry", subtitle: "End-to-end digital land administration platform", bullets: ["GPS + GeoJSON boundary capture eliminates measurement disputes", "Multi-stage approval workflows for registration, inheritance, and community consent", "Automated fraud detection and alert management", "Immutable audit trail for every action"] },
-    { type: "Live Data", title: "Pilot Data Snapshot", subtitle: `Greenfield LGA — as of today`, bullets: [`${gfl.length} parcels registered (${approvedParcels.length} approved)`, `${families.length} family ownership records, ${cases.length} inheritance cases`, `${certCases.length} inheritance certificates issued`, `${audits.length} audit log entries — full accountability`] },
-    { type: "Workflow Slide", title: "Five Core Workflows", subtitle: "All demonstrated in today's session", bullets: ["1. Land Registration → GPS capture → Boundary polygon → Approval", "2. Inheritance → Family tree → Beneficiary shares → Certificate", "3. Community Consent → Village head → Traditional ruler → SG approval", "4. Fraud Detection → Auto-scoring → Investigation → Resolution", "5. Dispute Management → Filing → Assignment → Resolution"] },
-    { type: "Value Proposition", title: "Why This Matters", subtitle: "Impact for Greenfield LGA", bullets: ["Prevents double-registration: spatial overlap detection is automatic", "Protects family land rights: customary inheritance is formally recorded", "Accountability: every official action is attributed and timestamped", "Scalable: architecture supports 10,000+ parcels without redesign"] },
-    { type: "Go-Live Plan", title: "Pilot Deployment Plan", subtitle: "Greenfield LGA rollout schedule", bullets: ["Week 1: Complete user invitations and role assignment", "Week 2: Field agent GPS training and device setup", "Week 3: Bulk import of legacy parcel data (CSV)", "Week 4: Parallel run — paper + digital side by side", "Week 5+: Full digital operation — paper backup only"] },
-    { type: "Call to Action", title: "Next Steps", subtitle: "Actions required for go-live", bullets: ["Approve pilot budget and resourcing", "Confirm user list for all 6 roles across pilot area", "Schedule field agent training workshop (2 days)", "Set official go-live date and communications plan", "Assign dedicated compliance officer for pilot monitoring"] },
-  ];
-
-  const deployChecklist = [
-    { label: "Platform access accounts created for all pilot users", detail: "6 roles: super_admin, surveyor_general, compliance_officer, surveyor, field_agent, general_user", owner: "IT Admin", check: () => true },
-    { label: "Demo data seeded: ≥100 GFL parcels", detail: `Current: ${gfl.length} GFL parcels registered`, owner: "Registry Officer", check: (d) => d.parcels.filter(p=>p.lga==="Greenfield Local Government").length >= 100 },
-    { label: "Inheritance end-to-end demonstrated: ≥1 certificate", detail: `Current: ${certCases.length} certificates issued`, owner: "Surveyor General", check: (d) => d.cases.filter(c=>c.certificate_generated).length > 0 },
-    { label: "Community validation workflow approved", detail: `Current: ${communityVal.filter(c=>c.status==="approved").length} approved validations`, owner: "Compliance Officer", check: (d) => d.communityVal.filter(c=>c.status==="approved").length > 0 },
-    { label: "GIS boundary coverage ≥70%", detail: `Current: ${Math.round(gfl.filter(p=>p.parcel_boundary&&p.parcel_boundary!=="null").length/Math.max(gfl.length,1)*100)}%`, owner: "Surveyor", check: (d) => { const g = d.parcels.filter(p=>p.lga==="Greenfield Local Government"); return g.filter(p=>p.parcel_boundary&&p.parcel_boundary!=="null").length/Math.max(g.length,1) >= 0.7; } },
-    { label: "Audit log active with ≥100 entries", detail: `Current: ${audits.length} entries`, owner: "System", check: (d) => d.audits.length >= 100 },
-    { label: "Field agents trained on GPS capture", detail: `${fieldReports.filter(r=>r.capture_method==="gps_auto").length} GPS auto reports submitted`, owner: "Field Supervisor", check: (d) => d.fieldReports.filter(r=>r.capture_method==="gps_auto").length > 0 ? true : "warn" },
-    { label: "Fraud alert workflow tested", detail: `${fraud.length} alerts; ${fraud.filter(f=>["resolved","dismissed"].includes(f.status)).length} resolved`, owner: "Compliance Officer", check: (d) => d.fraud.length > 0 },
-    { label: "Dispute resolution workflow tested", detail: `${disputes.length} disputes; ${disputes.filter(d=>d.status==="resolved").length} resolved`, owner: "Compliance Officer", check: (d) => d.disputes.filter(d=>d.status==="resolved").length > 0 },
-    { label: "Bulk import template tested with ≥10 records", detail: "ImportHistory entity should have ≥1 successful import", owner: "Registry Officer", check: () => "warn" },
-    { label: "Offline sync tested by field agents", detail: `${fieldReports.filter(r=>r.network_status==="synced_offline").length} synced_offline reports`, owner: "Field Agent", check: (d) => d.fieldReports.filter(r=>r.network_status==="synced_offline").length > 0 ? true : "warn" },
-    { label: "Security penetration test completed", detail: "Role boundary testing verified — see Security tab", owner: "IT Security", check: () => true },
-    { label: "Pilot Validation Framework: all tabs reviewed", detail: "Pilot Acceptance Testing: 11 domains checked", owner: "Project Lead", check: () => true },
-    { label: "Go-live date confirmed by all stakeholders", detail: "Formal sign-off from government authority", owner: "Director", check: () => "warn" },
-    { label: "Rollback plan documented and tested", detail: "Export all entities to CSV before go-live", owner: "IT Admin", check: () => true },
-  ];
-
-  const goLiveChecklist = [
-    { label: "All user accounts active and passwords set", owner: "IT Admin", check: () => true },
-    { label: "No critical fraud alerts unresolved", detail: `${fraud.filter(f=>f.severity==="critical"&&!["resolved","dismissed"].includes(f.status)).length} unresolved critical alerts`, owner: "Compliance", check: (d) => d.fraud.filter(f=>f.severity==="critical"&&!["resolved","dismissed"].includes(f.status)).length === 0 },
-    { label: "No duplicate parcel numbers in registry", owner: "Registry", check: (d) => { const m = {}; d.parcels.forEach(p=>{m[p.parcel_number]=(m[p.parcel_number]||0)+1;}); return Object.values(m).every(v=>v===1); } },
-    { label: "All conflict_blocked parcels investigated", detail: `${gfl.filter(p=>p.spatial_validation_status==="conflict_blocked").length} conflict_blocked parcels`, owner: "Surveyor", check: (d) => d.parcels.filter(p=>p.spatial_validation_status==="conflict_blocked").length === 0 ? true : "warn" },
-    { label: "Training completed for all pilot staff", owner: "Training Lead", check: () => "warn" },
-    { label: "Executive sign-off obtained", owner: "Director General", check: () => "warn" },
-    { label: "Press/communication plan ready", owner: "Communications", check: () => "warn" },
-  ];
-
-  function downloadScript() {
-    const lines = [
-      "20-MINUTE STAKEHOLDER DEMO SCRIPT",
-      "LandSecure Registry — Greenfield LGA Pilot",
-      "=".repeat(60),
-      `Total Duration: ${totalDemoMins} minutes`,
-      "",
-      ...demoScript.flatMap((s, i) => [
-        `STEP ${i+1}: ${s.title} [${s.duration}]`,
-        `Route: ${s.route}`,
-        `Objective: ${s.objective}`,
-        `Talking Point: ${s.talkingPoint}`,
-        `Live Data: ${s.liveData}`,
-        `Key Message: ${s.keyMessage}`,
-        "",
-      ]),
-    ];
+  function downloadChecklist() {
+    const lines = ["PILOT GO-LIVE READINESS CHECKLIST", `Generated: ${new Date().toLocaleString()}`, `Score: ${score}% (${passed}/${total})`, `Verdict: ${verdict}`, "=".repeat(60), ""];
+    CHECKLIST.forEach(cat => {
+      lines.push(`\n${cat.category}`);
+      lines.push("-".repeat(40));
+      cat.items.forEach(item => {
+        const r = item.check(data);
+        lines.push(`[${r.pass ? "PASS" : "FAIL"}] ${item.label} — ${r.value}`);
+      });
+    });
     const blob = new Blob([lines.join("\n")], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url;
-    a.download = "stakeholder_demo_script.txt"; a.click();
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `golive_readiness_${new Date().toISOString().slice(0,10)}.txt`;
+    a.click();
     URL.revokeObjectURL(url);
   }
 
   return (
-    <div className="space-y-6">
-      {/* Demo Script */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2">
-            <PlayCircle className="w-4 h-4 text-blue-600" /> 20-Minute Stakeholder Demo Script
-            <Badge variant="outline" className="text-[11px]">{totalDemoMins} min total · {demoScript.length} steps</Badge>
-          </h3>
-          <Button size="sm" variant="outline" onClick={downloadScript} className="gap-1 text-xs h-7">
-            <Download className="w-3 h-3" /> Download Script
-          </Button>
-        </div>
-        <div className="space-y-2">
-          {demoScript.map((step, i) => (
-            <DemoStep
-              key={i}
-              step={step}
-              index={i}
-              isActive={activeStep === i}
-              onClick={() => setActiveStep(activeStep === i ? -1 : i)}
-            />
+    <div className="space-y-4">
+      {/* Nav */}
+      <div className="flex gap-2 flex-wrap">
+        {[
+          { key: "script", label: "20-Min Demo Script", icon: PlayCircle },
+          { key: "slides", label: "Exec Slides", icon: BarChart2 },
+          { key: "checklist", label: "Deployment Checklist", icon: List },
+          { key: "golive", label: "Go-Live Assessment", icon: CheckCircle2 },
+        ].map(s => {
+          const Icon = s.icon;
+          return (
+            <Button key={s.key} size="sm" variant={activeSection === s.key ? "default" : "outline"} onClick={() => setActiveSection(s.key)} className="gap-1.5">
+              <Icon className="w-3.5 h-3.5" />{s.label}
+            </Button>
+          );
+        })}
+      </div>
+
+      {/* 20-min demo script */}
+      {activeSection === "script" && (
+        <div className="space-y-3">
+          <Card className="border-blue-200 bg-blue-50">
+            <CardContent className="p-3">
+              <p className="text-xs font-bold text-blue-800">20-Minute Stakeholder Demo Script — Greenfield LGA Pilot</p>
+              <p className="text-xs text-blue-700 mt-1">Click each segment to expand navigation path, on-screen actions, and talking points.</p>
+            </CardContent>
+          </Card>
+          {DEMO_SCRIPT.map((seg, i) => (
+            <Card key={i} className="overflow-hidden">
+              <div className="flex items-start justify-between p-3 cursor-pointer hover:bg-gray-50" onClick={() => setExpandedStep(expandedStep === i ? null : i)}>
+                <div className="flex items-start gap-3">
+                  <span className="text-[11px] font-mono bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5">{seg.time}</span>
+                  <div>
+                    <p className="text-sm font-bold text-gray-800">{seg.segment}</p>
+                    <p className="text-[11px] text-muted-foreground">{seg.speaker} · Navigate to: <code className="font-mono">{seg.nav}</code></p>
+                  </div>
+                </div>
+                {expandedStep === i ? <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" /> : <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />}
+              </div>
+              {expandedStep === i && (
+                <CardContent className="pt-0 grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-2">On-Screen Actions</p>
+                    <ol className="space-y-1">
+                      {seg.actions.map((a, j) => <li key={j} className="flex gap-2 text-xs text-gray-700"><span className="text-gray-400 font-mono w-4 flex-shrink-0">{j+1}.</span><span>{a}</span></li>)}
+                    </ol>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-2">Talking Points</p>
+                    <ul className="space-y-1">
+                      {seg.talking_points.map((t, j) => <li key={j} className="flex gap-2 text-xs text-gray-700"><span className="text-gray-400 flex-shrink-0">•</span><span>{t}</span></li>)}
+                    </ul>
+                  </div>
+                </CardContent>
+              )}
+            </Card>
           ))}
         </div>
-      </div>
+      )}
 
-      {/* Executive Slides */}
-      <div>
-        <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-          <FileText className="w-4 h-4 text-indigo-600" /> Executive Presentation Slides
-          <Badge variant="outline" className="text-[11px]">{execSlides.length} slides</Badge>
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {execSlides.map((s, i) => <SlideCard key={i} slide={s} index={i} />)}
+      {/* Exec slides */}
+      {activeSection === "slides" && (
+        <div className="space-y-3">
+          <Card className="border-purple-200 bg-purple-50">
+            <CardContent className="p-3">
+              <p className="text-xs font-bold text-purple-800">Executive Presentation — {EXEC_SLIDES.length} slides</p>
+              <p className="text-xs text-purple-700 mt-1">Click a slide to expand content. Dynamic slides pull from live platform data.</p>
+            </CardContent>
+          </Card>
+          {EXEC_SLIDES.map((slide, i) => (
+            <Card key={i} className="overflow-hidden">
+              <div className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50" onClick={() => setExpandedSlide(expandedSlide === i ? null : i)}>
+                <div className="flex items-center gap-3">
+                  <span className="text-[11px] font-mono bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full w-14 text-center flex-shrink-0">Slide {slide.slide}</span>
+                  <div>
+                    <p className="text-sm font-bold text-gray-800">{slide.title}</p>
+                    <p className="text-[11px] text-muted-foreground">{slide.subtitle}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {slide.dynamic && <Badge className="bg-amber-100 text-amber-800 text-[10px]">Live Data</Badge>}
+                  {expandedSlide === i ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronRight className="w-4 h-4 text-gray-400" />}
+                </div>
+              </div>
+              {expandedSlide === i && (
+                <CardContent className="pt-0">
+                  {slide.dynamic && slide.type === "data" && (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {[
+                        { label: "GFL Parcels Registered", value: gfl.length },
+                        { label: "Approved Parcels", value: gfl.filter(p=>p.status==="approved").length },
+                        { label: "Inheritance Cases", value: data.cases.length },
+                        { label: "Approved Cases", value: data.cases.filter(c=>c.status==="approved").length },
+                        { label: "Certificates Issued", value: data.cases.filter(c=>c.certificate_generated).length },
+                        { label: "Audit Entries", value: data.audits.length },
+                        { label: "Field Reports", value: data.fieldReports.length },
+                        { label: "Community Validations", value: data.communityVal.length },
+                        { label: "Fraud Alerts Resolved", value: data.fraud.filter(f=>f.status==="resolved").length },
+                      ].map(s => (
+                        <Card key={s.label}><CardContent className="p-3 text-center">
+                          <p className="text-xl font-black text-gray-800">{s.value}</p>
+                          <p className="text-[11px] text-muted-foreground">{s.label}</p>
+                        </CardContent></Card>
+                      ))}
+                    </div>
+                  )}
+                  {slide.dynamic && slide.type === "readiness" && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-4">
+                        <div className="text-center"><p className="text-3xl font-black text-gray-800">{score}%</p><p className="text-xs text-muted-foreground">Readiness Score</p></div>
+                        <div className="flex-1"><ProgressBar pct={score} color={score>=85?"bg-emerald-500":score>=65?"bg-amber-500":"bg-red-500"} /></div>
+                        <span className={`px-3 py-1 rounded-full text-sm font-bold border ${verdictColor}`}>{verdict}</span>
+                      </div>
+                    </div>
+                  )}
+                  {slide.dynamic && slide.type === "golive" && (
+                    <div className={`p-4 rounded-lg border-2 ${verdictColor} text-center`}>
+                      <p className="text-2xl font-black">{verdict}</p>
+                      <p className="text-sm mt-1">{passed}/{total} readiness criteria passed · Score: {score}%</p>
+                    </div>
+                  )}
+                  {slide.bullets && (
+                    <ul className="space-y-2 mt-2">
+                      {slide.bullets.map((b, j) => <li key={j} className="flex gap-2 text-sm text-gray-700"><CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" /><span>{b}</span></li>)}
+                    </ul>
+                  )}
+                </CardContent>
+              )}
+            </Card>
+          ))}
         </div>
-      </div>
+      )}
 
       {/* Deployment Checklist */}
-      <div>
-        <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Pilot Deployment Checklist
-        </h3>
-        <ChecklistSection title="Pre-Deployment Requirements" items={deployChecklist} data={data} />
-      </div>
+      {activeSection === "checklist" && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <p className="text-sm text-muted-foreground">{passed}/{total} items passing · Click items for details</p>
+            <Button size="sm" variant="outline" onClick={downloadChecklist} className="gap-2"><Download className="w-3.5 h-3.5" />Export Checklist</Button>
+          </div>
+          {CHECKLIST.map(cat => (
+            <Card key={cat.category} className="overflow-hidden">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-bold">{cat.category}</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="divide-y divide-gray-100">
+                  {cat.items.map((item, j) => {
+                    const r = item.check(data);
+                    return (
+                      <div key={j} className={`flex items-center gap-3 px-4 py-2.5 ${r.pass ? "" : "bg-amber-50"}`}>
+                        {r.pass
+                          ? <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                          : <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" />}
+                        <p className="text-sm text-gray-800 flex-1">{item.label}</p>
+                        <code className="text-xs font-mono font-bold text-gray-600 bg-gray-100 px-2 py-0.5 rounded">{String(r.value)}</code>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
-      {/* Go-Live Readiness */}
-      <div>
-        <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-          <Shield className="w-4 h-4 text-green-600" /> Go-Live Readiness Assessment
-        </h3>
-        <ChecklistSection title="Go-Live Gate Checks" items={goLiveChecklist} data={data} />
-        <Card className="mt-3 border-blue-200 bg-blue-50">
-          <CardContent className="p-4 text-xs text-blue-800">
-            <strong>Go-Live Definition:</strong> All gate checks must show PASS or acceptable WARN status.
-            Any FAIL item blocks go-live and requires a corrective action plan before the launch date.
-            Items marked WARN should have a documented risk acceptance by the project director.
-          </CardContent>
-        </Card>
-      </div>
+      {/* Go-Live Assessment */}
+      {activeSection === "golive" && (
+        <div className="space-y-4">
+          <Card className={`border-2 ${verdictColor}`}>
+            <CardContent className="p-6 text-center">
+              <p className="text-4xl font-black mb-2">{verdict}</p>
+              <p className="text-lg font-semibold">{passed} / {total} criteria met</p>
+              <div className="mt-4 max-w-sm mx-auto"><ProgressBar pct={score} color={score>=85?"bg-emerald-500":score>=65?"bg-amber-500":"bg-red-500"} /></div>
+              <p className="text-sm text-muted-foreground mt-2">Readiness Score: {score}%</p>
+            </CardContent>
+          </Card>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm font-bold text-emerald-700">✓ Criteria Passing</CardTitle></CardHeader>
+              <CardContent className="p-3 pt-0 space-y-1.5">
+                {CHECKLIST.flatMap(cat => cat.items.map(item => ({ label: item.label, r: item.check(data) }))).filter(x => x.r.pass).map((x, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs text-gray-700">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-500 flex-shrink-0" />
+                    <span>{x.label}</span>
+                    <code className="ml-auto font-mono text-emerald-700 font-bold">{String(x.r.value)}</code>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm font-bold text-amber-700">⚠ Criteria Failing</CardTitle></CardHeader>
+              <CardContent className="p-3 pt-0 space-y-1.5">
+                {CHECKLIST.flatMap(cat => cat.items.map(item => ({ label: item.label, r: item.check(data) }))).filter(x => !x.r.pass).length === 0
+                  ? <p className="text-xs text-emerald-700 font-semibold">All criteria passing!</p>
+                  : CHECKLIST.flatMap(cat => cat.items.map(item => ({ label: item.label, r: item.check(data) }))).filter(x => !x.r.pass).map((x, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs text-gray-700">
+                    <AlertTriangle className="w-3 h-3 text-amber-500 flex-shrink-0" />
+                    <span>{x.label}</span>
+                    <code className="ml-auto font-mono text-amber-700 font-bold">{String(x.r.value)}</code>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="border-gray-200 bg-gray-50">
+            <CardContent className="p-4">
+              <p className="text-xs font-bold text-gray-700 mb-2">Verdict Thresholds</p>
+              <div className="space-y-1 text-xs text-gray-600">
+                <p>• <strong className="text-emerald-700">≥ 85%</strong> — GO-LIVE APPROVED: Platform is ready for 1,000-parcel controlled pilot</p>
+                <p>• <strong className="text-amber-700">65–84%</strong> — CONDITIONAL APPROVAL: Resolve failing items before expanding beyond 100 parcels</p>
+                <p>• <strong className="text-red-700">&lt; 65%</strong> — NOT READY: Critical gaps require remediation before any pilot activity</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

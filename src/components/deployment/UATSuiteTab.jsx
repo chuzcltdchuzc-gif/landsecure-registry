@@ -1,63 +1,289 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronRight, CheckCircle2, AlertTriangle, XCircle, User, Map, Shield, Users, GitBranch } from "lucide-react";
+import { ChevronDown, ChevronRight, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
 
-function pass(ok) {
-  if (ok === true) return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800"><CheckCircle2 className="w-3 h-3" />PASS</span>;
-  if (ok === "warn") return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800"><AlertTriangle className="w-3 h-3" />WARN</span>;
-  return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-red-100 text-red-800"><XCircle className="w-3 h-3" />FAIL</span>;
-}
+const SCENARIOS = {
+  surveyor: {
+    label: "Surveyor Scenarios",
+    color: "bg-blue-100 text-blue-800",
+    cases: [
+      {
+        id: "SUR-01", title: "Upload Survey Document",
+        steps: ["Log in as Licensed Surveyor", "Navigate to Survey Documents", "Upload a survey plan PDF for an existing parcel", "Verify file_url stored and review_status = pending"],
+        expected: "Document uploaded, review_status = 'pending', AuditLog entry created",
+        dataCheck: (d) => `${d.surveyDocs.length} survey docs in system · ${d.surveyDocs.filter(s=>s.review_status==="pending").length} pending review`,
+      },
+      {
+        id: "SUR-02", title: "Capture GPS Field Report",
+        steps: ["Log in as Field Agent", "Open Field Reports", "Create report with GPS coordinates for a GFL parcel", "Set network_status = offline, capture_method = gps_auto"],
+        expected: "Report saved with latitude/longitude · quality_flag assessed automatically",
+        dataCheck: (d) => `${d.fieldReports.length} field reports · ${d.fieldReports.filter(r=>r.latitude&&r.longitude).length} with GPS`,
+      },
+      {
+        id: "SUR-03", title: "Review and Approve Survey Document",
+        steps: ["Log in as Surveyor General", "Navigate to Survey Reviews", "Open a pending survey document", "Add review notes and set status to approved"],
+        expected: "review_status = 'approved', reviewed_by populated, AuditLog updated",
+        dataCheck: (d) => `${d.surveyDocs.filter(s=>s.review_status==="approved").length} approved · ${d.surveyDocs.filter(s=>s.review_status==="rejected").length} rejected`,
+      },
+      {
+        id: "SUR-04", title: "GIS Boundary Validation",
+        steps: ["Open GIS Map page", "Locate a parcel with boundary polygon", "Verify polygon renders correctly on Leaflet map", "Check spatial_validation_status is not conflict_blocked"],
+        expected: "Boundary visible, no spatial conflict for valid parcel",
+        dataCheck: (d) => { const gfl=d.parcels.filter(p=>p.lga==="Greenfield Local Government"); return `${gfl.filter(p=>p.parcel_boundary&&p.parcel_boundary!=="null").length}/${gfl.length} GFL parcels have boundary`; },
+      },
+      {
+        id: "SUR-05", title: "Reject Survey with Reason",
+        steps: ["Log in as Surveyor General", "Open a pending survey document", "Set review_status = rejected", "Provide mandatory review_notes"],
+        expected: "review_status = 'rejected', review_notes populated",
+        dataCheck: (d) => `${d.surveyDocs.filter(s=>s.review_status==="rejected").length} rejections recorded with notes`,
+      },
+      {
+        id: "SUR-06", title: "Parcel Registration — Survey Plan Attached",
+        steps: ["Log in as General User or Field Agent", "Register a new parcel via Register Land", "Attach survey plan URL", "Submit for approval"],
+        expected: "LandParcel.survey_plan_url stored, status = pending",
+        dataCheck: (d) => `${d.parcels.filter(p=>p.survey_plan_url).length} parcels have survey plan attached`,
+      },
+      {
+        id: "SUR-07", title: "Offline Report Sync",
+        steps: ["Create field report with network_status = offline", "Simulate reconnect: update to synced_offline", "Verify report appears in Field Reports list"],
+        expected: "network_status transitions correctly, report accessible after sync",
+        dataCheck: (d) => `${d.fieldReports.filter(r=>r.network_status==="synced_offline").length} synced-offline reports`,
+      },
+      {
+        id: "SUR-08", title: "GPS Accuracy Threshold Check",
+        steps: ["Submit field report with gps_accuracy > 10m", "Submit another with gps_accuracy < 5m", "Compare quality_flag on both reports"],
+        expected: "High-accuracy report = pass, low-accuracy = warn or fail",
+        dataCheck: (d) => `${d.fieldReports.filter(r=>r.gps_accuracy&&r.gps_accuracy<5).length} high-accuracy · ${d.fieldReports.filter(r=>r.gps_accuracy&&r.gps_accuracy>10).length} low-accuracy reports`,
+      },
+    ]
+  },
+  compliance: {
+    label: "Compliance Scenarios",
+    color: "bg-purple-100 text-purple-800",
+    cases: [
+      {
+        id: "COM-01", title: "Fraud Alert Triage",
+        steps: ["Log in as Compliance Officer", "Navigate to Fraud Alerts", "Open a critical alert", "Assign to self, add investigation_notes, set status = under_investigation"],
+        expected: "assigned_to populated, investigation_notes saved, AuditLog entry",
+        dataCheck: (d) => `${d.fraud.length} alerts · ${d.fraud.filter(f=>f.severity==="critical").length} critical · ${d.fraud.filter(f=>f.status==="under_investigation").length} under investigation`,
+      },
+      {
+        id: "COM-02", title: "Fraud Alert Resolution",
+        steps: ["Open an under_investigation fraud alert", "Set status = resolved", "Populate resolved_by and resolved_date", "Verify parcel no longer shows fraud_risk_level = high"],
+        expected: "status = resolved, resolved fields populated",
+        dataCheck: (d) => `${d.fraud.filter(f=>f.status==="resolved").length} resolved · ${d.fraud.filter(f=>f.status==="dismissed").length} dismissed`,
+      },
+      {
+        id: "COM-03", title: "Compliance Review — Inheritance Case",
+        steps: ["Log in as Compliance Officer", "Open an InheritanceCase in compliance_review stage", "Review beneficiary shares and witness records", "Approve or reject with notes"],
+        expected: "compliance_reviewer, compliance_review_date, compliance_notes all populated",
+        dataCheck: (d) => `${d.cases.filter(c=>c.status==="compliance_review").length} cases at compliance stage · ${d.cases.filter(c=>c.compliance_notes).length} with compliance notes`,
+      },
+      {
+        id: "COM-04", title: "Dispute Escalation",
+        steps: ["Navigate to Disputes", "Open a high-priority dispute", "Escalate to next authority: status = escalated", "Verify assigned_to and priority retained"],
+        expected: "status = escalated, priority = high, audit trail updated",
+        dataCheck: (d) => `${d.disputes.filter(d2=>d2.status==="escalated").length} escalated · ${d.disputes.filter(d2=>d2.priority==="high").length} high priority`,
+      },
+      {
+        id: "COM-05", title: "Audit Log Inspection",
+        steps: ["Navigate to Audit Logs as Compliance Officer", "Filter by entity_type = LandParcel", "Verify actions, timestamps, and user emails are fully recorded"],
+        expected: "Audit entries with user_email, entity_id, action, timestamp all populated",
+        dataCheck: (d) => `${d.audits.length} entries · ${d.audits.filter(a=>a.user_email&&a.entity_id&&a.action).length} fully populated`,
+      },
+      {
+        id: "COM-06", title: "Generate Compliance Report",
+        steps: ["Navigate to Compliance Reports", "Set date range covering pilot period", "Download or view report", "Verify all pending items flagged"],
+        expected: "Report includes pending approvals, unresolved alerts, open disputes",
+        dataCheck: (d) => `${d.parcels.filter(p=>p.status==="pending").length} pending parcels · ${d.fraud.filter(f=>f.status==="open").length} open fraud alerts`,
+      },
+      {
+        id: "COM-07", title: "Parcel Freeze Verification",
+        steps: ["Navigate to Parcel Freeze module", "Freeze a disputed parcel", "Attempt modification as another user", "Verify modification blocked"],
+        expected: "Parcel status = frozen, edit attempts rejected",
+        dataCheck: (d) => `${d.parcels.filter(p=>p.status==="frozen").length} parcels currently frozen`,
+      },
+    ]
+  },
+  registry: {
+    label: "Registry Officer Scenarios",
+    color: "bg-emerald-100 text-emerald-800",
+    cases: [
+      {
+        id: "REG-01", title: "Land Parcel Approval",
+        steps: ["Log in as Surveyor General or Admin", "Navigate to Pending Approvals", "Open a pending parcel registration", "Set status = approved, populate approved_by and approval_date"],
+        expected: "Parcel status = approved, approval fields populated, notification sent",
+        dataCheck: (d) => { const gfl=d.parcels.filter(p=>p.lga==="Greenfield Local Government"); return `${gfl.filter(p=>p.status==="approved").length} approved · ${gfl.filter(p=>p.status==="pending").length} pending`; },
+      },
+      {
+        id: "REG-02", title: "Parcel Rejection with Reason",
+        steps: ["Open a pending parcel", "Set status = rejected", "Provide rejection_reason (mandatory)", "Verify status updated and owner notified"],
+        expected: "status = rejected, rejection_reason populated, AuditLog entry",
+        dataCheck: (d) => `${d.parcels.filter(p=>p.status==="rejected").length} rejected · ${d.parcels.filter(p=>p.status==="rejected"&&p.rejection_reason).length} with documented reason`,
+      },
+      {
+        id: "REG-03", title: "Ownership Transfer Recording",
+        steps: ["Navigate to a parcel's ownership history", "Record a new transfer: from_owner → to_owner", "Set transfer_type = purchase, provide transfer_date", "Approve the transfer"],
+        expected: "OwnershipHistory record created, parcel owner_name updated",
+        dataCheck: (d) => `${d.ownershipHistory.length} transfers recorded · ${d.ownershipHistory.filter(o=>o.status==="approved").length} approved`,
+      },
+      {
+        id: "REG-04", title: "Bulk Import Parcels",
+        steps: ["Navigate to Bulk Import", "Upload CSV with GFL parcel data", "Review import summary", "Confirm records created in LandParcel entity"],
+        expected: "ImportHistory record created, parcels imported with correct LGA",
+        dataCheck: (d) => { const gfl=d.parcels.filter(p=>p.lga==="Greenfield Local Government"); return `${gfl.length} GFL parcels in registry`; },
+      },
+      {
+        id: "REG-05", title: "Search and Filter Parcels",
+        steps: ["Navigate to Land Registry", "Search by owner name", "Filter by LGA = Greenfield Local Government", "Filter by status = approved", "Verify results match"],
+        expected: "Filtered results accurate, response < 3 seconds",
+        dataCheck: (d) => `${d.parcels.length} total parcels searchable`,
+      },
+      {
+        id: "REG-06", title: "Parcel Revision Request",
+        steps: ["Locate an approved parcel", "Submit a revision request with documented reason", "Officer reviews and approves/rejects revision", "Parcel updated to revised values"],
+        expected: "ParcelRevision record created, original parcel updated on approval",
+        dataCheck: (d) => `${d.parcels.filter(p=>p.status==="approved").length} approved parcels eligible for revision`,
+      },
+    ]
+  },
+  community: {
+    label: "Community Validation Scenarios",
+    color: "bg-amber-100 text-amber-800",
+    cases: [
+      {
+        id: "COM-CV-01", title: "Community Validation Submission",
+        steps: ["Log in as General User", "Navigate to Inheritance → Community Validation", "Submit new validation with community_name, lga, village_name", "Assign community elder and village head"],
+        expected: "CommunityValidation record created, status = submitted",
+        dataCheck: (d) => `${d.communityVal.length} submissions · ${d.communityVal.filter(c=>c.status==="submitted").length} awaiting review`,
+      },
+      {
+        id: "COM-CV-02", title: "Village Head Validation Step",
+        steps: ["Open a community validation at village_head_validation stage", "Log in as authorised officer", "Record village_head_validated_by and village_head_validation_date", "Add notes"],
+        expected: "Stage advances to traditional_authority_validation",
+        dataCheck: (d) => `${d.communityVal.filter(c=>c.village_head_validated_by).length} village head validations recorded`,
+      },
+      {
+        id: "COM-CV-03", title: "Traditional Authority Endorsement",
+        steps: ["Navigate to Traditional Authority Validations", "Open a pending validation", "Record traditional_ruler_name, validation_date, and comments", "Set validation_status = approved"],
+        expected: "TraditionalAuthorityValidation approved, digital_signature_url stored",
+        dataCheck: (d) => `${d.tradVal.filter(t=>t.validation_status==="approved").length} approved · ${d.tradVal.filter(t=>t.validation_status==="pending").length} pending`,
+      },
+      {
+        id: "COM-CV-04", title: "Community Consent Granting",
+        steps: ["Create CommunityConsent record for a parcel", "Set consent_type = community, date_granted", "Verify status = granted", "Check expiry_date populated"],
+        expected: "CommunityConsent with status = granted, expiry tracked",
+        dataCheck: (d) => `${d.communityVal.filter(c=>c.status==="approved").length} fully approved community validations`,
+      },
+      {
+        id: "COM-CV-05", title: "Full Multi-Stage Community Approval",
+        steps: ["Trace a validation from submitted → community_review → village_head_validation → traditional_authority_validation → compliance_review → approved", "Verify each stage reviewer recorded"],
+        expected: "All review fields populated for each stage, no gaps in chain",
+        dataCheck: (d) => `${d.communityVal.filter(c=>c.status==="approved").length} full approvals · ${d.communityVal.filter(c=>["community_review","village_head_validation","traditional_authority_validation"].includes(c.status)).length} in progress`,
+      },
+    ]
+  },
+  inheritance: {
+    label: "Inheritance Processing Scenarios",
+    color: "bg-rose-100 text-rose-800",
+    cases: [
+      {
+        id: "INH-01", title: "Create Inheritance Case",
+        steps: ["Navigate to Inheritance Management", "Click New Case", "Select case_type = succession", "Link to FamilyOwnership and parcel", "Set initiated_by"],
+        expected: "InheritanceCase created with status = draft, case_reference populated",
+        dataCheck: (d) => `${d.cases.length} cases · ${d.cases.filter(c=>c.case_type==="succession").length} succession type`,
+      },
+      {
+        id: "INH-02", title: "Add Beneficiaries and Shares",
+        steps: ["Open an inheritance case", "Add at least 2 FamilyBeneficiary records", "Assign percentage_share ensuring total = 100%", "Set relationship and generation_level"],
+        expected: "Beneficiaries saved, share totals validated (must sum to 100)",
+        dataCheck: (d) => { const families=d.families; const byFam={}; d.beneficiaries.forEach(b=>{ byFam[b.family_ownership_id]=(byFam[b.family_ownership_id]||0)+b.percentage_share; }); const ok=Object.values(byFam).filter(v=>Math.abs(v-100)<1).length; return `${d.beneficiaries.length} beneficiaries · ${ok} families with 100% share total`; },
+      },
+      {
+        id: "INH-03", title: "Witness Registration and Verification",
+        steps: ["Open an inheritance case", "Add at least 1 InheritanceWitness", "Set witness_role = family_witness or community_witness", "Record identification and witness_statement"],
+        expected: "Witness records saved, verification_status = pending",
+        dataCheck: (d) => `${d.witnesses.length} witnesses · ${d.witnesses.filter(w=>w.verification_status==="verified").length} verified`,
+      },
+      {
+        id: "INH-04", title: "Multi-Stage Approval Workflow",
+        steps: ["Submit case from draft → submitted", "Surveyor review stage: set surveyor_reviewer + date + notes", "Compliance review stage", "Surveyor General review stage", "Final approval: status = approved"],
+        expected: "All review stages populated, final_approved_by and final_approved_date set",
+        dataCheck: (d) => `${d.cases.filter(c=>c.status==="approved").length} approved · ${d.cases.filter(c=>c.final_approved_by).length} with final approver recorded`,
+      },
+      {
+        id: "INH-05", title: "Plot Allocation from Approved Case",
+        steps: ["Open an approved inheritance case", "Create PlotAllocation for each beneficiary", "Set area_sqm and allocation_percentage", "Confirm allocations: allocation_status = confirmed"],
+        expected: "PlotAllocation records created and confirmed",
+        dataCheck: (d) => `${d.plotAllocations.length} allocations · ${d.plotAllocations.filter(a=>a.allocation_status==="confirmed").length} confirmed`,
+      },
+      {
+        id: "INH-06", title: "Certificate Generation",
+        steps: ["Open a fully approved inheritance case", "Trigger certificate generation", "Verify certificate_generated = true and certificate_url stored"],
+        expected: "certificate_generated = true, certificate_url accessible",
+        dataCheck: (d) => `${d.cases.filter(c=>c.certificate_generated).length} certificates issued of ${d.cases.filter(c=>c.status==="approved").length} approved cases`,
+      },
+      {
+        id: "INH-07", title: "Inheritance Dispute Handling",
+        steps: ["Raise a dispute on an active inheritance case", "Set dispute_type = share_percentage", "Assign to compliance officer", "Record resolution and close"],
+        expected: "InheritanceDispute created, linked to case, resolved with notes",
+        dataCheck: (d) => `${d.cases.filter(c=>c.status==="rejected").length} cases rejected · ${d.disputes.filter(d2=>d2.dispute_type==="ownership").length} ownership disputes`,
+      },
+    ]
+  }
+};
 
-function ScenarioGroup({ title, icon: Icon, iconColor, scenarios }) {
+function ScenarioGroup({ groupKey, group, data }) {
   const [open, setOpen] = useState(true);
-  const passed = scenarios.filter(s => s.result === true).length;
-  const warned = scenarios.filter(s => s.result === "warn").length;
-  const failed = scenarios.filter(s => s.result === false).length;
+  const [expanded, setExpanded] = useState({});
   return (
     <Card className="overflow-hidden">
-      <CardHeader className="pb-2 cursor-pointer select-none" onClick={() => setOpen(v => !v)}>
+      <CardHeader className="pb-2 cursor-pointer select-none" onClick={() => setOpen(v=>!v)}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Icon className={`w-4 h-4 ${iconColor}`} />
-            <CardTitle className="text-sm font-bold">{title}</CardTitle>
-            <span className="text-xs text-muted-foreground ml-1">{scenarios.length} scenarios</span>
+            <CardTitle className="text-sm font-bold">{group.label}</CardTitle>
+            <Badge className={group.color}>{group.cases.length} test cases</Badge>
           </div>
-          <div className="flex items-center gap-2">
-            {passed > 0 && <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">{passed} pass</span>}
-            {warned > 0 && <span className="text-[11px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">{warned} warn</span>}
-            {failed > 0 && <span className="text-[11px] font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-full">{failed} fail</span>}
-            {open ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronRight className="w-4 h-4 text-gray-400" />}
-          </div>
+          {open ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronRight className="w-4 h-4 text-gray-400" />}
         </div>
       </CardHeader>
       {open && (
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs border-collapse">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="text-left px-3 py-2 font-semibold text-gray-600 w-8">#</th>
-                  <th className="text-left px-3 py-2 font-semibold text-gray-600">Scenario</th>
-                  <th className="text-left px-3 py-2 font-semibold text-gray-600">Precondition</th>
-                  <th className="text-left px-3 py-2 font-semibold text-gray-600">Expected Outcome</th>
-                  <th className="text-left px-3 py-2 font-semibold text-gray-600">Live Evidence</th>
-                  <th className="text-center px-3 py-2 font-semibold text-gray-600 w-16">Result</th>
-                </tr>
-              </thead>
-              <tbody>
-                {scenarios.map((s, i) => (
-                  <tr key={i} className={`border-b border-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"} ${s.result === false ? "!bg-red-50" : s.result === "warn" ? "!bg-amber-50" : ""}`}>
-                    <td className="px-3 py-2 text-gray-400 font-mono">{i + 1}</td>
-                    <td className="px-3 py-2 font-medium text-gray-800">{s.scenario}</td>
-                    <td className="px-3 py-2 text-gray-600">{s.precondition}</td>
-                    <td className="px-3 py-2 text-gray-600">{s.expected}</td>
-                    <td className="px-3 py-2 text-[11px] text-gray-500 italic">{s.evidence}</td>
-                    <td className="px-3 py-2 text-center">{pass(s.result)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="divide-y divide-gray-100">
+            {group.cases.map(tc => (
+              <div key={tc.id} className="p-3">
+                <div className="flex items-start justify-between cursor-pointer" onClick={() => setExpanded(e=>({...e, [tc.id]: !e[tc.id]}))}>
+                  <div className="flex items-start gap-2">
+                    <code className="text-[10px] font-mono bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded mt-0.5">{tc.id}</code>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800">{tc.title}</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">{tc.dataCheck(data)}</p>
+                    </div>
+                  </div>
+                  {expanded[tc.id] ? <ChevronDown className="w-3.5 h-3.5 text-gray-400 mt-1 flex-shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 text-gray-400 mt-1 flex-shrink-0" />}
+                </div>
+                {expanded[tc.id] && (
+                  <div className="mt-3 ml-10 space-y-2">
+                    <div>
+                      <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-1">Test Steps</p>
+                      <ol className="space-y-1">
+                        {tc.steps.map((s, i) => (
+                          <li key={i} className="flex gap-2 text-xs text-gray-700">
+                            <span className="text-gray-400 font-mono w-4 flex-shrink-0">{i+1}.</span>
+                            <span>{s}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                    <div className="bg-emerald-50 border border-emerald-200 rounded p-2">
+                      <p className="text-[11px] font-bold text-emerald-700 mb-0.5">Expected Result</p>
+                      <p className="text-xs text-emerald-800">{tc.expected}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </CardContent>
       )}
@@ -66,92 +292,32 @@ function ScenarioGroup({ title, icon: Icon, iconColor, scenarios }) {
 }
 
 export default function UATSuiteTab({ data }) {
-  const { parcels, families, beneficiaries, cases, disputes, fraud,
-          audits, fieldReports, surveyDocs, communityVal, tradVal,
-          plotAllocations, witnesses, ownershipHistory } = data;
-
-  const gfl = parcels.filter(p => p.lga === "Greenfield Local Government");
-  const approvedParcels = gfl.filter(p => p.status === "approved");
-  const approvedCases = cases.filter(c => c.status === "approved");
-  const certCases = cases.filter(c => c.certificate_generated);
-  const resolvedDisputes = disputes.filter(d => d.status === "resolved");
-  const resolvedFraud = fraud.filter(f => ["resolved", "dismissed"].includes(f.status));
-  const approvedComm = communityVal.filter(c => c.status === "approved");
-  const approvedTrad = tradVal.filter(t => t.validation_status === "approved");
-  const verifiedWitnesses = witnesses.filter(w => w.verification_status === "verified");
-  const confirmedAllocations = plotAllocations.filter(a => a.allocation_status === "confirmed");
-  const approvedSurveyDocs = surveyDocs.filter(s => s.review_status === "approved");
-  const gpsFieldReports = fieldReports.filter(r => r.latitude && r.longitude);
-  const gflWithBoundary = gfl.filter(p => p.parcel_boundary && p.parcel_boundary !== "null");
-  const gflWithGps = gfl.filter(p => p.latitude && p.longitude);
-
-  const surveyorScenarios = [
-    { scenario: "Submit new survey plan for GFL parcel", precondition: "≥1 SurveyDocument uploaded", expected: "Document stored, review_status = pending", evidence: `${surveyDocs.length} survey docs on record; ${surveyDocs.filter(s=>s.review_status==="pending").length} pending review`, result: surveyDocs.length > 0 },
-    { scenario: "Capture GPS coordinates in field", precondition: "≥1 FieldReport with GPS capture", expected: "latitude/longitude stored, gps_auto capture method", evidence: `${gpsFieldReports.length} of ${fieldReports.length} field reports have GPS coordinates`, result: gpsFieldReports.length > 0 },
-    { scenario: "Upload boundary GeoJSON polygon", precondition: "≥1 GFL parcel with parcel_boundary", expected: "GeoJSON stored, spatial_validation_status updated", evidence: `${gflWithBoundary.length} of ${gfl.length} GFL parcels have boundary polygon`, result: gflWithBoundary.length > 0 ? true : "warn" },
-    { scenario: "Survey document approved by reviewer", precondition: "≥1 SurveyDocument with review_status = approved", expected: "Document status advances, parcel verification_status updated", evidence: `${approvedSurveyDocs.length} survey documents have review_status = approved`, result: approvedSurveyDocs.length > 0 },
-    { scenario: "Submit field report with offline sync", precondition: "≥1 FieldReport with network_status = synced_offline", expected: "Report stored with synced_offline status, capture_timestamp present", evidence: `${fieldReports.filter(r=>r.network_status==="synced_offline").length} offline-synced reports on record`, result: fieldReports.filter(r=>r.network_status==="synced_offline").length > 0 ? true : "warn" },
-    { scenario: "Reject survey document with notes", precondition: "≥1 SurveyDocument with review_status = rejected", expected: "review_notes populated, surveyor notified", evidence: `${surveyDocs.filter(s=>s.review_status==="rejected").length} rejected docs; ${surveyDocs.filter(s=>s.review_status==="rejected"&&s.review_notes).length} with notes`, result: surveyDocs.filter(s=>s.review_status==="rejected").length > 0 ? true : "warn" },
-    { scenario: "Review spatial conflict on map", precondition: "≥1 parcel with spatial_validation_status = overlap_warning", expected: "Conflict parcels visible on GIS, conflict_notes populated", evidence: `${gfl.filter(p=>p.spatial_validation_status==="overlap_warning").length} overlap_warning parcels in GFL`, result: gfl.filter(p=>p.spatial_validation_status==="overlap_warning").length > 0 ? true : "warn" },
-    { scenario: "Export survey report as CSV", precondition: "≥10 parcels registered", expected: "CSV file generated with all parcel fields", evidence: `${gfl.length} GFL parcels available for export; export UI present in LandRegistry page`, result: gfl.length >= 10 },
-  ];
-
-  const complianceScenarios = [
-    { scenario: "Investigate open fraud alert", precondition: "≥1 FraudAlert with status = open or under_investigation", expected: "Alert assigned to officer, investigation_notes added", evidence: `${fraud.filter(f=>f.status==="under_investigation").length} alerts under investigation; ${fraud.filter(f=>f.assigned_to).length} assigned to officers`, result: fraud.length > 0 },
-    { scenario: "Resolve fraud alert with outcome", precondition: "≥1 FraudAlert status = resolved", expected: "resolved_by, resolved_date, investigation_notes all populated", evidence: `${resolvedFraud.length} fraud alerts resolved/dismissed from ${fraud.length} total`, result: resolvedFraud.length > 0 },
-    { scenario: "Flag duplicate registration fraud", precondition: "≥1 FraudAlert with alert_type = duplicate_registration", expected: "Alert created, linked parcel frozen or flagged", evidence: `${fraud.filter(f=>f.alert_type==="duplicate_registration").length} duplicate registration alerts`, result: fraud.filter(f=>f.alert_type==="duplicate_registration").length > 0 ? true : "warn" },
-    { scenario: "Review compliance report", precondition: "Audit log has ≥50 entries", expected: "Compliance report shows activity by user, action type breakdown", evidence: `${audits.length} audit entries; ${new Set(audits.map(a=>a.user_email).filter(Boolean)).size} distinct users logged`, result: audits.length >= 50 },
-    { scenario: "Escalate critical dispute", precondition: "≥1 Dispute with priority = critical or status = escalated", expected: "Dispute escalated, escalation recorded in audit log", evidence: `${disputes.filter(d=>d.priority==="critical").length} critical disputes; ${disputes.filter(d=>d.status==="escalated").length} escalated`, result: disputes.filter(d=>d.priority==="critical").length > 0 ? true : "warn" },
-    { scenario: "Verify audit trail completeness", precondition: "≥100 AuditLog entries", expected: "Every action has user_email, action, entity_id, timestamp", evidence: `${audits.filter(a=>a.user_email&&a.entity_id&&a.action).length} of ${audits.length} entries fully attributed`, result: audits.length >= 100 },
-    { scenario: "Review boundary manipulation alert", precondition: "≥1 FraudAlert with alert_type = boundary_manipulation", expected: "Alert links to parcel, officer can view boundary history", evidence: `${fraud.filter(f=>f.alert_type==="boundary_manipulation").length} boundary manipulation alerts on record`, result: fraud.filter(f=>f.alert_type==="boundary_manipulation").length > 0 ? true : "warn" },
-  ];
-
-  const registryScenarios = [
-    { scenario: "Approve pending parcel registration", precondition: "≥1 LandParcel with status = approved", expected: "approval_date set, approved_by recorded, status = approved", evidence: `${approvedParcels.length} approved GFL parcels; ${approvedParcels.filter(p=>p.approval_date).length} with approval_date`, result: approvedParcels.length > 0 },
-    { scenario: "Reject parcel with documented reason", precondition: "≥1 LandParcel with status = rejected", expected: "rejection_reason populated, status = rejected", evidence: `${gfl.filter(p=>p.status==="rejected").length} rejected parcels; ${gfl.filter(p=>p.status==="rejected"&&p.rejection_reason).length} with reason`, result: gfl.filter(p=>p.status==="rejected").length > 0 ? true : "warn" },
-    { scenario: "Transfer parcel ownership", precondition: "≥1 OwnershipHistory record with status = approved", expected: "OwnershipHistory created, LandParcel owner_name updated", evidence: `${ownershipHistory.length} ownership history records; ${ownershipHistory.filter(o=>o.status==="approved").length} approved transfers`, result: ownershipHistory.filter(o=>o.status==="approved").length > 0 },
-    { scenario: "Search parcel by owner name", precondition: "≥50 parcels in database", expected: "Filtered results returned within 2 seconds", evidence: `${parcels.length} total parcels; ${new Set(parcels.map(p=>p.owner_name).filter(Boolean)).size} unique owners`, result: parcels.length >= 50 },
-    { scenario: "Filter parcels by LGA", precondition: "Multiple LGAs present in database", expected: "Only parcels from selected LGA returned", evidence: `LGAs present: ${[...new Set(parcels.map(p=>p.lga).filter(Boolean))].slice(0,4).join(", ")}`, result: new Set(parcels.map(p=>p.lga).filter(Boolean)).size > 1 },
-    { scenario: "Freeze parcel under investigation", precondition: "≥1 LandParcel with status = frozen", expected: "Parcel locked from edits, freeze reason recorded", evidence: `${parcels.filter(p=>p.status==="frozen").length} frozen parcels in registry`, result: parcels.filter(p=>p.status==="frozen").length > 0 ? true : "warn" },
-  ];
-
-  const communityScenarios = [
-    { scenario: "Submit community validation", precondition: "≥1 CommunityValidation record submitted", expected: "CommunityValidation created, status = submitted", evidence: `${communityVal.length} community validations on record`, result: communityVal.length > 0 },
-    { scenario: "Village head validates submission", precondition: "≥1 CommunityValidation with village_head_validation_date", expected: "village_head_validated_by populated, status advances", evidence: `${communityVal.filter(c=>c.village_head_validation_date).length} village head validations recorded`, result: communityVal.filter(c=>c.village_head_validation_date).length > 0 ? true : "warn" },
-    { scenario: "Traditional authority approves", precondition: "≥1 TraditionalAuthorityValidation with status = approved", expected: "digital_signature_url or seal_url present, validation_date set", evidence: `${approvedTrad.length} traditional authority approvals; ${tradVal.filter(t=>t.digital_signature_url).length} with digital signature`, result: approvedTrad.length > 0 },
-    { scenario: "Community consent granted", precondition: "≥1 CommunityConsent or communityVal with approved status", expected: "consent status = granted, date_granted recorded", evidence: `${approvedComm.length} community validations fully approved`, result: approvedComm.length > 0 },
-    { scenario: "Full community approval chain complete", precondition: "≥1 CommunityValidation through all 5 stages to approved", expected: "All reviewer fields populated, status = approved", evidence: `${approvedComm.length} validations reached approved status; final_approved_by: ${approvedComm.filter(c=>c.final_approved_by).length}`, result: approvedComm.length > 0 },
-  ];
-
-  const inheritanceScenarios = [
-    { scenario: "Initiate inheritance case", precondition: "≥1 InheritanceCase with status ≠ draft", expected: "Case created with family_ownership_id, parcel_id, case_type", evidence: `${cases.filter(c=>c.status!=="draft").length} cases submitted beyond draft stage`, result: cases.filter(c=>c.status!=="draft").length > 0 },
-    { scenario: "Add beneficiaries with shares totalling 100%", precondition: "≥1 FamilyOwnership with beneficiaries", expected: "All beneficiary percentage_share values sum to ≤100%", evidence: (() => { const shares = families.map(f => { const bs = beneficiaries.filter(b=>b.family_ownership_id===f.id&&b.status==="active"&&!b.is_deleted); const sum = bs.reduce((a,b)=>a+Number(b.percentage_share||0),0); return sum; }); const over = shares.filter(s=>s>100.5); return `${shares.length} families checked; ${over.length} with shares > 100%`; })(), result: (() => { const over = families.filter(f => { const bs = beneficiaries.filter(b=>b.family_ownership_id===f.id&&b.status==="active"&&!b.is_deleted); return bs.reduce((a,b)=>a+Number(b.percentage_share||0),0) > 100.5; }); return over.length === 0; })() },
-    { scenario: "Add witnesses to inheritance case", precondition: "≥1 InheritanceWitness with verification_status = verified", expected: "Witnesses linked to case, identification recorded", evidence: `${verifiedWitnesses.length} verified witnesses; ${witnesses.filter(w=>w.identification).length} with ID recorded`, result: verifiedWitnesses.length > 0 },
-    { scenario: "Complete surveyor review stage", precondition: "≥1 InheritanceCase with surveyor_review_date", expected: "surveyor_reviewer and surveyor_review_date populated", evidence: `${cases.filter(c=>c.surveyor_review_date).length} cases with surveyor review completed`, result: cases.filter(c=>c.surveyor_review_date).length > 0 ? true : "warn" },
-    { scenario: "Final approval by Surveyor General", precondition: "≥1 InheritanceCase with status = approved", expected: "final_approved_by, final_approved_date, status = approved", evidence: `${approvedCases.length} cases approved; ${approvedCases.filter(c=>c.final_approved_by).length} with final_approved_by`, result: approvedCases.length > 0 },
-    { scenario: "Generate inheritance certificate", precondition: "≥1 InheritanceCase with certificate_generated = true", expected: "certificate_url present, certificate_generated = true", evidence: `${certCases.length} certificates issued; ${certCases.filter(c=>c.certificate_url).length} with certificate_url`, result: certCases.length > 0 },
-    { scenario: "Confirm plot allocations", precondition: "≥1 PlotAllocation with allocation_status = confirmed", expected: "allocated_by, area_sqm, allocation_percentage all set", evidence: `${confirmedAllocations.length} confirmed allocations; ${plotAllocations.filter(a=>a.area_sqm).length} with area_sqm`, result: confirmedAllocations.length > 0 },
-  ];
-
-  const allScenarios = [...surveyorScenarios, ...complianceScenarios, ...registryScenarios, ...communityScenarios, ...inheritanceScenarios];
-  const totalPass = allScenarios.filter(s => s.result === true).length;
-  const totalWarn = allScenarios.filter(s => s.result === "warn").length;
-  const totalFail = allScenarios.filter(s => s.result === false).length;
+  const total = Object.values(SCENARIOS).reduce((a, g) => a + g.cases.length, 0);
+  const gfl = data.parcels.filter(p => p.lga === "Greenfield Local Government");
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-2">
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-black text-gray-900">{allScenarios.length}</p><p className="text-xs text-muted-foreground mt-0.5">Total Test Scenarios</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-black text-emerald-700">{totalPass}</p><p className="text-xs text-muted-foreground mt-0.5">Passed</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-black text-amber-600">{totalWarn}</p><p className="text-xs text-muted-foreground mt-0.5">Warnings</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-black text-red-600">{totalFail}</p><p className="text-xs text-muted-foreground mt-0.5">Failed</p></CardContent></Card>
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        {[
+          { label: "Total Test Cases", value: total, color: "text-blue-700" },
+          { label: "GFL Parcels", value: gfl.length, color: "text-emerald-700" },
+          { label: "Inheritance Cases", value: data.cases.length, color: "text-purple-700" },
+          { label: "Field Reports", value: data.fieldReports.length, color: "text-amber-700" },
+          { label: "Audit Entries", value: data.audits.length, color: "text-gray-700" },
+        ].map(s => (
+          <Card key={s.label}><CardContent className="p-3 text-center">
+            <p className={`text-xl font-black ${s.color}`}>{s.value}</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">{s.label}</p>
+          </CardContent></Card>
+        ))}
       </div>
-
-      <ScenarioGroup title="Surveyor Scenarios" icon={Map} iconColor="text-teal-600" scenarios={surveyorScenarios} />
-      <ScenarioGroup title="Compliance Scenarios" icon={Shield} iconColor="text-red-600" scenarios={complianceScenarios} />
-      <ScenarioGroup title="Registry Officer Scenarios" icon={User} iconColor="text-blue-600" scenarios={registryScenarios} />
-      <ScenarioGroup title="Community Validation Scenarios" icon={Users} iconColor="text-purple-600" scenarios={communityScenarios} />
-      <ScenarioGroup title="Inheritance Processing Scenarios" icon={GitBranch} iconColor="text-emerald-600" scenarios={inheritanceScenarios} />
+      <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+        <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0" />
+        <p className="text-xs text-blue-800">All test cases execute against live platform data. Click any test case ID to expand step-by-step instructions and live evidence counts.</p>
+      </div>
+      {Object.entries(SCENARIOS).map(([key, group]) => (
+        <ScenarioGroup key={key} groupKey={key} group={group} data={data} />
+      ))}
     </div>
   );
 }

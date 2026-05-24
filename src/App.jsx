@@ -112,6 +112,7 @@ const AuthenticatedApp = () => {
         <Route path="/gov/pilot-validation" element={<PilotValidation />} />
         <Route path="/gov/demo-readiness" element={<DemoReadinessReport />} />
         <Route path="/gov/deployment-package" element={<PilotDeploymentPackage />} />
+        <Route path="/gov/deployment-package" element={<PilotDeploymentPackage />} />
         <Route path="/demo-guide" element={<DemoGuide />} />
       </Route>
       <Route path="/demo" element={<DemoAccess />} />
