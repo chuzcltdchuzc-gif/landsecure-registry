@@ -1,354 +1,325 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Database, CheckCircle2, AlertTriangle, Play, Trash2, RefreshCw,
-  Map, Users, FileText, Camera, Shield, GitBranch, Landmark
+  Map, Users, FileText, Camera, Shield, GitBranch, Landmark, Clock,
+  XCircle, BarChart3, Layers, Activity
 } from "lucide-react";
-import {
-  generateParcels, generateFieldReports, generateDisputes,
-  generateFamilyOwnerships, generateBeneficiaries, generateInheritanceCases,
-  generateCommunityValidations, generateDeathVerifications, generateFamilyMeetingResolutions,
-  pick, fullName, dateOnly, rndInt, GFL_CONFIG
-} from "@/lib/demoDataGenerator";
 
-const SEED_STEPS = [
-  { id: "parcels", label: "Land Parcels", icon: Map, count: 200, color: "blue", desc: "200 parcels across Greenfield LGA communities" },
-  { id: "field_reports", label: "Field Reports", icon: Camera, count: 80, color: "orange", desc: "80 GPS-verified field inspection reports" },
-  { id: "disputes", label: "Disputes", icon: AlertTriangle, count: 20, color: "red", desc: "20 active and resolved disputes" },
-  { id: "family", label: "Family Ownership", icon: Users, count: 5, color: "emerald", desc: "5 families with beneficiary trees" },
-  { id: "inheritance", label: "Inheritance Cases", icon: GitBranch, count: 5, color: "purple", desc: "5 inheritance cases across workflow stages" },
-  { id: "community", label: "Community Validations", icon: Landmark, count: 8, color: "teal", desc: "8 community validation workflows" },
-  { id: "death_verifs", label: "Death Verifications", icon: FileText, count: 4, color: "indigo", desc: "4 death verification records" },
-  { id: "resolutions", label: "Family Resolutions", icon: FileText, count: 4, color: "violet", desc: "4 family meeting resolution records" },
+// All seeding phases in order
+const PHASES = [
+  { id: "parcels_0",   label: "Parcels Batch 1",        icon: Map,        color: "blue",    desc: "Parcels 20–119 (100 records)",   phase: "parcels",       params: { offset: 0,   batchSize: 100 } },
+  { id: "parcels_1",   label: "Parcels Batch 2",        icon: Map,        color: "blue",    desc: "Parcels 120–219 (100 records)",  phase: "parcels",       params: { offset: 100, batchSize: 100 } },
+  { id: "parcels_2",   label: "Parcels Batch 3",        icon: Map,        color: "blue",    desc: "Parcels 220–319 (100 records)",  phase: "parcels",       params: { offset: 200, batchSize: 100 } },
+  { id: "parcels_3",   label: "Parcels Batch 4",        icon: Map,        color: "blue",    desc: "Parcels 320–419 (100 records)",  phase: "parcels",       params: { offset: 300, batchSize: 100 } },
+  { id: "parcels_4",   label: "Parcels Batch 5",        icon: Map,        color: "blue",    desc: "Parcels 420–519 (100 records)",  phase: "parcels",       params: { offset: 400, batchSize: 100 } },
+  { id: "parcels_5",   label: "Parcels Batch 6",        icon: Map,        color: "blue",    desc: "Parcels 520–619 (100 records)",  phase: "parcels",       params: { offset: 500, batchSize: 100 } },
+  { id: "parcels_6",   label: "Parcels Batch 7",        icon: Map,        color: "blue",    desc: "Parcels 620–719 (100 records)",  phase: "parcels",       params: { offset: 600, batchSize: 100 } },
+  { id: "parcels_7",   label: "Parcels Batch 8",        icon: Map,        color: "blue",    desc: "Parcels 720–819 (100 records)",  phase: "parcels",       params: { offset: 700, batchSize: 100 } },
+  { id: "parcels_8",   label: "Parcels Batch 9",        icon: Map,        color: "blue",    desc: "Parcels 820–919 (100 records)",  phase: "parcels",       params: { offset: 800, batchSize: 100 } },
+  { id: "parcels_9",   label: "Parcels Batch 10",       icon: Map,        color: "blue",    desc: "Parcels 920–999 (80 records)",   phase: "parcels",       params: { offset: 900, batchSize: 80  } },
+  { id: "familyOwn",   label: "Family Ownerships",      icon: Users,      color: "emerald", desc: "50 family ownership records",     phase: "familyOwnerships", params: { count: 50 } },
+  { id: "benefics",    label: "Beneficiaries",          icon: Users,      color: "emerald", desc: "Beneficiary trees for families",  phase: "beneficiaries", params: {} },
+  { id: "inherit",     label: "Inheritance Cases",      icon: GitBranch,  color: "purple",  desc: "20 inheritance cases",           phase: "inheritanceCases", params: { count: 20 } },
+  { id: "fieldRep",    label: "Field Reports",          icon: Camera,     color: "orange",  desc: "150 field inspection reports",   phase: "fieldReports",  params: { count: 150 } },
+  { id: "surveyDocs",  label: "Survey Documents",       icon: FileText,   color: "teal",    desc: "50 survey submissions",          phase: "surveyDocuments", params: { count: 50 } },
+  { id: "disputes",    label: "Disputes",               icon: AlertTriangle, color: "red",  desc: "30 active disputes",             phase: "disputes",      params: { count: 30 } },
+  { id: "fraudAl",     label: "Fraud Alerts",           icon: Shield,     color: "rose",    desc: "20 fraud alert scenarios",       phase: "fraudAlerts",   params: { count: 20 } },
+  { id: "commVal",     label: "Community Validations",  icon: Landmark,   color: "indigo",  desc: "15 community validation cases",  phase: "communityValidations", params: { count: 15 } },
+  { id: "ownHist",     label: "Ownership History",      icon: Layers,     color: "cyan",    desc: "200 ownership transfer records", phase: "ownershipHistory", params: { count: 200 } },
+  { id: "deathVerif",  label: "Death Verifications",    icon: FileText,   color: "slate",   desc: "15 death verification records",  phase: "deathVerifications", params: {} },
+  { id: "fmr",         label: "Meeting Resolutions",    icon: FileText,   color: "violet",  desc: "20 family meeting resolutions",  phase: "familyMeetingResolutions", params: {} },
+  { id: "inhDisputes", label: "Inheritance Disputes",   icon: AlertTriangle, color: "red",  desc: "10 inheritance disputes",        phase: "inheritanceDisputes", params: {} },
+  { id: "witnesses",   label: "Witnesses",              icon: Users,      color: "amber",   desc: "Witness records for cases",      phase: "witnesses",     params: {} },
+  { id: "auditLogs1",  label: "Audit Logs Batch 1",     icon: Activity,   color: "gray",    desc: "200 audit log events",           phase: "auditLogs",     params: { count: 200 } },
+  { id: "auditLogs2",  label: "Audit Logs Batch 2",     icon: Activity,   color: "gray",    desc: "200 audit log events",           phase: "auditLogs",     params: { count: 200 } },
+  { id: "auditLogs3",  label: "Audit Logs Batch 3",     icon: Activity,   color: "gray",    desc: "100 audit log events",           phase: "auditLogs",     params: { count: 100 } },
+  { id: "notifs",      label: "Notifications",          icon: BarChart3,  color: "green",   desc: "50 user notifications",          phase: "notifications", params: { count: 50 } },
 ];
 
-const COLOR_MAP = {
-  blue: "bg-blue-50 text-blue-600 border-blue-200",
-  orange: "bg-orange-50 text-orange-600 border-orange-200",
-  red: "bg-red-50 text-red-600 border-red-200",
+const COLOR_CLASSES = {
+  blue:    "bg-blue-50 text-blue-600 border-blue-200",
   emerald: "bg-emerald-50 text-emerald-600 border-emerald-200",
-  purple: "bg-purple-50 text-purple-600 border-purple-200",
-  teal: "bg-teal-50 text-teal-600 border-teal-200",
-  indigo: "bg-indigo-50 text-indigo-600 border-indigo-200",
-  violet: "bg-violet-50 text-violet-600 border-violet-200",
+  orange:  "bg-orange-50 text-orange-600 border-orange-200",
+  red:     "bg-red-50 text-red-600 border-red-200",
+  rose:    "bg-rose-50 text-rose-600 border-rose-200",
+  purple:  "bg-purple-50 text-purple-600 border-purple-200",
+  teal:    "bg-teal-50 text-teal-600 border-teal-200",
+  indigo:  "bg-indigo-50 text-indigo-600 border-indigo-200",
+  cyan:    "bg-cyan-50 text-cyan-600 border-cyan-200",
+  slate:   "bg-slate-50 text-slate-600 border-slate-200",
+  violet:  "bg-violet-50 text-violet-600 border-violet-200",
+  amber:   "bg-amber-50 text-amber-600 border-amber-200",
+  gray:    "bg-gray-50 text-gray-600 border-gray-200",
+  green:   "bg-green-50 text-green-600 border-green-200",
 };
 
+const SUMMARY = [
+  { label: "Land Parcels", value: "~980", icon: Map, color: "text-blue-600" },
+  { label: "Family Ownerships", value: "50", icon: Users, color: "text-emerald-600" },
+  { label: "Field Reports", value: "150", icon: Camera, color: "text-orange-600" },
+  { label: "Disputes", value: "30", icon: AlertTriangle, color: "text-red-600" },
+  { label: "Fraud Alerts", value: "20", icon: Shield, color: "text-rose-600" },
+  { label: "Audit Events", value: "500+", icon: Activity, color: "text-gray-600" },
+];
+
 export default function DemoDataSeed() {
-  const [status, setStatus] = useState({});
+  const [phaseStatus, setPhaseStatus] = useState({});
   const [running, setRunning] = useState(false);
   const [log, setLog] = useState([]);
-  const [seededParcels, setSeededParcels] = useState([]);
-  const [seededFamilies, setSeededFamilies] = useState([]);
-  const [seededCases, setSeededCases] = useState([]);
+  const [startFrom, setStartFrom] = useState(0);
+  const abortRef = useRef(false);
+  const logEndRef = useRef(null);
 
   const addLog = (msg, type = "info") => {
-    setLog(prev => [...prev, { msg, type, ts: new Date().toLocaleTimeString() }]);
+    setLog(prev => {
+      const newLog = [...prev, { msg, type, ts: new Date().toLocaleTimeString() }];
+      return newLog;
+    });
+    setTimeout(() => logEndRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
   };
 
-  const setStepStatus = (id, s) => setStatus(prev => ({ ...prev, [id]: s }));
+  const setPS = (id, s) => setPhaseStatus(prev => ({ ...prev, [id]: s }));
 
-  const seedAll = async () => {
+  const runAll = async (fromIndex = 0) => {
     setRunning(true);
-    setLog([]);
-    setStatus({});
+    abortRef.current = false;
+    addLog(`Starting Demo Population Phase from step ${fromIndex + 1}/${PHASES.length}…`);
+    addLog("Note: This will take 5–10 minutes. Do not close this page.");
 
-    try {
-      // ── STEP 1: Parcels ──────────────────────────────────────────────────
-      setStepStatus("parcels", "running");
-      addLog("Generating 200 Greenfield LGA land parcels…");
-      const parcelData = generateParcels(200);
-      const batchSize = 25;
-      const createdParcels = [];
-      for (let i = 0; i < parcelData.length; i += batchSize) {
-        const batch = parcelData.slice(i, i + batchSize);
-        const results = await Promise.all(batch.map(p => base44.entities.LandParcel.create(p)));
-        createdParcels.push(...results);
-        addLog(`  Parcels: ${Math.min(i + batchSize, parcelData.length)}/${parcelData.length} created`);
+    for (let i = fromIndex; i < PHASES.length; i++) {
+      if (abortRef.current) {
+        addLog("⏹ Seeding paused by user.", "warn");
+        setRunning(false);
+        setStartFrom(i);
+        return;
       }
-      setSeededParcels(createdParcels);
-      setStepStatus("parcels", "done");
-      addLog(`✓ ${createdParcels.length} parcels created`, "success");
 
-      // ── STEP 2: Field Reports ────────────────────────────────────────────
-      setStepStatus("field_reports", "running");
-      addLog("Generating 80 field reports with GPS data…");
-      const reportData = generateFieldReports(createdParcels, 80);
-      for (let i = 0; i < reportData.length; i += batchSize) {
-        await Promise.all(reportData.slice(i, i + batchSize).map(r => base44.entities.FieldReport.create(r)));
-      }
-      setStepStatus("field_reports", "done");
-      addLog(`✓ ${reportData.length} field reports created`, "success");
+      const ph = PHASES[i];
+      setPS(ph.id, "running");
+      addLog(`[${i + 1}/${PHASES.length}] Running: ${ph.label}…`);
 
-      // ── STEP 3: Disputes ─────────────────────────────────────────────────
-      setStepStatus("disputes", "running");
-      addLog("Generating 20 land disputes…");
-      const disputeData = generateDisputes(createdParcels, 20);
-      await Promise.all(disputeData.map(d => base44.entities.Dispute.create(d)));
-      setStepStatus("disputes", "done");
-      addLog(`✓ ${disputeData.length} disputes created`, "success");
-
-      // Also seed fraud alerts
-      addLog("Generating 15 fraud alerts…");
-      const alertTypes = ["duplicate_coordinates", "overlapping_boundary", "suspicious_ownership", "fake_document", "multiple_claims"];
-      const fraudAlertsData = createdParcels.filter(p => p.fraud_risk_score > 40).slice(0, 15).map(p => ({
-        parcel_id: p.id,
-        parcel_number: p.parcel_number,
-        alert_type: pick(alertTypes),
-        risk_score: p.fraud_risk_score,
-        risk_level: p.fraud_risk_level,
-        description: `Automated system flagged ${p.parcel_number}: ${JSON.parse(p.fraud_risk_reasons || "[]")[0] || "Suspicious pattern detected"}`,
-        status: pick(["open", "open", "under_investigation", "resolved", "dismissed"]),
-        flagged_by: "system",
-        assigned_to: "sg.demo@landsecure.app",
-        created_date: dateOnly(90),
-      }));
-      for (const alert of fraudAlertsData) {
-        try { await base44.entities.FraudAlert.create(alert); } catch {}
-      }
-      addLog(`✓ Fraud alerts seeded`, "success");
-
-      // ── STEP 4: Family Ownership ─────────────────────────────────────────
-      setStepStatus("family", "running");
-      addLog("Creating 5 family ownership records with lineages…");
-      const familyData = generateFamilyOwnerships(createdParcels, 5);
-      const createdFamilies = await Promise.all(familyData.map(f => base44.entities.FamilyOwnership.create(f)));
-      setSeededFamilies(createdFamilies);
-      setStepStatus("family", "done");
-      addLog(`✓ ${createdFamilies.length} family ownership records created`, "success");
-
-      // Beneficiaries
-      addLog("Adding family beneficiaries and successor chains…");
-      const beneficiaryData = generateBeneficiaries(createdFamilies);
-      await Promise.all(beneficiaryData.map(b => base44.entities.FamilyBeneficiary.create(b)));
-      addLog(`✓ ${beneficiaryData.length} beneficiaries created`, "success");
-
-      // ── STEP 5: Inheritance Cases ────────────────────────────────────────
-      setStepStatus("inheritance", "running");
-      addLog("Creating 5 inheritance cases across workflow stages…");
-      const caseData = generateInheritanceCases(createdFamilies, Math.min(5, createdFamilies.length));
-      const createdCases = await Promise.all(caseData.map(c => base44.entities.InheritanceCase.create(c)));
-      setSeededCases(createdCases);
-      setStepStatus("inheritance", "done");
-      addLog(`✓ ${createdCases.length} inheritance cases created`, "success");
-
-      // Plot allocations
-      addLog("Adding plot allocations…");
-      for (const ic of createdCases) {
-        const bens = beneficiaryData.filter(b => b.family_ownership_id === ic.family_ownership_id);
-        if (bens.length > 0) {
-          const plotLetters = ["A", "B", "C", "D", "E"];
-          for (let pi = 0; pi < Math.min(bens.length, 3); pi++) {
-            try {
-              await base44.entities.PlotAllocation.create({
-                inheritance_case_id: ic.id,
-                family_ownership_id: ic.family_ownership_id,
-                parcel_id: ic.parcel_id,
-                parcel_number: ic.parcel_number,
-                beneficiary_id: bens[pi].id || `ben_${pi}`,
-                beneficiary_name: bens[pi].full_name,
-                planned_plot_number: `Plot ${plotLetters[pi]}`,
-                area_sqm: rndInt(200, 2000),
-                allocation_percentage: parseFloat((100 / Math.min(bens.length, 3)).toFixed(1)),
-                allocation_status: pick(["draft", "confirmed", "confirmed"]),
-                allocated_by: "surveyor.demo@landsecure.app",
-                is_deleted: false,
-              });
-            } catch {}
-          }
+      try {
+        const res = await base44.functions.invoke("seedDemoData", {
+          phase: ph.phase,
+          ...ph.params,
+        });
+        const data = res.data;
+        if (data?.error) {
+          addLog(`  ⚠ ${ph.label}: ${data.error}`, "warn");
+          setPS(ph.id, "error");
+        } else {
+          const count = data?.inserted ?? "✓";
+          addLog(`  ✓ ${ph.label}: ${count} records inserted`, "success");
+          setPS(ph.id, "done");
         }
+      } catch (err) {
+        addLog(`  ✗ ${ph.label}: ${err.message}`, "error");
+        setPS(ph.id, "error");
       }
-      addLog(`✓ Plot allocations created`, "success");
 
-      // ── STEP 6: Community Validations ────────────────────────────────────
-      setStepStatus("community", "running");
-      addLog("Creating 8 community validation workflows…");
-      const cvData = generateCommunityValidations(createdParcels, 8);
-      await Promise.all(cvData.map(cv => base44.entities.CommunityValidation.create(cv)));
-      setStepStatus("community", "done");
-      addLog(`✓ ${cvData.length} community validations created`, "success");
-
-      // ── STEP 7: Death Verifications ──────────────────────────────────────
-      setStepStatus("death_verifs", "running");
-      addLog("Creating death verification records…");
-      const dvData = generateDeathVerifications(createdCases, Math.min(4, createdCases.length));
-      await Promise.all(dvData.map(dv => base44.entities.DeathVerification.create(dv)));
-      setStepStatus("death_verifs", "done");
-      addLog(`✓ ${dvData.length} death verification records created`, "success");
-
-      // ── STEP 8: Family Meeting Resolutions ───────────────────────────────
-      setStepStatus("resolutions", "running");
-      addLog("Creating family meeting resolutions…");
-      const resData = generateFamilyMeetingResolutions(createdFamilies, Math.min(4, createdFamilies.length));
-      await Promise.all(resData.map(r => base44.entities.FamilyMeetingResolution.create(r)));
-      setStepStatus("resolutions", "done");
-      addLog(`✓ ${resData.length} family meeting resolutions created`, "success");
-
-      // ── Community Consents ───────────────────────────────────────────────
-      addLog("Creating community consent records…");
-      for (const fo of createdFamilies.slice(0, 4)) {
-        try {
-          await base44.entities.CommunityConsent.create({
-            parcel_id: fo.parcel_id,
-            parcel_number: fo.parcel_number,
-            family_ownership_id: fo.id,
-            community_name: pick(["Greenfield Central Community", "Emeka Town Community", "Okafor Hills Community"]),
-            consent_type: pick(["family", "community", "traditional_authority"]),
-            date_granted: dateOnly(60),
-            status: pick(["granted", "granted", "pending"]),
-            consent_notes: "Community has reviewed and endorsed the land transfer/inheritance proceedings.",
-            submitted_by: "citizen.demo@landsecure.app",
-            submitted_by_name: fullName(),
-            is_deleted: false,
-          });
-        } catch {}
-      }
-      addLog(`✓ Community consent records created`, "success");
-
-      // ── Audit Logs ───────────────────────────────────────────────────────
-      addLog("Creating audit log entries…");
-      const auditEntries = [
-        { user_email: "sg.demo@landsecure.app", user_name: "Dr. Amara Okafor", action: "BULK_SEED_PARCELS", entity_type: "LandParcel", entity_id: "bulk", details: `Seeded ${createdParcels.length} demo parcels for Greenfield LGA pilot` },
-        { user_email: "agent.demo@landsecure.app", user_name: "Emeka Obi", action: "FIELD_REPORTS_BATCH", entity_type: "FieldReport", entity_id: "bulk", details: "Generated 80 field inspection reports with GPS data" },
-        { user_email: "citizen.demo@landsecure.app", user_name: "Blessing Eze", action: "FAMILY_REGISTRATION", entity_type: "FamilyOwnership", entity_id: "bulk", details: `Registered ${createdFamilies.length} family ownership records` },
-        { user_email: "surveyor.demo@landsecure.app", user_name: "Tobi Fashola", action: "INHERITANCE_CASES", entity_type: "InheritanceCase", entity_id: "bulk", details: `Created ${createdCases.length} inheritance cases for pilot demonstration` },
-      ];
-      await Promise.all(auditEntries.map(e => base44.entities.AuditLog.create(e)));
-      addLog(`✓ Audit log entries created`, "success");
-
-      addLog("🎉 Greenfield LGA demo environment fully seeded!", "success");
-
-    } catch (err) {
-      addLog(`❌ Error: ${err.message}`, "error");
-    } finally {
-      setRunning(false);
+      // Small delay between phases to avoid rate limiting
+      await new Promise(r => setTimeout(r, 800));
     }
+
+    if (!abortRef.current) {
+      addLog("", "info");
+      addLog("🎉 Greenfield LGA Demo Population Complete!", "success");
+      addLog("All ~1,000 parcels, families, reports, disputes, fraud cases, and audit trails are now live.", "success");
+      addLog("Refresh dashboards to see all populated data.", "success");
+      setStartFrom(0);
+    }
+    setRunning(false);
   };
 
-  const clearAll = async () => {
-    if (!confirm("This will delete ALL demo data from all entities. Are you sure?")) return;
-    setRunning(true);
-    addLog("Clearing all demo data…", "warn");
-    try {
-      await Promise.all([
-        base44.entities.LandParcel.filter({ lga: GFL_CONFIG.lga }).then(items => Promise.all(items.map(i => base44.entities.LandParcel.delete(i.id)))),
-        base44.entities.FieldReport.list().then(items => Promise.all(items.map(i => base44.entities.FieldReport.delete(i.id)))),
-        base44.entities.Dispute.list().then(items => Promise.all(items.map(i => base44.entities.Dispute.delete(i.id)))),
-      ]);
-      addLog("✓ Demo data cleared", "success");
-      setStatus({});
-    } catch (err) {
-      addLog(`Error clearing: ${err.message}`, "error");
-    } finally {
-      setRunning(false);
-    }
-  };
+  const pause = () => { abortRef.current = true; };
 
-  const completedSteps = Object.values(status).filter(s => s === "done").length;
+  const completedCount = Object.values(phaseStatus).filter(s => s === "done").length;
+  const errorCount = Object.values(phaseStatus).filter(s => s === "error").length;
+  const progress = (completedCount / PHASES.length) * 100;
+
+  // Group phases for display
+  const parcelPhases = PHASES.filter(p => p.phase === "parcels");
+  const otherPhases = PHASES.filter(p => p.phase !== "parcels");
+
+  const PhaseRow = ({ ph }) => {
+    const Icon = ph.icon;
+    const s = phaseStatus[ph.id];
+    const colClasses = COLOR_CLASSES[ph.color] || COLOR_CLASSES.gray;
+    return (
+      <div className={`flex items-center gap-3 px-3 py-2 rounded-lg border text-xs transition-all
+        ${s === "done" ? "bg-emerald-50 border-emerald-300" :
+          s === "running" ? "bg-blue-50 border-blue-300 animate-pulse" :
+          s === "error" ? "bg-red-50 border-red-300" :
+          "bg-white border-border"}`}>
+        <div className={`w-6 h-6 rounded flex items-center justify-center flex-shrink-0 ${s === "done" ? "bg-emerald-100" : s === "error" ? "bg-red-100" : colClasses.split(" ")[0]}`}>
+          {s === "done" ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> :
+           s === "running" ? <RefreshCw className="w-3.5 h-3.5 text-blue-600 animate-spin" /> :
+           s === "error" ? <XCircle className="w-3.5 h-3.5 text-red-600" /> :
+           <Icon className={`w-3.5 h-3.5 ${colClasses.split(" ")[1]}`} />}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-medium truncate">{ph.label}</p>
+          <p className="text-muted-foreground truncate">{ph.desc}</p>
+        </div>
+        {s && (
+          <Badge variant="outline" className={`text-[9px] px-1.5 py-0 ${
+            s === "done" ? "border-emerald-400 text-emerald-700" :
+            s === "running" ? "border-blue-400 text-blue-700" :
+            s === "error" ? "border-red-400 text-red-700" : ""}`}>
+            {s}
+          </Badge>
+        )}
+      </div>
+    );
+  };
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6 max-w-4xl">
+      {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-1">
           <Database className="w-5 h-5 text-primary" />
-          <h1 className="text-2xl font-bold text-foreground">Demo Data Seed</h1>
+          <h1 className="text-2xl font-bold">Demo Population Phase</h1>
           <Badge className="bg-primary/10 text-primary border-primary/20">Admin Only</Badge>
         </div>
         <p className="text-sm text-muted-foreground">
-          Populate Greenfield LGA with realistic pilot demonstration data. This creates all entities needed for stakeholder demonstrations.
+          Full-scale Greenfield LGA demonstration environment. Generates ~1,000 interconnected land parcels, families, disputes, fraud cases, and audit histories.
         </p>
       </div>
 
-      {/* LGA Info */}
-      <Card className="border-emerald-200 bg-emerald-50/50">
-        <CardContent className="p-4">
-          <p className="text-xs font-semibold text-emerald-800 uppercase tracking-wide mb-2">Target Pilot Area</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
-            <div><p className="text-muted-foreground">LGA Name</p><p className="font-semibold">Greenfield Local Government</p></div>
-            <div><p className="text-muted-foreground">State</p><p className="font-semibold">Rivers State</p></div>
-            <div><p className="text-muted-foreground">Communities</p><p className="font-semibold">10 communities</p></div>
-            <div><p className="text-muted-foreground">Villages</p><p className="font-semibold">25 villages</p></div>
-            <div><p className="text-muted-foreground">Wards</p><p className="font-semibold">12 wards</p></div>
-            <div><p className="text-muted-foreground">GPS Centre</p><p className="font-semibold">6.455°N, 3.384°E</p></div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Seed Steps Overview */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {SEED_STEPS.map(step => {
-          const Icon = step.icon;
-          const s = status[step.id];
-          const cls = COLOR_MAP[step.color];
+      {/* Summary Cards */}
+      <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+        {SUMMARY.map(s => {
+          const Icon = s.icon;
           return (
-            <Card key={step.id} className={`border transition-all ${s === "done" ? "border-emerald-400 bg-emerald-50" : s === "running" ? "border-primary/50" : cls.split(" ")[2]}`}>
-              <CardContent className="p-3 text-center">
-                <div className={`w-8 h-8 rounded-lg mx-auto mb-2 flex items-center justify-center ${s === "done" ? "bg-emerald-100" : cls.split(" ")[0]}`}>
-                  {s === "done" ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : s === "running" ? <RefreshCw className="w-4 h-4 text-primary animate-spin" /> : <Icon className={`w-4 h-4 ${cls.split(" ")[1]}`} />}
-                </div>
-                <p className="text-[10px] font-semibold">{step.label}</p>
-                <p className="text-[9px] text-muted-foreground">{step.count} records</p>
+            <Card key={s.label} className="text-center">
+              <CardContent className="p-3">
+                <Icon className={`w-4 h-4 mx-auto mb-1 ${s.color}`} />
+                <p className="text-lg font-bold">{s.value}</p>
+                <p className="text-[9px] text-muted-foreground leading-tight">{s.label}</p>
               </CardContent>
             </Card>
           );
         })}
       </div>
 
-      {/* Progress */}
-      {completedSteps > 0 && (
-        <div className="space-y-1.5">
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>Seeding progress</span>
-            <span>{completedSteps}/{SEED_STEPS.length} steps complete</span>
-          </div>
-          <div className="w-full bg-muted rounded-full h-2">
-            <div className="bg-emerald-500 h-2 rounded-full transition-all" style={{ width: `${(completedSteps / SEED_STEPS.length) * 100}%` }} />
-          </div>
-        </div>
+      {/* Progress Bar */}
+      {completedCount > 0 && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex justify-between text-xs text-muted-foreground mb-2">
+              <span>{completedCount} / {PHASES.length} phases complete</span>
+              <span className="flex items-center gap-2">
+                {errorCount > 0 && <span className="text-red-500">{errorCount} errors</span>}
+                <span>{Math.round(progress)}%</span>
+              </span>
+            </div>
+            <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
+              <div className="bg-emerald-500 h-3 rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
+            </div>
+            {completedCount === PHASES.length && (
+              <p className="text-xs text-emerald-700 font-semibold mt-2 text-center">
+                🎉 All phases complete — Greenfield LGA is fully populated!
+              </p>
+            )}
+          </CardContent>
+        </Card>
       )}
 
       {/* Action Buttons */}
       <div className="flex gap-3 flex-wrap">
-        <Button onClick={seedAll} disabled={running} className="gap-2 bg-primary hover:bg-primary/90">
+        <Button
+          onClick={() => runAll(startFrom)}
+          disabled={running}
+          className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
+          size="lg"
+        >
           {running ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-          {running ? "Seeding in progress…" : "Seed Demo Data"}
+          {running ? "Seeding in progress…" : startFrom > 0 ? `Resume from step ${startFrom + 1}` : "Begin Full Population"}
         </Button>
-        <Button onClick={clearAll} disabled={running} variant="destructive" className="gap-2">
-          <Trash2 className="w-4 h-4" /> Clear GFL Data
-        </Button>
+
+        {running && (
+          <Button onClick={pause} variant="outline" className="gap-2 border-red-300 text-red-600 hover:bg-red-50">
+            <XCircle className="w-4 h-4" /> Pause
+          </Button>
+        )}
+
+        {startFrom > 0 && !running && (
+          <Button onClick={() => { setStartFrom(0); setPhaseStatus({}); setLog([]); }} variant="outline" className="gap-2">
+            <RefreshCw className="w-4 h-4" /> Reset
+          </Button>
+        )}
       </div>
 
+      {/* Phase Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Parcel batches */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Map className="w-4 h-4 text-blue-600" />
+              Land Parcels (980 total)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1.5">
+            {parcelPhases.map(ph => <PhaseRow key={ph.id} ph={ph} />)}
+          </CardContent>
+        </Card>
+
+        {/* All other phases */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Layers className="w-4 h-4 text-purple-600" />
+              Supporting Data
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1.5">
+            {otherPhases.map(ph => <PhaseRow key={ph.id} ph={ph} />)}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Notes */}
       <Card className="border-amber-200 bg-amber-50/50">
         <CardContent className="p-4">
-          <p className="text-xs font-semibold text-amber-800 mb-2">⚠️ Important Notes</p>
-          <ul className="text-xs text-amber-700 space-y-1">
-            <li>• Seeding takes 2–3 minutes. Do not close the page during seeding.</li>
-            <li>• Data is cumulative — run once per pilot environment setup.</li>
-            <li>• "Clear GFL Data" only removes parcels in the Greenfield LGA.</li>
-            <li>• After seeding, refresh all dashboards to see updated statistics.</li>
-            <li>• This page is admin-only — not visible to demo users.</li>
+          <p className="text-xs font-semibold text-amber-800 mb-2">⚠️ Before Running</p>
+          <ul className="text-xs text-amber-700 space-y-1 list-disc list-inside">
+            <li>This process takes approximately <strong>5–10 minutes</strong> end-to-end.</li>
+            <li>Do <strong>not</strong> close or refresh the page during seeding.</li>
+            <li>Use <strong>Pause</strong> to stop between phases — seeding resumes from where it stopped.</li>
+            <li>Data is additive — run once per fresh pilot environment.</li>
+            <li>After completion, refresh all dashboards to load live statistics.</li>
           </ul>
         </CardContent>
       </Card>
 
-      {/* Log output */}
+      {/* Log */}
       {log.length > 0 && (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <Database className="w-4 h-4" /> Seed Log
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Clock className="w-4 h-4" /> Seed Log
+              <Badge variant="outline" className="ml-auto text-xs">{log.length} entries</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="bg-gray-900 rounded-lg p-4 max-h-72 overflow-y-auto font-mono text-xs space-y-1">
+            <div className="bg-gray-950 rounded-lg p-4 max-h-80 overflow-y-auto font-mono text-xs space-y-0.5">
               {log.map((entry, i) => (
-                <div key={i} className={`${entry.type === "success" ? "text-emerald-400" : entry.type === "error" ? "text-red-400" : entry.type === "warn" ? "text-amber-400" : "text-gray-300"}`}>
-                  <span className="text-gray-500">[{entry.ts}]</span> {entry.msg}
+                <div key={i} className={
+                  entry.type === "success" ? "text-emerald-400" :
+                  entry.type === "error" ? "text-red-400" :
+                  entry.type === "warn" ? "text-amber-400" : "text-gray-300"
+                }>
+                  {entry.msg && <><span className="text-gray-600">[{entry.ts}]</span> {entry.msg}</>}
                 </div>
               ))}
-              {running && <div className="text-blue-400 animate-pulse">Processing…</div>}
+              {running && <div className="text-blue-400 animate-pulse mt-1">● Processing…</div>}
+              <div ref={logEndRef} />
             </div>
           </CardContent>
         </Card>
