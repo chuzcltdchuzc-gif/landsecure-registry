@@ -11,204 +11,190 @@ import {
 
 const STEPS = [
   {
-    id: 1, icon: MapPin, color: "blue", title: "Register Land Parcel",
+    id: 1, icon: MapPin, color: "blue", title: "Land Registration",
     route: "/register-land", routeLabel: "Go to Register Land",
     duration: "3 min",
-    description: "A surveyor or land owner registers a new parcel by providing parcel details, uploading documents, and entering GPS coordinates.",
+    description: "A surveyor or land owner registers a new parcel by providing parcel details, uploading documents, and entering GPS coordinates. Over 1,000 parcels are already registered in the Greenfield LGA pilot.",
     actions: [
       "Navigate to Register Land in the sidebar",
-      "Fill in Parcel Number: GFL/2025/DEMO/001",
+      "Fill in Parcel Number: GFL/2026/DEMO/001",
       "Enter owner name: Chukwuemeka Okafor",
       "Select Land Use: Residential",
-      "Enter Address: 12 Mango Street, Greenfield South Ward",
-      "Set GPS coordinates: 6.4550, 3.3841",
-      "Click Register Parcel to submit"
+      "Enter Address: 12 Mango Street, Central Ward, Greenfield LGA",
+      "Enter GPS coordinates: 6.4550, 3.3841",
+      "Click Register Parcel to submit",
+      "Point to existing parcels GFL/2023/0001–0050 already approved"
     ],
-    outcome: "Parcel created with Pending status and assigned to approval queue"
+    outcome: "Parcel created with Pending status — joins 1,000+ parcels already in the Greenfield LGA registry",
+    liveData: "1,000+ parcels | 10 communities | 25 villages | 12 wards"
   },
   {
-    id: 2, icon: FileText, color: "purple", title: "Upload Survey Plan",
+    id: 2, icon: FileText, color: "purple", title: "Survey Submission",
     route: "/survey-documents", routeLabel: "Go to Survey Documents",
-    duration: "2 min",
-    description: "A licensed surveyor uploads the official survey plan document and CAD drawings to be reviewed by the Surveyor General.",
+    duration: "3 min",
+    description: "A licensed surveyor uploads the official survey plan and GIS data. The system maintains 50+ reviewed survey documents with approval history.",
     actions: [
-      "Navigate to Survey Documents",
+      "Navigate to Survey Documents in the sidebar",
       "Click Upload Document",
       "Select Document Type: Survey Plan",
-      "Enter Surveyor Name: Adebayo Fashola (FNIVS/2019/4421)",
+      "Enter Surveyor: Chidi Okoye (FNIVS/2019/4421)",
       "Upload a PDF survey plan file",
-      "Add description: Residential plot, Greenfield South Ward",
-      "Submit for review"
+      "Add description: Residential plot, Central Ward",
+      "Submit — status becomes Pending review",
+      "Show an existing approved document from the list"
     ],
-    outcome: "Survey document uploaded with Pending review status"
+    outcome: "Survey document queued for Surveyor General review — joins 50+ survey documents on file",
+    liveData: "50+ survey documents | Approved, Pending, Rejected statuses visible"
   },
   {
-    id: 3, icon: Crop, color: "green", title: "Capture Polygon Boundary",
+    id: 3, icon: Crop, color: "green", title: "GIS Validation",
     route: "/gis-map", routeLabel: "Open GIS Map",
     duration: "4 min",
-    description: "Field Agent uses the GIS mapping tools to draw an accurate polygon boundary for the parcel using GPS-verified coordinates.",
+    description: "The spatial validation engine checks every registered polygon for overlaps, duplicates, and boundary conflicts. All 1,000+ parcels have GIS polygons rendered in real-time.",
     actions: [
       "Open the GIS Map from the sidebar",
-      "Locate the parcel marker on the map",
-      "Click on the parcel to view details",
-      "Click 'Show Family Lineage' to view ownership overlay",
-      "Observe boundary polygon drawn on the map",
-      "Verify coordinates match survey plan",
-      "Note spatial validation status: Valid"
+      "Zoom into Greenfield LGA area (6.43–6.48°N, 3.35–3.42°E)",
+      "Observe coloured polygons — green=valid, orange=warning, red=conflict",
+      "Click a parcel to view spatial validation status",
+      "Click 'Show Family Lineage' toggle for ownership overlay",
+      "Locate a parcel with 'overlap_warning' status",
+      "Explain how spatial validation prevents double allocation",
+      "Show boundary coordinates and area calculations in the panel"
     ],
-    outcome: "Parcel boundary verified on GIS map with valid spatial status"
+    outcome: "GIS map shows live polygon data for all registered parcels with spatial validation colour coding",
+    liveData: "1,000+ polygons rendered | Valid / Overlap Warning / Conflict statuses shown"
   },
   {
-    id: 4, icon: Play, color: "amber", title: "Field Agent Site Visit",
-    route: "/field-reports", routeLabel: "Go to Field Reports",
-    duration: "3 min",
-    description: "A field agent conducts an on-site inspection, captures GPS coordinates and photographs, then submits a verification report.",
-    actions: [
-      "Navigate to Field Reports",
-      "Click New Field Report",
-      "Select Parcel: GFL/2025/DEMO/001",
-      "Select Report Type: Site Inspection",
-      "Click 'Use My GPS Location' to auto-capture coordinates",
-      "Enter description: Boundary markers verified on-site",
-      "Upload site photographs",
-      "Submit report"
-    ],
-    outcome: "Field report submitted with GPS coordinates and photos attached"
-  },
-  {
-    id: 5, icon: CheckCircle2, color: "teal", title: "Submit for Approval",
-    route: "/approvals", routeLabel: "Go to Approvals",
-    duration: "2 min",
-    description: "The approval officer reviews pending parcels, checks spatial validation, and approves or rejects with documented reasons.",
-    actions: [
-      "Navigate to Approvals (as Surveyor General or Compliance Officer)",
-      "Find GFL/2025/DEMO/001 in the pending list",
-      "Click View Details to review full parcel information",
-      "Check spatial validation status",
-      "Review field reports and survey documents",
-      "Click Approve to confirm the registration",
-      "Parcel status changes to Approved"
-    ],
-    outcome: "Parcel approved and locked — official record in the registry"
-  },
-  {
-    id: 6, icon: Shield, color: "indigo", title: "Compliance Review",
-    route: "/gov/pending-approvals", routeLabel: "Open Pending Approvals",
-    duration: "3 min",
-    description: "The Compliance Officer reviews pending inheritance cases and land registrations for regulatory compliance before final approval.",
-    actions: [
-      "Login as Compliance Officer",
-      "Navigate to Gov → Pending Approvals",
-      "Switch to Inheritance Cases tab",
-      "Select a pending inheritance case",
-      "Review beneficiary allocations and percentages",
-      "Check attached documentation",
-      "Add compliance review notes",
-      "Advance case to Surveyor General Review"
-    ],
-    outcome: "Case advances through compliance stage with documented review notes"
-  },
-  {
-    id: 7, icon: Users, color: "emerald", title: "Family Ownership Registration",
+    id: 4, icon: Users, color: "emerald", title: "Family Ownership Registration",
     route: "/inheritance", routeLabel: "Open Inheritance Management",
     duration: "5 min",
-    description: "Register a family ownership record linking multiple beneficiaries to a land parcel with defined inheritance shares.",
+    description: "Register a family ownership record linking multiple beneficiaries with defined inheritance shares, wife lineage groups, and economic improvements. 50+ family ownerships are pre-populated.",
     actions: [
       "Navigate to Inheritance Management",
-      "Click New Case",
-      "Select Case Type: Succession",
-      "Link to parcel: GFL/2025/DEMO/001",
-      "Enter Family Name: Okafor Family",
-      "Add Family Head: Elder Chukwuemeka Okafor",
-      "Add 3 beneficiaries with percentage shares",
-      "Set inheritance rank and generation levels",
-      "Submit the inheritance case"
+      "Show existing families: Okafor, Eze, Nwosu, Adeleke — click any",
+      "Demonstrate the Family Record: head, wife groups, generation level",
+      "Show site features: buildings, boreholes, economic trees",
+      "Click a family to view its Beneficiary Tree",
+      "Show multi-generation structure: Gen 1 → Gen 2 → Gen 3",
+      "Point out: percentage shares, inheritance rank, allocated plots",
+      "Show a deceased beneficiary with successor chain"
     ],
-    outcome: "Family ownership registered with beneficiary tree and succession chain"
+    outcome: "Full family ownership record visible — multi-wife, multi-generation beneficiary hierarchy with plot allocations",
+    liveData: "50+ family ownerships | 240+ beneficiaries | 10 community + 10 traditional institution records"
   },
   {
-    id: 8, icon: GitBranch, color: "violet", title: "Inheritance Management",
+    id: 5, icon: GitBranch, color: "violet", title: "Inheritance Processing",
     route: "/inheritance", routeLabel: "Open Inheritance Management",
     duration: "5 min",
-    description: "Navigate a full inheritance case showing multi-generational family tree, plot allocations, and community validation.",
+    description: "Navigate a complete inheritance case from initiation through surveyor review, compliance, and Surveyor General approval. 25+ cases at various workflow stages.",
     actions: [
-      "Open Inheritance Management",
-      "Find the Okafor Family succession case",
-      "Click to open the full case detail",
-      "View the Beneficiaries tab — see generation hierarchy",
-      "Open Plot Allocation tab — assign sub-plots to beneficiaries",
-      "Open Community Validation tab — add community elder approval",
-      "Add Traditional Authority validation from Obi of Greenfield",
-      "Generate Inheritance Certificate"
+      "In Inheritance Management, switch to Cases tab",
+      "Filter by Status: compliance_review — pick one",
+      "Click case to open full detail view",
+      "Show IC/2024/010 — Dim Family — allocation case",
+      "Review case timeline: draft → surveyor → compliance → SG",
+      "Show attached witnesses (3 verified witnesses per case)",
+      "Show death verification with LGA and court confirmation",
+      "Click the Plot Allocation tab — show Plot A, B, C assignments",
+      "Show Family Meeting Resolution — adopted, 26 attendees"
     ],
-    outcome: "Complete inheritance case with multi-generation lineage, allocations, and certificate"
+    outcome: "Full inheritance workflow demonstrated — from family meeting resolution to plot allocations with evidence chain",
+    liveData: "25 inheritance cases | 54 witnesses | 10 death verifications | 51 plot allocations | 15 meeting resolutions"
   },
   {
-    id: 9, icon: AlertTriangle, color: "red", title: "Fraud Detection",
-    route: "/gov/fraud-alerts", routeLabel: "Open Fraud Alerts",
-    duration: "4 min",
-    description: "Review the automated fraud detection system flagging duplicate submissions, overlapping parcels, and suspicious claims.",
-    actions: [
-      "Navigate to Gov → Fraud Alerts",
-      "View the fraud risk dashboard",
-      "Click on a High Risk alert",
-      "Review the fraud risk reasons",
-      "Open the GIS Map to visualise overlapping parcels",
-      "Assign the alert to an investigation officer",
-      "Document investigation findings",
-      "Resolve or escalate the alert"
-    ],
-    outcome: "Fraud alert investigated with documented resolution path"
-  },
-  {
-    id: 10, icon: Shield, color: "orange", title: "Dispute Resolution",
-    route: "/disputes", routeLabel: "Open Disputes",
-    duration: "4 min",
-    description: "Follow a boundary dispute from filing through investigation, mediation, and resolution with full evidence trail.",
-    actions: [
-      "Navigate to Disputes",
-      "Find an active boundary dispute",
-      "Review dispute details and claimants",
-      "View attached evidence files",
-      "Change status to Under Review",
-      "Add investigation notes",
-      "Schedule a hearing date",
-      "Mark as Resolved with resolution summary"
-    ],
-    outcome: "Dispute resolved with full timeline and audit trail documented"
-  },
-  {
-    id: 11, icon: Landmark, color: "teal", title: "Community Validation",
+    id: 6, icon: Landmark, color: "teal", title: "Community Validation",
     route: "/gov/customary-governance", routeLabel: "Open Customary Governance",
     duration: "4 min",
-    description: "Demonstrate the full community and traditional authority validation workflow for customary land governance.",
+    description: "Full community and traditional authority validation workflow — from community elder review through village head, traditional ruler, compliance, and Surveyor General sign-off.",
     actions: [
       "Navigate to Gov → Customary Governance",
-      "Open an active community validation",
-      "View the 7-stage workflow pipeline",
-      "Advance: Community Review → Village Head → Traditional Authority",
-      "Add community elder name: Chief Emmanuel Nwosu",
-      "Add traditional ruler: Obi Obiora II of Greenfield",
-      "Review Death Verification for inheritance case",
-      "View Evidence Chain with document hashes"
+      "Open the Community Validations panel",
+      "Show a validation at 'village_head_validation' stage",
+      "Show community elder: Chief Obinna Garba, CDC Chairman",
+      "Show traditional ruler: Obi Achebe III of Greenfield",
+      "Switch to Traditional Authority Validations panel",
+      "Show an approved TAV with full ruler signature and comments",
+      "Show a conditionally approved case with stated conditions",
+      "Show Community Consent records — 15 granted consents"
     ],
-    outcome: "Community validation completed through all governance stages"
+    outcome: "Multi-stage community governance workflow visible — traditional rulers, village heads, and community consent fully documented",
+    liveData: "18+ community validations | 18 traditional authority validations | 15 community consent records"
   },
   {
-    id: 12, icon: Award, color: "gold", title: "Certificate Generation",
-    route: "/inheritance", routeLabel: "Open Inheritance Management",
-    duration: "2 min",
-    description: "Generate the official Land Inheritance Certificate — the final output of the complete workflow.",
+    id: 7, icon: AlertTriangle, color: "red", title: "Fraud Detection",
+    route: "/gov/fraud-alerts", routeLabel: "Open Fraud Alerts",
+    duration: "4 min",
+    description: "Automated fraud detection flags duplicates, overlapping boundaries, forged documents, and suspicious transfers. 25+ fraud alerts with severity levels and investigation trails.",
     actions: [
-      "Open a fully approved inheritance case",
-      "Navigate to the Certificate tab",
-      "Review all case details pre-populated on certificate",
-      "Click Generate Certificate",
-      "Certificate created with official seals and signatures",
-      "Download PDF for official records",
-      "Share with all beneficiaries"
+      "Navigate to Gov → Fraud Alerts",
+      "Show the fraud alert dashboard — severity distribution",
+      "Click a Critical severity alert",
+      "Read: 'Three separate claimants submitted documents for this parcel within 60 days'",
+      "Show alert type: duplicate_registration / boundary_manipulation",
+      "Show parcel's fraud_risk_score (e.g. 85/100) in GIS map",
+      "Assign the investigation to Compliance Officer",
+      "Show a resolved alert with investigation notes",
+      "Cross-reference: open GIS map to see conflicting polygon"
     ],
-    outcome: "Official Land Inheritance Certificate generated and archived"
+    outcome: "Fraud detection workflow demonstrated — from automated flag through investigation to resolution or escalation",
+    liveData: "25+ fraud alerts | Critical / High / Medium / Low severity | Open, Under Investigation, Resolved statuses"
+  },
+  {
+    id: 8, icon: Shield, color: "orange", title: "Dispute Resolution",
+    route: "/disputes", routeLabel: "Open Disputes",
+    duration: "4 min",
+    description: "Full dispute lifecycle from filing through assignment, investigation, and resolution. 60+ disputes including boundary overlaps, ownership conflicts, and double allocations.",
+    actions: [
+      "Navigate to Disputes in the sidebar",
+      "Show dispute statistics: Open, Under Review, Escalated, Resolved",
+      "Click an Under Review boundary dispute",
+      "Read dispute: 'Boundary overlap of 312sqm with adjacent parcel'",
+      "Show complainant details and priority: High / Critical",
+      "Show assigned officer: Dr. Amara Okafor (Surveyor General)",
+      "Open a resolved dispute — show resolution notes",
+      "Cross-reference: open GIS Map and locate the parcel"
+    ],
+    outcome: "Complete dispute timeline visible — from citizen complaint through SG resolution with documented evidence",
+    liveData: "60+ disputes | Open, Under Review, Escalated, Resolved, Closed statuses | All linked to GIS parcels"
+  },
+  {
+    id: 9, icon: CheckCircle2, color: "indigo", title: "Surveyor General Approval",
+    route: "/gov/pending-approvals", routeLabel: "Open Pending Approvals",
+    duration: "3 min",
+    description: "The Surveyor General reviews, approves, or rejects pending parcel registrations and inheritance cases. Full compliance and survey review history visible.",
+    actions: [
+      "Login as Surveyor General (sg.demo@landsecure.app)",
+      "Navigate to Gov → Pending Approvals",
+      "Show pending parcel registrations count",
+      "Click a pending parcel — review spatial validation, field reports",
+      "Check survey document status: Approved",
+      "Switch to Inheritance Cases tab",
+      "Show a case at 'surveyor_general_review' stage",
+      "Review compliance notes from previous reviewer",
+      "Approve case — status advances to Approved",
+      "Show Executive Dashboard — metrics update in real time"
+    ],
+    outcome: "Surveyor General approval demonstrated across both parcel registrations and inheritance cases",
+    liveData: "Pending parcels + inheritance cases | Full review history | Live metrics on Executive Dashboard"
+  },
+  {
+    id: 10, icon: Award, color: "gold", title: "Certificate Generation",
+    route: "/inheritance", routeLabel: "Open Inheritance Management",
+    duration: "3 min",
+    description: "Generate the official Land Inheritance Certificate — the final authoritative output of the complete customary governance workflow.",
+    actions: [
+      "Open Inheritance Management → Cases",
+      "Filter by Status: Approved",
+      "Open IC/2024/012 — Asogwa Family (fully approved, certificate generated)",
+      "Click to open case detail",
+      "Navigate to the Certificate tab",
+      "Show auto-populated certificate: parcel number, family, beneficiaries, SG signature",
+      "Click Generate / View Certificate",
+      "Download PDF — show official seals, case reference, date",
+      "Explain: certificate is immutable — locked once issued"
+    ],
+    outcome: "Official Land Inheritance Certificate generated with parcel details, beneficiary allocations, and Surveyor General's digital seal",
+    liveData: "Multiple approved cases with certificates: Asogwa Family (IC/2024/012), Mbah Family (IC/2024/013)"
   },
 ];
 
@@ -276,6 +262,12 @@ function StepCard({ step, isOpen, onToggle, isCompleted, onComplete }) {
                 <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-1">Expected Outcome</p>
                 <p className="text-xs font-medium">{step.outcome}</p>
               </div>
+              {step.liveData && (
+                <div className="rounded-xl p-3 border border-emerald-200 bg-emerald-50">
+                  <p className="text-[10px] font-semibold text-emerald-700 uppercase tracking-wide mb-1">Live Data in System</p>
+                  <p className="text-xs text-emerald-800 font-medium">{step.liveData}</p>
+                </div>
+              )}
               <div className="flex gap-2 flex-wrap">
                 <Link to={step.route}>
                   <Button size="sm" className={`gap-1.5 h-7 text-xs`}>
@@ -321,7 +313,7 @@ export default function DemoGuide() {
             <h1 className="text-2xl font-bold text-foreground">Demonstration Guide</h1>
           </div>
           <p className="text-sm text-muted-foreground">
-            Walk stakeholders through all 12 core workflows of LandSecure Registry
+            Walk stakeholders through the 10 core workflows of LandSecure Registry — Greenfield LGA
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -344,7 +336,7 @@ export default function DemoGuide() {
           <div className="flex items-center justify-between mb-3">
             <div>
               <p className="text-sm font-semibold text-foreground">Demo Progress</p>
-              <p className="text-xs text-muted-foreground">{completed.size} of {STEPS.length} workflows demonstrated</p>
+              <p className="text-xs text-muted-foreground">{completed.size} of {STEPS.length} workflows demonstrated — ~30 min full walkthrough</p>
             </div>
             <div className="text-2xl font-bold text-primary">{progress}%</div>
           </div>
@@ -368,10 +360,10 @@ export default function DemoGuide() {
       {/* Overview stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Total Workflows", value: "12", icon: Play, color: "text-primary" },
-          { label: "Est. Duration", value: "~40 min", icon: Clock, color: "text-amber-600" },
+          { label: "Total Workflows", value: "10", icon: Play, color: "text-primary" },
+          { label: "Est. Duration", value: "~30 min", icon: Clock, color: "text-amber-600" },
           { label: "Roles Covered", value: "6", icon: Users, color: "text-emerald-600" },
-          { label: "Modules Shown", value: "8", icon: Globe, color: "text-purple-600" },
+          { label: "Live Records", value: "1,000+", icon: Globe, color: "text-purple-600" },
         ].map(item => (
           <Card key={item.label}>
             <CardContent className="p-3 flex items-center gap-2">
@@ -391,12 +383,12 @@ export default function DemoGuide() {
           <p className="text-xs font-semibold text-blue-800 uppercase tracking-wide mb-3">Recommended Demo Path by Audience</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {[
-              { audience: "Government Officials", steps: "1, 5, 6, 9, 10, 11", color: "text-blue-700" },
-              { audience: "Investors / Board", steps: "1, 5, 9, 12 + Executive Dashboard", color: "text-purple-700" },
-              { audience: "Traditional Authorities", steps: "7, 8, 11, 12", color: "text-emerald-700" },
-              { audience: "Surveyors", steps: "1, 2, 3, 5", color: "text-orange-700" },
-              { audience: "Field Agents", steps: "1, 4, 3", color: "text-amber-700" },
-              { audience: "Full Walkthrough", steps: "All 12 steps in order", color: "text-red-700" },
+              { audience: "Government Officials", steps: "1, 3, 7, 9, 10 + Executive Dashboard", color: "text-blue-700" },
+              { audience: "Investors / Board", steps: "1, 3, 7, 10 + Executive Dashboard", color: "text-purple-700" },
+              { audience: "Traditional Authorities", steps: "4, 5, 6, 10", color: "text-emerald-700" },
+              { audience: "Surveyors / SG Office", steps: "1, 2, 3, 9", color: "text-orange-700" },
+              { audience: "Field Agents", steps: "1, 2, 3", color: "text-amber-700" },
+              { audience: "Full Walkthrough", steps: "All 10 steps in order (~30 min)", color: "text-red-700" },
             ].map(item => (
               <div key={item.audience} className="text-xs">
                 <p className={`font-semibold ${item.color}`}>{item.audience}</p>
@@ -426,7 +418,7 @@ export default function DemoGuide() {
           <CardContent className="p-6 text-center">
             <Award className="w-12 h-12 text-emerald-600 mx-auto mb-3" />
             <h3 className="text-xl font-bold text-emerald-800 mb-1">Demonstration Complete!</h3>
-            <p className="text-sm text-emerald-700">All 12 workflows successfully demonstrated. The system is ready for pilot deployment.</p>
+            <p className="text-sm text-emerald-700">All 10 workflows successfully demonstrated. Greenfield LGA pilot is ready for stakeholder sign-off.</p>
             <Link to="/gov/executive-dashboard">
               <Button className="mt-4 gap-2 bg-emerald-600 hover:bg-emerald-700">
                 <BarChart2 className="w-4 h-4" /> View Executive Summary
