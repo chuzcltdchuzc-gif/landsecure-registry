@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   CheckCircle2, AlertTriangle, XCircle, RefreshCw,
-  Database, GitBranch, Copy, Users, FileText, Map,
+  Database, GitBranch, Copy, Users, FileText, Map as MapIcon,
   Shield, Activity, HardDrive
 } from "lucide-react";
 
@@ -527,7 +527,7 @@ export default function DataIntegrityReport() {
       {/* Summary strip */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         {[
-          { label: "GFL Parcels", value: counts.gflParcels, icon: Map, color: "text-blue-600", bg: "bg-blue-50" },
+          { label: "GFL Parcels", value: counts.gflParcels, icon: MapIcon, color: "text-blue-600", bg: "bg-blue-50" },
           { label: "Family Ownerships", value: counts.families, icon: Users, color: "text-purple-600", bg: "bg-purple-50" },
           { label: "Inheritance Cases", value: counts.inheritanceCases, icon: GitBranch, color: "text-emerald-600", bg: "bg-emerald-50" },
           { label: "Audit Entries", value: counts.auditLogs.toLocaleString(), icon: Database, color: "text-amber-600", bg: "bg-amber-50" },
@@ -577,7 +577,7 @@ export default function DataIntegrityReport() {
               <Row label="DeathVerifications → InheritanceCase (broken)" value={inheritance.deathNoCase} status={grade(inheritance.deathNoCase, c => c > 0, c => c > 3)} />
             </Section>
 
-            <Section title="Parcel References" icon={Map} color="text-blue-600"
+            <Section title="Parcel References" icon={MapIcon} color="text-blue-600"
               summary={{ fail: parcelRefs.orphanDisputes + parcelRefs.orphanFraud + parcelRefs.parcelsNoOwner, warn: parcelRefs.orphanFieldReports + parcelRefs.parcelsNoAddress }}>
               <Row label="Disputes → Parcel (orphan)" value={parcelRefs.orphanDisputes} status={grade(parcelRefs.orphanDisputes, c => c > 0, c => c > 5)} />
               <Row label="FraudAlerts → Parcel (orphan)" value={parcelRefs.orphanFraud} status={grade(parcelRefs.orphanFraud, c => c > 0, c => c > 5)} />
@@ -607,7 +607,7 @@ export default function DataIntegrityReport() {
               <Row label="Total survey documents" value={docRefs.totalSurveyDocs} status={S.ok} />
             </Section>
 
-            <Section title="GIS References" icon={Map} color="text-teal-600"
+            <Section title="GIS References" icon={MapIcon} color="text-teal-600"
               summary={{ fail: 0, warn: gisRefs.total - gisRefs.withBoundary > 100 ? 1 : 0 }}>
               <Row label="GFL parcels with GeoJSON boundary" value={`${gisRefs.withBoundary} / ${gisRefs.total}`} status={grade(gisRefs.withBoundary / Math.max(gisRefs.total, 1), v => v < 0.9, v => v < 0.6)} detail={`${Math.round(gisRefs.withBoundary / Math.max(gisRefs.total, 1) * 100)}% coverage`} />
               <Row label="GFL parcels with GPS coordinates" value={`${gisRefs.withGps} / ${gisRefs.total}`} status={grade(gisRefs.withGps / Math.max(gisRefs.total, 1), v => v < 0.9, v => v < 0.6)} detail={`${Math.round(gisRefs.withGps / Math.max(gisRefs.total, 1) * 100)}% coverage`} />
@@ -628,7 +628,7 @@ export default function DataIntegrityReport() {
         <TabsContent value="gis" className="space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-            <Section title="Polygon Closure & Validity" icon={Map} color="text-teal-600"
+            <Section title="Polygon Closure & Validity" icon={MapIcon} color="text-teal-600"
               summary={{ fail: gis.invalidCoords.length, warn: gis.notClosed.length }}>
               <Row label="Boundaries submitted for GIS audit" value={gis.total} status={S.ok} />
               <Row label="Successfully parsed as valid GeoJSON" value={gis.parsed} status={grade(gis.parsed, v => v < gis.total, v => v < gis.total * 0.8)} detail={`${gis.total - gis.parsed} failed to parse`} />
@@ -688,7 +688,7 @@ export default function DataIntegrityReport() {
               <Row label="Approved parcels with approval date" value={workflow.reg.withApprovalDate} status={grade(workflow.reg.withApprovalDate, v => v < workflow.reg.approved, v => v < workflow.reg.approved * 0.5)} detail="Date record completeness" />
             </Section>
 
-            <Section title="Survey Workflow" icon={Map} color="text-teal-600"
+            <Section title="Survey Workflow" icon={MapIcon} color="text-teal-600"
               summary={{ fail: 0, warn: workflow.survey.withReviewer < workflow.survey.total * 0.5 ? 1 : 0 }}>
               <Row label="Survey documents — approved" value={workflow.survey.approved} status={grade(workflow.survey.approved, () => false, c => c < 5)} />
               <Row label="Survey documents — rejected" value={workflow.survey.rejected} status={S.ok} detail="Rejection path functional" />
@@ -789,7 +789,7 @@ export default function DataIntegrityReport() {
               <Row label="Total audit log entries" value={counts.auditLogs.toLocaleString()} status={grade(counts.auditLogs, () => false, c => c < 100)} />
             </Section>
 
-            <Section title="GIS Data Recovery" icon={Map} color="text-teal-600"
+            <Section title="GIS Data Recovery" icon={MapIcon} color="text-teal-600"
               summary={{ fail: backup.gisRecovery.unparseable > 10 ? 1 : 0, warn: backup.gisRecovery.unparseable > 0 ? 1 : 0 }}>
               <Row label="GIS boundaries recoverable (valid JSON)" value={backup.gisRecovery.recoverable} status={grade(backup.gisRecovery.recoverable / Math.max(gisRefs.withBoundary, 1), v => v < 0.95, v => v < 0.8)} />
               <Row label="GIS boundaries unparseable (corrupt/missing)" value={backup.gisRecovery.unparseable} status={grade(backup.gisRecovery.unparseable, c => c > 0, c => c > 10)} detail="Would be lost in a restore" />
