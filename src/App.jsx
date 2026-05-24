@@ -42,6 +42,7 @@ import DemoGuide from './pages/DemoGuide';
 import DemoDataSeed from './pages/gov/DemoDataSeed';
 import PilotReports from './pages/gov/PilotReports';
 import DataIntegrityReport from './pages/gov/DataIntegrityReport';
+import PilotValidation from './pages/gov/PilotValidation';
 import DemoReadinessReport from './pages/gov/DemoReadinessReport';
 
 const AuthenticatedApp = () => {
@@ -107,6 +108,7 @@ const AuthenticatedApp = () => {
         <Route path="/gov/demo-seed" element={<DemoDataSeed />} />
         <Route path="/gov/pilot-reports" element={<PilotReports />} />
         <Route path="/gov/data-integrity" element={<DataIntegrityReport />} />
+        <Route path="/gov/pilot-validation" element={<PilotValidation />} />
         <Route path="/gov/demo-readiness" element={<DemoReadinessReport />} />
         <Route path="/demo-guide" element={<DemoGuide />} />
       </Route>
