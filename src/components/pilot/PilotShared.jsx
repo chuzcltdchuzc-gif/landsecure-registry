@@ -4,6 +4,42 @@ import { CheckCircle2, AlertTriangle, XCircle, ChevronDown, ChevronRight } from 
 
 export const S = { ok: "ok", warn: "warn", fail: "fail" };
 
+export function parseCoords(raw) {
+  try {
+    const geo = typeof raw === "string" ? JSON.parse(raw) : raw;
+    if (!geo) return null;
+    if (geo.type === "Polygon") return geo.coordinates?.[0] ?? null;
+    if (geo.type === "Feature") return geo.geometry?.coordinates?.[0] ?? null;
+    if (Array.isArray(geo)) return geo;
+    return null;
+  } catch { return null; }
+}
+
+export function polygonAreaSqm(coords) {
+  if (!coords || coords.length < 3) return 0;
+  // Shoelace formula (approximate, degrees → meters at Nigeria latitudes)
+  let area = 0;
+  const n = coords.length;
+  for (let i = 0; i < n; i++) {
+    const [x1, y1] = coords[i];
+    const [x2, y2] = coords[(i + 1) % n];
+    area += x1 * y2 - x2 * y1;
+  }
+  // 1 degree ≈ 111,320 m
+  return Math.abs(area / 2) * 111320 * 111320;
+}
+
+export function StatBox({ label, value, color = "text-gray-900" }) {
+  return (
+    <Card>
+      <CardContent className="p-4 text-center">
+        <p className={`text-2xl font-black ${color}`}>{value}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{label}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function StatusPill({ s }) {
   if (s === S.ok) return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800"><CheckCircle2 className="w-3 h-3" />PASS</span>;
   if (s === S.warn) return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800"><AlertTriangle className="w-3 h-3" />WARN</span>;
