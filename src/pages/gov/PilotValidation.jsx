@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,8 +7,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   CheckCircle2, AlertTriangle, XCircle, RefreshCw,
   Database, Map, GitBranch, Shield, HardDrive, Download,
-  FileText, ChevronDown, ChevronRight
+  FileText, ChevronDown, ChevronRight, Link, Users, Ruler,
+  AlertOctagon, Smartphone, ClipboardCheck
 } from "lucide-react";
+import ChainOfTitleTab from "@/components/pilot/ChainOfTitleTab";
+import CustomaryOwnershipTab from "@/components/pilot/CustomaryOwnershipTab";
+import SurveyAccuracyTab from "@/components/pilot/SurveyAccuracyTab";
+import FraudSimulationTab from "@/components/pilot/FraudSimulationTab";
+import FieldOpsTab from "@/components/pilot/FieldOpsTab";
+import AcceptanceReportTab from "@/components/pilot/AcceptanceReportTab";
 
 const S = { ok: "ok", warn: "warn", fail: "fail" };
 
@@ -57,7 +64,8 @@ function EvidenceTable({ rows }) {
   );
 }
 
-function SectionCard({ title, icon: Icon, iconColor, rows, summary }) {
+function SectionCard({ title, icon: IconComp, iconColor, rows, summary }) {
+  const Icon = IconComp;
   const [open, setOpen] = useState(true);
   const pass = rows.filter(r => r.status === S.ok).length;
   const fail = rows.filter(r => r.status === S.fail).length;
@@ -753,6 +761,12 @@ export default function PilotValidation() {
           <TabsTrigger value="workflow" className="text-xs"><GitBranch className="w-3.5 h-3.5 mr-1" />Workflows</TabsTrigger>
           <TabsTrigger value="recovery" className="text-xs"><HardDrive className="w-3.5 h-3.5 mr-1" />Backup & Recovery</TabsTrigger>
           <TabsTrigger value="readiness" className="text-xs"><Shield className="w-3.5 h-3.5 mr-1" />Pilot Readiness</TabsTrigger>
+          <TabsTrigger value="chain" className="text-xs"><Link className="w-3.5 h-3.5 mr-1" />Chain of Title</TabsTrigger>
+          <TabsTrigger value="customary" className="text-xs"><Users className="w-3.5 h-3.5 mr-1" />Customary</TabsTrigger>
+          <TabsTrigger value="survey" className="text-xs"><Ruler className="w-3.5 h-3.5 mr-1" />Survey Accuracy</TabsTrigger>
+          <TabsTrigger value="fraud" className="text-xs"><AlertTriangle className="w-3.5 h-3.5 mr-1" />Fraud Simulation</TabsTrigger>
+          <TabsTrigger value="fieldops" className="text-xs"><Smartphone className="w-3.5 h-3.5 mr-1" />Field Ops</TabsTrigger>
+          <TabsTrigger value="acceptance" className="text-xs font-bold"><ClipboardCheck className="w-3.5 h-3.5 mr-1" />Acceptance Report</TabsTrigger>
         </TabsList>
 
         <TabsContent value="integrity" className="mt-4"><DBIntegrityTab data={data} /></TabsContent>
@@ -760,6 +774,12 @@ export default function PilotValidation() {
         <TabsContent value="workflow" className="mt-4"><WorkflowTab data={data} /></TabsContent>
         <TabsContent value="recovery" className="mt-4"><BackupRecoveryTab data={data} /></TabsContent>
         <TabsContent value="readiness" className="mt-4"><PilotReadinessTab data={data} /></TabsContent>
+        <TabsContent value="chain" className="mt-4"><ChainOfTitleTab data={data} /></TabsContent>
+        <TabsContent value="customary" className="mt-4"><CustomaryOwnershipTab data={data} /></TabsContent>
+        <TabsContent value="survey" className="mt-4"><SurveyAccuracyTab data={data} /></TabsContent>
+        <TabsContent value="fraud" className="mt-4"><FraudSimulationTab data={data} /></TabsContent>
+        <TabsContent value="fieldops" className="mt-4"><FieldOpsTab data={data} /></TabsContent>
+        <TabsContent value="acceptance" className="mt-4"><AcceptanceReportTab data={data} onDownload={handleDownload} /></TabsContent>
       </Tabs>
 
       <p className="text-xs text-center text-muted-foreground pt-2">
