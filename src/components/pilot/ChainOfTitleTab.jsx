@@ -1,5 +1,12 @@
-import { S, SectionCard, StatBox } from "./PilotShared";
+import { S, SectionCard } from "./PilotShared";
+import { Card, CardContent } from "@/components/ui/card";
 import { GitBranch, FileText, AlertTriangle, Shield, Link } from "lucide-react";
+
+function StatBox({ label, value, color = "text-gray-900" }) {
+  return (
+    <Card><CardContent className="p-4 text-center"><p className={`text-2xl font-black ${color}`}>{value}</p><p className="text-xs text-muted-foreground mt-0.5">{label}</p></CardContent></Card>
+  );
+}
 
 export default function ChainOfTitleTab({ data }) {
   const { parcels, families, ownershipHistory, cases, surveyDocs, audits, beneficiaries } = data;
