@@ -37,6 +37,10 @@ import PilotDashboard from './pages/gov/PilotDashboard';
 import AuditReports from './pages/gov/AuditReports';
 import InheritanceManagement from './pages/InheritanceManagement';
 import CustomaryGovernanceDashboard from './pages/gov/CustomaryGovernanceDashboard';
+import ExecutiveDashboard from './pages/gov/ExecutiveDashboard';
+import DemoGuide from './pages/DemoGuide';
+import DemoDataSeed from './pages/gov/DemoDataSeed';
+import PilotReports from './pages/gov/PilotReports';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkUserAuth } = useAuth();
@@ -97,6 +101,10 @@ const AuthenticatedApp = () => {
         <Route path="/gov/audit-reports" element={<AuditReports />} />
         <Route path="/inheritance" element={<InheritanceManagement />} />
         <Route path="/gov/customary-governance" element={<CustomaryGovernanceDashboard />} />
+        <Route path="/gov/executive-dashboard" element={<ExecutiveDashboard />} />
+        <Route path="/gov/demo-seed" element={<DemoDataSeed />} />
+        <Route path="/gov/pilot-reports" element={<PilotReports />} />
+        <Route path="/demo-guide" element={<DemoGuide />} />
       </Route>
       <Route path="/demo" element={<DemoAccess />} />
       <Route path="*" element={<PageNotFound />} />

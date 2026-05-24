@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Shield, Copy, CheckCheck, User, Compass, Camera, MapPin, ChevronRight, Lock, Eye, EyeOff } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Shield, Copy, CheckCheck, User, Compass, Camera, MapPin, ChevronRight, Lock, Eye, EyeOff, BookOpen, BarChart2, ShieldCheck, Star } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -96,17 +97,67 @@ const roles = [
     badgeClass: "bg-amber-100 text-amber-700",
     description: "A field officer who conducts on-site inspections, captures GPS coordinates, takes photos, and submits verification reports.",
     demoData: [
-      "6 field reports: 2 reviewed, 2 submitted, 1 draft",
+      "80+ field reports with GPS coordinates",
       "Reports cover boundary checks, GPS surveys, inspections",
-      "GPS coordinates captured for 5 parcels",
-      "2 unread notifications (review + new assignment)",
+      "GPS accuracy metrics for every report",
+      "Offline capture and sync examples",
     ],
     experience: [
       "Dashboard showing report counts by status",
       "Create report with GPS auto-capture button",
       "Upload multiple site photos per report",
       "View unverified parcels needing field visit",
-      "Access GIS map to navigate to parcel locations",
+      "Access GIS map with Family Lineage overlay",
+    ],
+  },
+  {
+    key: "compliance_officer",
+    label: "Compliance Officer",
+    name: "Ngozi Adeyemi",
+    email: "compliance.demo@landsecure.app",
+    icon: ShieldCheck,
+    color: "indigo",
+    bgClass: "bg-indigo-50 border-indigo-200",
+    iconClass: "bg-indigo-100 text-indigo-600",
+    badgeClass: "bg-indigo-100 text-indigo-700",
+    description: "A compliance officer who reviews pending parcels and inheritance cases for regulatory compliance before final Surveyor General approval.",
+    demoData: [
+      "Pilot Operations dashboard with all KPIs",
+      "Pending Approvals queue with inheritance cases",
+      "Fraud alert monitoring and investigation",
+      "Community validation workflow review",
+    ],
+    experience: [
+      "Review pending inheritance cases in approval queue",
+      "Add compliance review notes to cases",
+      "Monitor fraud alerts and assign investigators",
+      "Export Pilot Reports for presentations",
+      "View Executive Dashboard for executive summary",
+    ],
+  },
+  {
+    key: "super_admin",
+    label: "Super Admin",
+    name: "Abubakar Danjuma",
+    email: "admin.demo@landsecure.app",
+    icon: Star,
+    color: "rose",
+    bgClass: "bg-rose-50 border-rose-200",
+    iconClass: "bg-rose-100 text-rose-600",
+    badgeClass: "bg-rose-100 text-rose-700",
+    description: "System administrator with full access to all modules, user management, demo data seeding, bulk import, and executive reporting.",
+    demoData: [
+      "Full access to all system modules",
+      "Demo Data Seed tool for Greenfield LGA",
+      "Executive Dashboard with investor metrics",
+      "User Management and role assignment",
+    ],
+    experience: [
+      "Run Demo Data Seed to populate Greenfield LGA",
+      "View Executive Dashboard (investor view)",
+      "Manage user roles and permissions",
+      "Export Pilot Reports in CSV format",
+      "Access Pilot Operations real-time control centre",
     ],
   },
 ];
@@ -162,10 +213,22 @@ export default function DemoAccess() {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-2">
             <Lock className="w-3 h-3" /> Demo Environment
           </div>
-          <h2 className="text-3xl font-bold text-foreground">Explore Every Role</h2>
+          <h2 className="text-3xl font-bold text-foreground">Greenfield LGA Pilot Demo</h2>
           <p className="text-muted-foreground max-w-xl mx-auto text-sm">
-            Four demo accounts are pre-configured with realistic Nigerian land registry data. Use the credentials below to log in as each role and experience their unique workflow.
+            Six demo accounts are pre-configured for the Greenfield LGA pilot. Each role opens into a populated dashboard with realistic data and pending actions.
           </p>
+          <div className="flex items-center justify-center gap-3 flex-wrap mt-2">
+            <Link to="/demo-guide">
+              <Button size="sm" variant="outline" className="gap-2">
+                <BookOpen className="w-4 h-4" /> View Demo Guide (12 Workflows)
+              </Button>
+            </Link>
+            <Link to="/gov/executive-dashboard">
+              <Button size="sm" variant="outline" className="gap-2">
+                <BarChart2 className="w-4 h-4" /> Executive Dashboard
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Shared password */}
@@ -173,7 +236,7 @@ export default function DemoAccess() {
           <CardContent className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Universal Demo Password</p>
-              <p className="text-sm text-muted-foreground">All 4 accounts share the same password</p>
+              <p className="text-sm text-muted-foreground">All 6 demo accounts share the same password</p>
             </div>
             <div className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 border border-border shadow-sm">
               <span className="font-mono font-semibold text-foreground tracking-wide">

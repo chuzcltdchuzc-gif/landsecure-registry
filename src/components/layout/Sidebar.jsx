@@ -25,6 +25,9 @@ import {
   Upload,
   GitBranch,
   Landmark,
+  BarChart2,
+  Database,
+  BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
@@ -39,6 +42,7 @@ const roleMenus = {
   ],
   surveyor_general: [
     { label: "Dashboard", icon: LayoutDashboard, path: "/" },
+    { label: "Executive Dashboard", icon: BarChart2, path: "/gov/executive-dashboard" },
     { label: "Approvals", icon: Shield, path: "/approvals" },
     { label: "Land Registry", icon: Map, path: "/lands" },
     { label: "Inheritance Mgmt", icon: GitBranch, path: "/inheritance" },
@@ -46,6 +50,7 @@ const roleMenus = {
     { label: "Survey Reviews", icon: Compass, path: "/survey-reviews" },
     { label: "Disputes", icon: AlertTriangle, path: "/disputes" },
     { label: "GIS Map", icon: Map, path: "/gis-map" },
+    { label: "Pilot Reports", icon: FileText, path: "/gov/pilot-reports" },
     { label: "Audit Logs", icon: History, path: "/audit-logs" },
     { label: "Notifications", icon: Bell, path: "/notifications" },
   ],
@@ -67,7 +72,10 @@ const roleMenus = {
   ],
   super_admin: [
     { label: "Dashboard", icon: LayoutDashboard, path: "/" },
+    { label: "Executive Dashboard", icon: BarChart2, path: "/gov/executive-dashboard" },
     { label: "Pilot Operations", icon: Activity, path: "/gov/pilot-dashboard" },
+    { label: "Demo Data Seed", icon: Database, path: "/gov/demo-seed" },
+    { label: "Pilot Reports", icon: FileText, path: "/gov/pilot-reports" },
     { label: "Customary Governance", icon: Landmark, path: "/gov/customary-governance" },
     { label: "Inheritance Mgmt", icon: GitBranch, path: "/inheritance" },
     { label: "User Management", icon: Users, path: "/gov/user-management" },
@@ -82,7 +90,9 @@ const roleMenus = {
   ],
   compliance_officer: [
     { label: "Dashboard", icon: LayoutDashboard, path: "/" },
+    { label: "Executive Dashboard", icon: BarChart2, path: "/gov/executive-dashboard" },
     { label: "Pilot Operations", icon: Activity, path: "/gov/pilot-dashboard" },
+    { label: "Pilot Reports", icon: FileText, path: "/gov/pilot-reports" },
     { label: "Customary Governance", icon: Landmark, path: "/gov/customary-governance" },
     { label: "Pending Approvals", icon: ClipboardList, path: "/gov/pending-approvals" },
     { label: "Inheritance Mgmt", icon: GitBranch, path: "/inheritance" },
@@ -143,12 +153,20 @@ export default function Sidebar({ user, collapsed, setCollapsed }) {
 
       <div className="p-3 border-t border-border space-y-1">
         <Link
+          to="/demo-guide"
+          onClick={() => setMobileOpen(false)}
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${location.pathname === "/demo-guide" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
+        >
+          <BookOpen className="w-4 h-4 flex-shrink-0" />
+          {!collapsed && <span>Demo Guide</span>}
+        </Link>
+        <Link
           to="/demo"
           onClick={() => setMobileOpen(false)}
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground w-full transition-all"
         >
           <PlayCircle className="w-4 h-4 flex-shrink-0 text-primary" />
-          {!collapsed && <span>Demo Guide</span>}
+          {!collapsed && <span>Demo Accounts</span>}
         </Link>
         <button
           onClick={() => base44.auth.logout()}
