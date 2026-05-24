@@ -7,16 +7,14 @@
       "description": "Related land parcel ID"
     },
     "parcel_number": {
-      "type": "string",
-      "description": "Parcel number"
+      "type": "string"
     },
     "flagged_by": {
       "type": "string",
-      "description": "Email of the user who flagged"
+      "description": "Email of user who flagged"
     },
     "flagged_by_name": {
-      "type": "string",
-      "description": "Name of user who flagged"
+      "type": "string"
     },
     "alert_type": {
       "type": "string",
@@ -26,7 +24,6 @@
         "boundary_manipulation",
         "ownership_fraud",
         "suspicious_transfer",
-        "identity_theft",
         "other"
       ],
       "description": "Type of fraud alert"
@@ -42,21 +39,20 @@
       "default": "medium"
     },
     "description": {
-      "type": "string",
-      "description": "Detailed description of the suspicious activity"
+      "type": "string"
     },
     "evidence_urls": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Supporting evidence URLs"
+      }
     },
     "status": {
       "type": "string",
       "enum": [
         "open",
         "under_investigation",
+        "escalated",
         "resolved",
         "dismissed"
       ],
@@ -67,31 +63,71 @@
       "description": "Compliance officer assigned"
     },
     "investigation_notes": {
-      "type": "string",
-      "description": "Notes from investigation"
+      "type": "string"
     },
     "resolved_by": {
-      "type": "string",
-      "description": "Email of officer who resolved"
+      "type": "string"
     },
     "resolved_date": {
       "type": "string",
       "format": "date"
-    },
-    "resolution": {
-      "type": "string",
-      "enum": [
-        "confirmed_fraud",
-        "false_positive",
-        "escalated",
-        "pending_review"
-      ],
-      "description": "Final resolution"
     }
   },
   "required": [
     "parcel_id",
     "alert_type",
     "description"
-  ]
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "data.assigned_to": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "compliance_officer",
+                "surveyor_general"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "data.assigned_to": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "compliance_officer",
+                "surveyor_general"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
 }
