@@ -8,13 +8,13 @@ import {
   CheckCircle2, AlertTriangle, XCircle, RefreshCw,
   Database, Map, GitBranch, Shield, HardDrive, Download,
   FileText, ChevronDown, ChevronRight, Link, Users, Ruler,
-  AlertOctagon, Smartphone, ClipboardCheck
+  Crosshair, Wifi, ClipboardCheck
 } from "lucide-react";
 import ChainOfTitleTab from "@/components/pilot/ChainOfTitleTab";
 import CustomaryOwnershipTab from "@/components/pilot/CustomaryOwnershipTab";
 import SurveyAccuracyTab from "@/components/pilot/SurveyAccuracyTab";
 import FraudSimulationTab from "@/components/pilot/FraudSimulationTab";
-import FieldOpsTab from "@/components/pilot/FieldOpsTab";
+import FieldOperationsTab from "@/components/pilot/FieldOperationsTab";
 import AcceptanceReportTab from "@/components/pilot/AcceptanceReportTab";
 
 const S = { ok: "ok", warn: "warn", fail: "fail" };
@@ -64,8 +64,7 @@ function EvidenceTable({ rows }) {
   );
 }
 
-function SectionCard({ title, icon: IconComp, iconColor, rows, summary }) {
-  const Icon = IconComp;
+function SectionCard({ title, icon: Icon, iconColor, rows, summary }) {
   const [open, setOpen] = useState(true);
   const pass = rows.filter(r => r.status === S.ok).length;
   const fail = rows.filter(r => r.status === S.fail).length;
@@ -738,9 +737,9 @@ export default function PilotValidation() {
     <div className="p-6 max-w-7xl mx-auto space-y-5">
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Pilot Validation — Verification Phase</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Pilot Acceptance Testing Framework</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Greenfield LGA · Detailed evidence for every check · Live database only
+            Greenfield LGA · 1,000-parcel deployment readiness · Live database only
             {lastRun && ` · Run at ${lastRun.toLocaleTimeString()}`}
           </p>
         </div>
@@ -765,7 +764,7 @@ export default function PilotValidation() {
           <TabsTrigger value="customary" className="text-xs"><Users className="w-3.5 h-3.5 mr-1" />Customary</TabsTrigger>
           <TabsTrigger value="survey" className="text-xs"><Ruler className="w-3.5 h-3.5 mr-1" />Survey Accuracy</TabsTrigger>
           <TabsTrigger value="fraud" className="text-xs"><AlertTriangle className="w-3.5 h-3.5 mr-1" />Fraud Simulation</TabsTrigger>
-          <TabsTrigger value="fieldops" className="text-xs"><Smartphone className="w-3.5 h-3.5 mr-1" />Field Ops</TabsTrigger>
+          <TabsTrigger value="field" className="text-xs"><Wifi className="w-3.5 h-3.5 mr-1" />Field Ops</TabsTrigger>
           <TabsTrigger value="acceptance" className="text-xs font-bold"><ClipboardCheck className="w-3.5 h-3.5 mr-1" />Acceptance Report</TabsTrigger>
         </TabsList>
 
@@ -778,8 +777,8 @@ export default function PilotValidation() {
         <TabsContent value="customary" className="mt-4"><CustomaryOwnershipTab data={data} /></TabsContent>
         <TabsContent value="survey" className="mt-4"><SurveyAccuracyTab data={data} /></TabsContent>
         <TabsContent value="fraud" className="mt-4"><FraudSimulationTab data={data} /></TabsContent>
-        <TabsContent value="fieldops" className="mt-4"><FieldOpsTab data={data} /></TabsContent>
-        <TabsContent value="acceptance" className="mt-4"><AcceptanceReportTab data={data} onDownload={handleDownload} /></TabsContent>
+        <TabsContent value="field" className="mt-4"><FieldOperationsTab data={data} /></TabsContent>
+        <TabsContent value="acceptance" className="mt-4"><AcceptanceReportTab data={data} lastRun={lastRun} /></TabsContent>
       </Tabs>
 
       <p className="text-xs text-center text-muted-foreground pt-2">
