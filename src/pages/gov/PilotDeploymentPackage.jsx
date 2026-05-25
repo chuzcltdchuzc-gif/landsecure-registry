@@ -15,24 +15,28 @@ export default function PilotDeploymentPackage() {
   const [lastRun, setLastRun] = useState(null);
   const [activeTab, setActiveTab] = useState("uat");
 
+  const delay = (ms) => new Promise(res => setTimeout(res, ms));
+
   async function load() {
     setLoading(true);
-    const [
-      parcels, families, beneficiaries, cases,
-      disputes, fraud, audits, fieldReports,
-      surveyDocs, ownershipHistory, communityVal,
-      tradVal, plotAllocations, witnesses, users
-    ] = await Promise.all([
-      base44.entities.LandParcel.list("-created_date", 2000),
+    // Fetch in batches of 5 to avoid rate limits
+    const [parcels, families, beneficiaries, cases, disputes] = await Promise.all([
+      base44.entities.LandParcel.list("-created_date", 500),
       base44.entities.FamilyOwnership.list("-created_date", 500),
       base44.entities.FamilyBeneficiary.list("-created_date", 500),
       base44.entities.InheritanceCase.list("-created_date", 500),
       base44.entities.Dispute.list("-created_date", 500),
+    ]);
+    await delay(300);
+    const [fraud, audits, fieldReports, surveyDocs, ownershipHistory] = await Promise.all([
       base44.entities.FraudAlert.list("-created_date", 500),
-      base44.entities.AuditLog.list("-created_date", 2000),
-      base44.entities.FieldReport.list("-created_date", 1000),
+      base44.entities.AuditLog.list("-created_date", 500),
+      base44.entities.FieldReport.list("-created_date", 500),
       base44.entities.SurveyDocument.list("-created_date", 500),
       base44.entities.OwnershipHistory.list("-created_date", 500),
+    ]);
+    await delay(300);
+    const [communityVal, tradVal, plotAllocations, witnesses, users] = await Promise.all([
       base44.entities.CommunityValidation.list("-created_date", 500),
       base44.entities.TraditionalAuthorityValidation.list("-created_date", 500),
       base44.entities.PlotAllocation.list("-created_date", 500),
