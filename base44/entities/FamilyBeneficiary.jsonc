@@ -2,6 +2,10 @@
   "name": "FamilyBeneficiary",
   "type": "object",
   "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant identifier (LGA code). Enforces multi-tenant isolation."
+    },
     "family_ownership_id": {
       "type": "string",
       "description": "Reference to FamilyOwnership ID"

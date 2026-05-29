@@ -2,6 +2,10 @@
   "name": "CommunityValidation",
   "type": "object",
   "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant identifier (LGA code). Enforces multi-tenant isolation."
+    },
     "parcel_id": {
       "type": "string"
     },
