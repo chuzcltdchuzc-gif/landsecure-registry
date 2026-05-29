@@ -28,6 +28,7 @@ import {
   BarChart2,
   Database,
   BookOpen,
+  ServerCog,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
@@ -55,6 +56,7 @@ const roleMenus = {
     { label: "Demo Readiness", icon: BookOpen, path: "/gov/demo-readiness" },
     { label: "Pilot Validation", icon: Activity, path: "/gov/pilot-validation" },
     { label: "Deployment Package", icon: ClipboardList, path: "/gov/deployment-package" },
+    { label: "Production Readiness", icon: ServerCog, path: "/gov/production-readiness" },
     { label: "Audit Logs", icon: History, path: "/audit-logs" },
     { label: "Notifications", icon: Bell, path: "/notifications" },
   ],
@@ -84,6 +86,7 @@ const roleMenus = {
     { label: "Demo Readiness Report", icon: BookOpen, path: "/gov/demo-readiness" },
     { label: "Pilot Validation", icon: Activity, path: "/gov/pilot-validation" },
     { label: "Deployment Package", icon: ClipboardList, path: "/gov/deployment-package" },
+    { label: "Production Readiness", icon: ServerCog, path: "/gov/production-readiness" },
     { label: "Customary Governance", icon: Landmark, path: "/gov/customary-governance" },
     { label: "Inheritance Mgmt", icon: GitBranch, path: "/inheritance" },
     { label: "User Management", icon: Users, path: "/gov/user-management" },
@@ -105,6 +108,7 @@ const roleMenus = {
     { label: "Demo Readiness", icon: BookOpen, path: "/gov/demo-readiness" },
     { label: "Pilot Validation", icon: Activity, path: "/gov/pilot-validation" },
     { label: "Deployment Package", icon: ClipboardList, path: "/gov/deployment-package" },
+    { label: "Production Readiness", icon: ServerCog, path: "/gov/production-readiness" },
     { label: "Customary Governance", icon: Landmark, path: "/gov/customary-governance" },
     { label: "Pending Approvals", icon: ClipboardList, path: "/gov/pending-approvals" },
     { label: "Inheritance Mgmt", icon: GitBranch, path: "/inheritance" },

@@ -45,6 +45,7 @@ import DataIntegrityReport from './pages/gov/DataIntegrityReport';
 import PilotValidation from './pages/gov/PilotValidation';
 import DemoReadinessReport from './pages/gov/DemoReadinessReport';
 import PilotDeploymentPackage from './pages/gov/PilotDeploymentPackage';
+import ProductionReadiness from './pages/gov/ProductionReadiness';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkUserAuth } = useAuth();
@@ -112,7 +113,7 @@ const AuthenticatedApp = () => {
         <Route path="/gov/pilot-validation" element={<PilotValidation />} />
         <Route path="/gov/demo-readiness" element={<DemoReadinessReport />} />
         <Route path="/gov/deployment-package" element={<PilotDeploymentPackage />} />
-        <Route path="/gov/deployment-package" element={<PilotDeploymentPackage />} />
+        <Route path="/gov/production-readiness" element={<ProductionReadiness />} />
         <Route path="/demo-guide" element={<DemoGuide />} />
       </Route>
       <Route path="/demo" element={<DemoAccess />} />
