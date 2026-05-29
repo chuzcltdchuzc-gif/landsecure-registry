@@ -1,0 +1,73 @@
+{
+  "name": "ParcelSequence",
+  "type": "object",
+  "properties": {
+    "sequence_key": {
+      "type": "string",
+      "description": "Composite key: STATE-LGA-WARD-PROPTYPE e.g. IMO-EHM-UME-RES"
+    },
+    "last_sequence": {
+      "type": "number",
+      "default": 0,
+      "description": "Last used sequence number. NEVER resets or decrements."
+    },
+    "state_code": {
+      "type": "string"
+    },
+    "lga_code": {
+      "type": "string"
+    },
+    "ward_code": {
+      "type": "string"
+    },
+    "property_type": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "sequence_key"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer",
+            "surveyor"
+          ]
+        }
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer",
+            "surveyor"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer",
+            "surveyor"
+          ]
+        }
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

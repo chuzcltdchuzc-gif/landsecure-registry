@@ -29,6 +29,8 @@ import {
   Database,
   BookOpen,
   ServerCog,
+  MapPin,
+  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
@@ -44,6 +46,11 @@ const roleMenus = {
   surveyor_general: [
     { label: "Dashboard", icon: LayoutDashboard, path: "/" },
     { label: "Executive Dashboard", icon: BarChart2, path: "/gov/executive-dashboard" },
+    { label: "── Ehime Mbano LGA ──", icon: MapPin, path: null, divider: true },
+    { label: "Parcel Registry", icon: MapPin, path: "/ehime/parcels" },
+    { label: "Register Parcel", icon: FileText, path: "/ehime/register" },
+    { label: "Public Verify", icon: Search, path: "/verify" },
+    { label: "── ──────────── ──", icon: null, path: null, divider: true },
     { label: "Approvals", icon: Shield, path: "/approvals" },
     { label: "Land Registry", icon: Map, path: "/lands" },
     { label: "Inheritance Mgmt", icon: GitBranch, path: "/inheritance" },
@@ -62,6 +69,11 @@ const roleMenus = {
   ],
   surveyor: [
     { label: "Dashboard", icon: LayoutDashboard, path: "/" },
+    { label: "── Ehime Mbano LGA ──", icon: MapPin, path: null, divider: true },
+    { label: "Parcel Registry", icon: MapPin, path: "/ehime/parcels" },
+    { label: "Register Parcel", icon: FileText, path: "/ehime/register" },
+    { label: "Public Verify", icon: Search, path: "/verify" },
+    { label: "── ──────────── ──", icon: null, path: null, divider: true },
     { label: "Register Land", icon: FileText, path: "/register-land" },
     { label: "My Submissions", icon: ClipboardList, path: "/my-submissions" },
     { label: "Survey Documents", icon: Compass, path: "/survey-documents" },
@@ -71,6 +83,10 @@ const roleMenus = {
   ],
   field_agent: [
     { label: "Dashboard", icon: LayoutDashboard, path: "/" },
+    { label: "── Ehime Mbano LGA ──", icon: MapPin, path: null, divider: true },
+    { label: "Parcel Registry", icon: MapPin, path: "/ehime/parcels" },
+    { label: "Public Verify", icon: Search, path: "/verify" },
+    { label: "── ──────────── ──", icon: null, path: null, divider: true },
     { label: "Field Reports", icon: Camera, path: "/field-reports" },
     { label: "GIS Map", icon: Map, path: "/gis-map" },
     { label: "Assigned Parcels", icon: ClipboardList, path: "/assigned-parcels" },
@@ -79,6 +95,11 @@ const roleMenus = {
   super_admin: [
     { label: "Dashboard", icon: LayoutDashboard, path: "/" },
     { label: "Executive Dashboard", icon: BarChart2, path: "/gov/executive-dashboard" },
+    { label: "── Ehime Mbano LGA ──", icon: MapPin, path: null, divider: true },
+    { label: "Parcel Registry", icon: MapPin, path: "/ehime/parcels" },
+    { label: "Register Parcel", icon: FileText, path: "/ehime/register" },
+    { label: "Public Verify", icon: Search, path: "/verify" },
+    { label: "── ──────────── ──", icon: null, path: null, divider: true },
     { label: "Pilot Operations", icon: Activity, path: "/gov/pilot-dashboard" },
     { label: "Demo Data Seed", icon: Database, path: "/gov/demo-seed" },
     { label: "Pilot Reports", icon: FileText, path: "/gov/pilot-reports" },
@@ -102,6 +123,11 @@ const roleMenus = {
   compliance_officer: [
     { label: "Dashboard", icon: LayoutDashboard, path: "/" },
     { label: "Executive Dashboard", icon: BarChart2, path: "/gov/executive-dashboard" },
+    { label: "── Ehime Mbano LGA ──", icon: MapPin, path: null, divider: true },
+    { label: "Parcel Registry", icon: MapPin, path: "/ehime/parcels" },
+    { label: "Register Parcel", icon: FileText, path: "/ehime/register" },
+    { label: "Public Verify", icon: Search, path: "/verify" },
+    { label: "── ──────────── ──", icon: null, path: null, divider: true },
     { label: "Pilot Operations", icon: Activity, path: "/gov/pilot-dashboard" },
     { label: "Pilot Reports", icon: FileText, path: "/gov/pilot-reports" },
     { label: "Data Integrity", icon: ShieldCheck, path: "/gov/data-integrity" },
@@ -146,7 +172,14 @@ export default function Sidebar({ user, collapsed, setCollapsed }) {
       </div>
 
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-        {menuItems.map((item) => {
+        {menuItems.map((item, idx) => {
+          if (item.divider) {
+            return collapsed ? null : (
+              <p key={idx} className="text-[10px] text-muted-foreground px-3 pt-3 pb-1 uppercase tracking-widest truncate font-semibold">
+                {item.label.includes("Ehime") ? "Ehime Mbano" : ""}
+              </p>
+            );
+          }
           const isActive = location.pathname === item.path;
           return (
             <Link
@@ -160,7 +193,7 @@ export default function Sidebar({ user, collapsed, setCollapsed }) {
                 }
               `}
             >
-              <item.icon className="w-4 h-4 flex-shrink-0" />
+              {item.icon && <item.icon className="w-4 h-4 flex-shrink-0" />}
               {!collapsed && <span className="truncate">{item.label}</span>}
             </Link>
           );

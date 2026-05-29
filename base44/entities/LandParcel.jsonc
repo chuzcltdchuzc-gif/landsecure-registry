@@ -4,11 +4,11 @@
   "properties": {
     "tenant_id": {
       "type": "string",
-      "description": "Tenant identifier (LGA code, e.g. GFL-001). Enforces multi-tenant isolation."
+      "description": "Tenant identifier (LGA code, e.g. EHM-001). Enforces multi-tenant isolation."
     },
     "parcel_number": {
       "type": "string",
-      "description": "Unique parcel identifier"
+      "description": "System-generated unique parcel ID. Format: STATE-LGA-WARD-PROPTYPE-SEQUENCE e.g. IMO-EHM-UME-RES-000001"
     },
     "title": {
       "type": "string",
@@ -22,6 +22,29 @@
       "type": "string",
       "description": "Owner email reference"
     },
+    "owner_phone": {
+      "type": "string",
+      "description": "Owner phone number (private \u2014 not shown publicly)"
+    },
+    "owner_nin": {
+      "type": "string",
+      "description": "Owner National Identification Number (strictly private)"
+    },
+    "ownership_type": {
+      "type": "string",
+      "enum": [
+        "individual",
+        "family",
+        "community",
+        "government"
+      ],
+      "default": "individual",
+      "description": "Type of ownership structure"
+    },
+    "size_sqm": {
+      "type": "number",
+      "description": "Size in square metres (primary size field for Ehime Mbano)"
+    },
     "size_hectares": {
       "type": "number",
       "description": "Size in hectares"
@@ -30,13 +53,52 @@
       "type": "string",
       "description": "Physical address"
     },
+    "community": {
+      "type": "string",
+      "description": "Community name within the LGA"
+    },
     "state": {
       "type": "string",
-      "description": "State/Province"
+      "description": "State \u2014 defaults to Imo"
     },
     "lga": {
       "type": "string",
-      "description": "Local Government Area"
+      "description": "Local Government Area \u2014 defaults to Ehime Mbano"
+    },
+    "ward": {
+      "type": "string",
+      "description": "Ward within the LGA (used in parcel number generation)"
+    },
+    "ward_code": {
+      "type": "string",
+      "description": "3-letter ward code used in parcel ID (e.g. UME, OKE, OHO)"
+    },
+    "property_type": {
+      "type": "string",
+      "enum": [
+        "RES",
+        "COM",
+        "FRM",
+        "MKT",
+        "SHP",
+        "STL",
+        "KSK",
+        "GOV",
+        "INS"
+      ],
+      "description": "Property type code: RES=Residential, COM=Commercial, FRM=Farm, MKT=Market, SHP=Shop, STL=Stall, KSK=Kiosk, GOV=Government, INS=Institutional"
+    },
+    "encumbrance_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "mortgage",
+        "dispute",
+        "lien",
+        "court_order"
+      ],
+      "default": "none",
+      "description": "Encumbrance/charge on the parcel"
     },
     "latitude": {
       "type": "number",
@@ -154,6 +216,11 @@
       "type": "string",
       "format": "date"
     },
+    "registration_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Official registration date (public)"
+    },
     "rejection_reason": {
       "type": "string"
     },
@@ -181,6 +248,14 @@
     "fraud_risk_reasons": {
       "type": "string",
       "description": "JSON array of risk reason strings"
+    },
+    "qr_code_url": {
+      "type": "string",
+      "description": "URL of generated QR code image for this parcel"
+    },
+    "certificate_url": {
+      "type": "string",
+      "description": "URL of the generated digital certificate PDF"
     }
   },
   "required": [

@@ -46,6 +46,10 @@ import PilotValidation from './pages/gov/PilotValidation';
 import DemoReadinessReport from './pages/gov/DemoReadinessReport';
 import PilotDeploymentPackage from './pages/gov/PilotDeploymentPackage';
 import ProductionReadiness from './pages/gov/ProductionReadiness';
+import PublicVerify from './pages/PublicVerify';
+import EhimeRegisterLand from './pages/EhimeRegisterLand';
+import EhimeParcels from './pages/EhimeParcels';
+import EhimeParcelDetail from './pages/EhimeParcelDetail';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkUserAuth } = useAuth();
@@ -115,8 +119,13 @@ const AuthenticatedApp = () => {
         <Route path="/gov/deployment-package" element={<PilotDeploymentPackage />} />
         <Route path="/gov/production-readiness" element={<ProductionReadiness />} />
         <Route path="/demo-guide" element={<DemoGuide />} />
+        {/* Ehime Mbano LGA Registry */}
+        <Route path="/ehime/parcels" element={<EhimeParcels />} />
+        <Route path="/ehime/register" element={<EhimeRegisterLand />} />
+        <Route path="/ehime/parcel/:id" element={<EhimeParcelDetail />} />
       </Route>
       <Route path="/demo" element={<DemoAccess />} />
+      <Route path="/verify" element={<PublicVerify />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
