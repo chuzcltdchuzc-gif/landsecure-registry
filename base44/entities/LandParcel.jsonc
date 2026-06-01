@@ -46,7 +46,7 @@
     },
     "size_hectares": {
       "type": "number",
-      "description": "Size in hectares \u2014 derived from size_sqm / 10000 when not explicitly set"
+      "description": "Size in hectares"
     },
     "address": {
       "type": "string",
