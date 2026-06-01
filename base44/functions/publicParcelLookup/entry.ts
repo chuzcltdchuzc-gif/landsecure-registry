@@ -24,6 +24,24 @@ const PUBLIC_FIELDS = [
   'registration_date', 'approval_date', 'latitude', 'longitude',
   'parcel_boundary', 'boundary_area', 'id', 'land_use', 'address',
   'ownership_type',
+  // Certificate status — public safe (no payment amounts, no balances)
+  'certificate_release_status',
+  'registration_completed',
+  'survey_completed',
+  'protected_in_registry',
+  'ownership_verified',
+];
+
+// NEVER include in public response — strictly private
+const PRIVATE_FIELDS = [
+  'owner_name', 'owner_email', 'owner_phone', 'owner_nin',
+  'outstanding_certificate_fee', 'certificate_hold_reason', 'certificate_released_date',
+  'registration_package_id',
+  'consent_audio', 'consent_signature', 'consent_photo',
+  'verbal_consent_gps', 'verbal_consent_agent_id',
+  'sign_declined_agent_id', 'sign_declined_gps', 'sign_declined_notes',
+  'witness_phone', 'fraud_risk_score', 'fraud_risk_reasons',
+  'notes', 'import_source',
 ];
 
 function sanitizeParcel(parcel) {
@@ -101,6 +119,11 @@ Deno.serve(async (req) => {
       community: 'Community Ownership',
       government: 'Government Ownership',
     }[parcel.ownership_type] || parcel.ownership_type;
+
+    // Certificate status label — public safe, no financial detail
+    safe.certificate_status_label = parcel.certificate_release_status === 'released'
+      ? 'Certificate Issued'
+      : 'Certificate Pending Release';
 
     safe.property_type_label = {
       RES: 'Residential', COM: 'Commercial', FRM: 'Farm',

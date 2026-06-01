@@ -31,6 +31,7 @@ import {
   ServerCog,
   MapPin,
   Search,
+  Package,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
@@ -73,6 +74,7 @@ const roleMenus = {
     { label: "── Ehime Mbano LGA ──", icon: MapPin, path: null, divider: true },
     { label: "Parcel Registry", icon: MapPin, path: "/ehime/parcels" },
     { label: "Register Parcel", icon: FileText, path: "/ehime/register" },
+    { label: "Bulk Packages", icon: Package, path: "/ehime/packages" },
     { label: "Public Verify", icon: Search, path: "/verify" },
     { label: "── ──────────── ──", icon: null, path: null, divider: true },
     { label: "Register Land", icon: FileText, path: "/register-land" },
@@ -99,6 +101,7 @@ const roleMenus = {
     { label: "── Ehime Mbano LGA ──", icon: MapPin, path: null, divider: true },
     { label: "Parcel Registry", icon: MapPin, path: "/ehime/parcels" },
     { label: "Register Parcel", icon: FileText, path: "/ehime/register" },
+    { label: "Bulk Packages", icon: Package, path: "/ehime/packages" },
     { label: "Public Verify", icon: Search, path: "/verify" },
     { label: "── ──────────── ──", icon: null, path: null, divider: true },
     { label: "Pilot Operations", icon: Activity, path: "/gov/pilot-dashboard" },
@@ -127,6 +130,7 @@ const roleMenus = {
     { label: "── Ehime Mbano LGA ──", icon: MapPin, path: null, divider: true },
     { label: "Parcel Registry", icon: MapPin, path: "/ehime/parcels" },
     { label: "Register Parcel", icon: FileText, path: "/ehime/register" },
+    { label: "Bulk Packages", icon: Package, path: "/ehime/packages" },
     { label: "Public Verify", icon: Search, path: "/verify" },
     { label: "── ──────────── ──", icon: null, path: null, divider: true },
     { label: "Pilot Operations", icon: Activity, path: "/gov/pilot-dashboard" },
