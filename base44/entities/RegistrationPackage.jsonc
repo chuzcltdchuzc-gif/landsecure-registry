@@ -1,0 +1,143 @@
+{
+  "name": "RegistrationPackage",
+  "type": "object",
+  "properties": {
+    "package_number": {
+      "type": "string",
+      "description": "System-generated package reference e.g. PKG-EHM-000001"
+    },
+    "family_name": {
+      "type": "string",
+      "description": "Family or entity name for this package"
+    },
+    "owner_type": {
+      "type": "string",
+      "enum": [
+        "individual",
+        "family",
+        "community"
+      ],
+      "default": "individual"
+    },
+    "state": {
+      "type": "string"
+    },
+    "lga": {
+      "type": "string"
+    },
+    "ward": {
+      "type": "string"
+    },
+    "community": {
+      "type": "string"
+    },
+    "total_parcels": {
+      "type": "number",
+      "description": "Total parcels planned in this package"
+    },
+    "registered_parcels": {
+      "type": "number",
+      "default": 0,
+      "description": "Parcels actually registered so far"
+    },
+    "certificates_released": {
+      "type": "number",
+      "default": 0
+    },
+    "certificates_held": {
+      "type": "number",
+      "default": 0
+    },
+    "package_value": {
+      "type": "number",
+      "description": "Total value at the applicable discount rate (\u20a6)"
+    },
+    "discount_amount": {
+      "type": "number",
+      "description": "Total discount applied (\u20a6)"
+    },
+    "amount_paid": {
+      "type": "number",
+      "default": 0,
+      "description": "Amount paid to date (\u20a6)"
+    },
+    "balance_due": {
+      "type": "number",
+      "description": "Outstanding balance (\u20a6)"
+    },
+    "payment_status": {
+      "type": "string",
+      "enum": [
+        "paid",
+        "partial",
+        "unpaid"
+      ],
+      "default": "unpaid"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "completed",
+        "cancelled"
+      ],
+      "default": "active"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "created_by_email": {
+      "type": "string"
+    },
+    "created_by_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "family_name",
+    "total_parcels"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer",
+            "surveyor"
+          ]
+        }
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer",
+            "surveyor",
+            "field_agent"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

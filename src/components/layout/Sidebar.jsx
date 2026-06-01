@@ -49,6 +49,7 @@ const roleMenus = {
     { label: "── Ehime Mbano LGA ──", icon: MapPin, path: null, divider: true },
     { label: "Parcel Registry", icon: MapPin, path: "/ehime/parcels" },
     { label: "Register Parcel", icon: FileText, path: "/ehime/register" },
+    { label: "Bulk Packages", icon: Package, path: "/ehime/packages" },
     { label: "Public Verify", icon: Search, path: "/verify" },
     { label: "── ──────────── ──", icon: null, path: null, divider: true },
     { label: "Approvals", icon: Shield, path: "/approvals" },

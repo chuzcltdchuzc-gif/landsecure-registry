@@ -50,6 +50,7 @@ import PublicVerify from './pages/PublicVerify';
 import EhimeRegisterLand from './pages/EhimeRegisterLand';
 import EhimeParcels from './pages/EhimeParcels';
 import EhimeParcelDetail from './pages/EhimeParcelDetail';
+import PackageManagement from './pages/ehime/PackageManagement';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkUserAuth } = useAuth();
@@ -123,6 +124,7 @@ const AuthenticatedApp = () => {
         <Route path="/ehime/parcels" element={<EhimeParcels />} />
         <Route path="/ehime/register" element={<EhimeRegisterLand />} />
         <Route path="/ehime/parcel/:id" element={<EhimeParcelDetail />} />
+        <Route path="/ehime/packages" element={<PackageManagement />} />
       </Route>
       <Route path="/demo" element={<DemoAccess />} />
       <Route path="/verify" element={<PublicVerify />} />

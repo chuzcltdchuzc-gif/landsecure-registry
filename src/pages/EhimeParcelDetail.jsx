@@ -20,6 +20,7 @@ import {
   ENCUMBRANCE_LABELS, LGA_CENTER
 } from "@/lib/ehimeMbanoData";
 import ParcelCertificate from "@/components/ehime/ParcelCertificate";
+import CertificateReleasePanel from "@/components/ehime/CertificateReleasePanel";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -138,20 +139,31 @@ export default function EhimeParcelDetail() {
               >
                 <Shield className="w-3.5 h-3.5" /> Public View
               </Button>
-              <Button
-                variant="outline" size="sm"
-                onClick={() => setShowCert(!showCert)}
-                className="gap-1.5"
-              >
-                <Download className="w-3.5 h-3.5" /> Certificate
-              </Button>
+              {parcel.certificate_release_status === "released" && (
+                <Button
+                  variant="outline" size="sm"
+                  onClick={() => setShowCert(!showCert)}
+                  className="gap-1.5 border-green-300 text-green-700"
+                >
+                  <Download className="w-3.5 h-3.5" /> Certificate
+                </Button>
+              )}
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Certificate Panel */}
-      {showCert && <ParcelCertificate parcel={parcel} />}
+      {showCert && parcel.certificate_release_status === "released" && <ParcelCertificate parcel={parcel} />}
+
+      {/* Certificate Release Panel — always shown to staff */}
+      {STAFF_ROLES.includes(user?.role) && (
+        <CertificateReleasePanel
+          parcel={parcel}
+          user={user}
+          onUpdated={() => qc.invalidateQueries({ queryKey: ["parcel-detail", id] })}
+        />
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Location */}

@@ -8,7 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  Search, MapPin, FileText, Shield, Plus, ExternalLink, Eye
+  Search, MapPin, FileText, Shield, Plus, ExternalLink, Eye, Package,
+  CheckCircle2, Clock
 } from "lucide-react";
 import {
   PROPERTY_TYPE_LABELS, STATUS_LABELS, VERIFICATION_LABELS,
@@ -42,6 +43,13 @@ export default function EhimeParcels() {
   const [wardFilter, setWardFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+
+  const { data: packages = [] } = useQuery({
+    queryKey: ["ehime-packages-map"],
+    queryFn: () => base44.entities.RegistrationPackage.list("-created_date", 200),
+    staleTime: 60_000,
+  });
+  const pkgMap = Object.fromEntries(packages.map(p => [p.id, p]));
 
   const { data: parcels = [], isLoading } = useQuery({
     queryKey: ["ehime-parcels"],
@@ -81,9 +89,9 @@ export default function EhimeParcels() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label: "Total Parcels", value: parcels.length, color: "text-foreground" },
-          { label: "Approved", value: parcels.filter(p => p.status === "approved" || p.status === "approved_locked").length, color: "text-green-700" },
-          { label: "Pending", value: parcels.filter(p => p.status === "pending").length, color: "text-yellow-700" },
-          { label: "Disputed", value: parcels.filter(p => p.status === "disputed").length, color: "text-red-700" },
+          { label: "Certs Released", value: parcels.filter(p => p.certificate_release_status === "released").length, color: "text-green-700" },
+          { label: "Certs Held", value: parcels.filter(p => p.certificate_release_status !== "released").length, color: "text-amber-700" },
+          { label: "Pending Review", value: parcels.filter(p => p.status === "pending").length, color: "text-yellow-700" },
         ].map(s => (
           <Card key={s.label}>
             <CardContent className="pt-4 pb-4">
@@ -167,11 +175,28 @@ export default function EhimeParcels() {
                       {parcel.registration_date && <span>Reg: {parcel.registration_date}</span>}
                     </div>
                     {/* Owner info — only shown to authorised staff */}
-                    {ALLOWED_ROLES.includes(user?.role) && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        <span className="flex items-center gap-1"><Shield className="w-3 h-3" /> {parcel.owner_name}</span>
-                      </p>
-                    )}
+                      {ALLOWED_ROLES.includes(user?.role) && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          <span className="flex items-center gap-1"><Shield className="w-3 h-3" /> {parcel.owner_name}</span>
+                        </p>
+                      )}
+                      {/* Certificate status badge */}
+                      <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                        {parcel.certificate_release_status === "released" ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-green-100 text-green-800 font-medium">
+                            <CheckCircle2 className="w-3 h-3" /> Certificate Released
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-amber-100 text-amber-800 font-medium">
+                            <Clock className="w-3 h-3" /> Certificate Held
+                          </span>
+                        )}
+                        {parcel.registration_package_id && pkgMap[parcel.registration_package_id] && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-700">
+                            <Package className="w-3 h-3" /> {pkgMap[parcel.registration_package_id].package_number}
+                          </span>
+                        )}
+                      </div>
                   </div>
                   <div className="flex gap-2 flex-shrink-0">
                     <Button

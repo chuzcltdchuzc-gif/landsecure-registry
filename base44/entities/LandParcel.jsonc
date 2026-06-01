@@ -4,11 +4,11 @@
   "properties": {
     "tenant_id": {
       "type": "string",
-      "description": "Tenant identifier (LGA code, e.g. EHM-001). Enforces multi-tenant isolation."
+      "description": "Tenant identifier (LGA code, e.g. EHM-001)."
     },
     "parcel_number": {
       "type": "string",
-      "description": "System-generated unique parcel ID. Format: STATE-LGA-WARD-PROPTYPE-SEQUENCE e.g. IMO-EHM-UME-RES-000001"
+      "description": "System-generated unique parcel ID. Format: STATE-LGA-WARD-PROPTYPE-SEQUENCE"
     },
     "title": {
       "type": "string",
@@ -24,7 +24,7 @@
     },
     "owner_phone": {
       "type": "string",
-      "description": "Owner phone number (private \u2014 not shown publicly)"
+      "description": "Owner phone number (private)"
     },
     "owner_nin": {
       "type": "string",
@@ -38,12 +38,11 @@
         "community",
         "government"
       ],
-      "default": "individual",
-      "description": "Type of ownership structure"
+      "default": "individual"
     },
     "size_sqm": {
       "type": "number",
-      "description": "Size in square metres (primary size field for Ehime Mbano)"
+      "description": "Size in square metres"
     },
     "size_hectares": {
       "type": "number",
@@ -54,24 +53,20 @@
       "description": "Physical address"
     },
     "community": {
-      "type": "string",
-      "description": "Community name within the LGA"
+      "type": "string"
     },
     "state": {
-      "type": "string",
-      "description": "State \u2014 defaults to Imo"
+      "type": "string"
     },
     "lga": {
-      "type": "string",
-      "description": "Local Government Area \u2014 defaults to Ehime Mbano"
+      "type": "string"
     },
     "ward": {
-      "type": "string",
-      "description": "Ward within the LGA (used in parcel number generation)"
+      "type": "string"
     },
     "ward_code": {
       "type": "string",
-      "description": "3-letter ward code used in parcel ID (e.g. UME, OKE, OHO)"
+      "description": "3-letter ward code"
     },
     "property_type": {
       "type": "string",
@@ -85,8 +80,7 @@
         "KSK",
         "GOV",
         "INS"
-      ],
-      "description": "Property type code: RES=Residential, COM=Commercial, FRM=Farm, MKT=Market, SHP=Shop, STL=Stall, KSK=Kiosk, GOV=Government, INS=Institutional"
+      ]
     },
     "encumbrance_status": {
       "type": "string",
@@ -97,32 +91,26 @@
         "lien",
         "court_order"
       ],
-      "default": "none",
-      "description": "Encumbrance/charge on the parcel"
+      "default": "none"
     },
     "latitude": {
-      "type": "number",
-      "description": "GPS latitude"
+      "type": "number"
     },
     "longitude": {
-      "type": "number",
-      "description": "GPS longitude"
+      "type": "number"
     },
     "boundary_coordinates": {
-      "type": "string",
-      "description": "JSON string of boundary polygon coordinates"
+      "type": "string"
     },
     "parcel_boundary": {
       "type": "string",
-      "description": "GeoJSON polygon string for the parcel boundary"
+      "description": "GeoJSON polygon string"
     },
     "boundary_area": {
-      "type": "number",
-      "description": "Calculated boundary area in sqm"
+      "type": "number"
     },
     "boundary_perimeter": {
-      "type": "number",
-      "description": "Calculated boundary perimeter in meters"
+      "type": "number"
     },
     "boundary_source": {
       "type": "string",
@@ -132,8 +120,7 @@
         "survey_plan",
         "cad_import",
         "legacy_import"
-      ],
-      "description": "How the boundary was captured"
+      ]
     },
     "boundary_capture_date": {
       "type": "string",
@@ -149,12 +136,10 @@
         "invalid_geometry",
         "conflict_blocked"
       ],
-      "default": "not_validated",
-      "description": "Result of spatial validation engine"
+      "default": "not_validated"
     },
     "spatial_conflict_notes": {
-      "type": "string",
-      "description": "Details of any spatial conflicts found"
+      "type": "string"
     },
     "land_use": {
       "type": "string",
@@ -165,8 +150,7 @@
         "industrial",
         "mixed_use",
         "government"
-      ],
-      "description": "Land use type"
+      ]
     },
     "status": {
       "type": "string",
@@ -180,8 +164,7 @@
         "frozen",
         "archived"
       ],
-      "default": "pending",
-      "description": "Registration status"
+      "default": "pending"
     },
     "verification_status": {
       "type": "string",
@@ -191,8 +174,7 @@
         "survey_verified",
         "fully_verified"
       ],
-      "default": "unverified",
-      "description": "Verification level"
+      "default": "unverified"
     },
     "survey_plan_url": {
       "type": "string"
@@ -228,12 +210,10 @@
       "type": "string"
     },
     "import_source": {
-      "type": "string",
-      "description": "ImportHistory ID if imported from bulk"
+      "type": "string"
     },
     "fraud_risk_score": {
-      "type": "number",
-      "description": "Automated fraud risk score 0-100"
+      "type": "number"
     },
     "fraud_risk_level": {
       "type": "string",
@@ -246,16 +226,172 @@
       "default": "none"
     },
     "fraud_risk_reasons": {
-      "type": "string",
-      "description": "JSON array of risk reason strings"
+      "type": "string"
     },
     "qr_code_url": {
-      "type": "string",
-      "description": "URL of generated QR code image for this parcel"
+      "type": "string"
     },
     "certificate_url": {
+      "type": "string"
+    },
+    "verbal_consent": {
+      "type": "boolean",
+      "description": "Representative verbally agreed to registration"
+    },
+    "verbal_consent_timestamp": {
       "type": "string",
-      "description": "URL of the generated digital certificate PDF"
+      "format": "date-time"
+    },
+    "verbal_consent_agent_id": {
+      "type": "string",
+      "description": "Email of field agent who recorded consent"
+    },
+    "verbal_consent_gps": {
+      "type": "string",
+      "description": "JSON: {lat, lng} at time of verbal consent"
+    },
+    "consent_audio": {
+      "type": "string",
+      "description": "PRIVATE \u2014 audio consent file URL (private bucket only)"
+    },
+    "audio_declined": {
+      "type": "boolean",
+      "default": false
+    },
+    "consent_signature": {
+      "type": "string",
+      "description": "PRIVATE \u2014 base64 data URL of signature/thumb image"
+    },
+    "sign_declined": {
+      "type": "boolean",
+      "default": false
+    },
+    "sign_declined_timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sign_declined_agent_id": {
+      "type": "string"
+    },
+    "sign_declined_gps": {
+      "type": "string"
+    },
+    "sign_declined_notes": {
+      "type": "string"
+    },
+    "consent_photo": {
+      "type": "string",
+      "description": "PRIVATE \u2014 representative photo URL (private bucket only)"
+    },
+    "photo_declined": {
+      "type": "boolean",
+      "default": false
+    },
+    "witness_name": {
+      "type": "string"
+    },
+    "witness_phone": {
+      "type": "string"
+    },
+    "witness_role": {
+      "type": "string",
+      "enum": [
+        "family_witness",
+        "community_witness",
+        "village_head",
+        "none"
+      ]
+    },
+    "witness_timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "witness_gps": {
+      "type": "string"
+    },
+    "consent_strength_score": {
+      "type": "number",
+      "description": "0\u2013100 consent completeness score"
+    },
+    "consent_confidence": {
+      "type": "string",
+      "enum": [
+        "HIGH",
+        "MEDIUM",
+        "LOW"
+      ],
+      "description": "HIGH=80-100, MEDIUM=50-79, LOW=0-49"
+    },
+    "community_confirmed": {
+      "type": "boolean",
+      "default": false
+    },
+    "community_confirmed_by": {
+      "type": "string"
+    },
+    "community_confirmed_timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "community_confirmation_pending": {
+      "type": "boolean",
+      "default": false
+    },
+    "consent_timeline": {
+      "type": "string",
+      "description": "IMMUTABLE \u2014 JSON array of consent timeline events. Append-only. Never edit or delete entries."
+    },
+    "registration_package_id": {
+      "type": "string",
+      "description": "Reference to RegistrationPackage record"
+    },
+    "registration_completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Land data capture complete"
+    },
+    "survey_completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Survey/GIS boundary captured"
+    },
+    "ownership_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "Ownership identity confirmed"
+    },
+    "protected_in_registry": {
+      "type": "boolean",
+      "default": true,
+      "description": "Parcel is protected against duplicate claims"
+    },
+    "certificate_release_status": {
+      "type": "string",
+      "enum": [
+        "released",
+        "held"
+      ],
+      "default": "held",
+      "description": "Whether the digital certificate has been released"
+    },
+    "certificate_hold_reason": {
+      "type": "string",
+      "enum": [
+        "payment_pending",
+        "fraud_review",
+        "dispute",
+        "legal_hold"
+      ],
+      "description": "Reason certificate is held"
+    },
+    "certificate_released_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When certificate was released"
+    },
+    "outstanding_certificate_fee": {
+      "type": "number",
+      "description": "Outstanding fee before certificate can be released (\u20a6)"
     }
   },
   "required": [
@@ -288,7 +424,8 @@
                 "super_admin",
                 "surveyor_general",
                 "compliance_officer",
-                "surveyor"
+                "surveyor",
+                "community_validator"
               ]
             }
           }
@@ -315,7 +452,8 @@
               "$in": [
                 "super_admin",
                 "surveyor_general",
-                "compliance_officer"
+                "compliance_officer",
+                "community_validator"
               ]
             }
           }
