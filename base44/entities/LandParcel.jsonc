@@ -46,7 +46,7 @@
     },
     "size_hectares": {
       "type": "number",
-      "description": "Size in hectares"
+      "description": "Size in hectares \u2014 derived from size_sqm / 10000 when not explicitly set"
     },
     "address": {
       "type": "string",
@@ -233,6 +233,11 @@
     },
     "certificate_url": {
       "type": "string"
+    },
+    "certificate_version": {
+      "type": "string",
+      "default": "V1",
+      "description": "Certificate version number. V1 = initial, increments on ownership transfer (V2, V3\u2026)"
     },
     "verbal_consent": {
       "type": "boolean",
