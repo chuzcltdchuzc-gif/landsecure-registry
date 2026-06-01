@@ -56,7 +56,7 @@ export default function UserManagement() {
       suspended_by: currentUser.email,
       suspended_at: new Date().toISOString(),
     });
-    // Note: always use account_status (not status) for user suspension
+
     await base44.entities.AuditLog.create({
       user_email: currentUser.email,
       user_name: currentUser.full_name,
@@ -79,6 +79,7 @@ export default function UserManagement() {
       suspended_by: "",
       suspended_at: "",
     });
+
     await base44.entities.AuditLog.create({
       user_email: currentUser.email,
       user_name: currentUser.full_name,

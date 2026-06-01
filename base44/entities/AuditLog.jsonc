@@ -48,8 +48,7 @@
             "compliance_officer",
             "surveyor_general",
             "surveyor",
-            "field_agent",
-            "general_user"
+            "field_agent"
           ]
         }
       }

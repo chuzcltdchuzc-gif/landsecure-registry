@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useOutletContext } from "react-router-dom";
-import { AlertTriangle, Plus, Search, Eye } from "lucide-react";
+import { AlertTriangle, Plus, Search, Eye, Lock, Unlock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,8 +40,16 @@ export default function FraudAlerts() {
     queryKey: ["parcels-for-fraud"],
     queryFn: () => base44.entities.LandParcel.list("-created_date", 500),
   });
+  // Active ParcelFreeze records — used to show freeze status per parcel
+  const { data: freezes = [] } = useQuery({
+    queryKey: ["parcel-freezes-fraud"],
+    queryFn: () => base44.entities.ParcelFreeze.filter({ status: "active" }, "-created_date", 200),
+  });
 
   if (isLoading) return <LoadingSpinner text="Loading fraud alerts..." />;
+
+  // Build a set of frozen parcel IDs for O(1) lookup
+  const frozenParcelIds = new Set(freezes.map(f => f.parcel_id));
 
   const filtered = alerts.filter(a => {
     const matchStatus = statusFilter === "all" || a.status === statusFilter;
@@ -97,6 +105,51 @@ export default function FraudAlerts() {
     toast.success("Alert updated");
   };
 
+  // Freeze/unfreeze now correctly uses the ParcelFreeze entity, not ad-hoc LandParcel fields
+  const handleFreezeParcel = async (alert) => {
+    const isFrozen = frozenParcelIds.has(alert.parcel_id);
+    if (isFrozen) {
+      // Lift the freeze record
+      const freeze = freezes.find(f => f.parcel_id === alert.parcel_id);
+      if (!freeze) return;
+      await base44.entities.ParcelFreeze.update(freeze.id, {
+        status: "lifted",
+        lifted_by: user.email,
+        lifted_at: new Date().toISOString(),
+        lift_notes: `Lifted via Fraud Alert investigation by ${user.email}`,
+      });
+      await base44.entities.AuditLog.create({
+        user_email: user.email,
+        user_name: user.full_name,
+        action: `Lifted parcel freeze: ${alert.parcel_number}`,
+        entity_type: "ParcelFreeze",
+        entity_id: freeze.id,
+        details: `Via fraud alert: ${alert.id}`,
+      });
+      toast.success("Parcel freeze lifted");
+    } else {
+      // Create a new ParcelFreeze record
+      await base44.entities.ParcelFreeze.create({
+        parcel_id: alert.parcel_id,
+        parcel_number: alert.parcel_number,
+        freeze_reason: "fraud_investigation",
+        notes: `Fraud alert: ${alert.alert_type} — ${alert.description?.slice(0, 100)}`,
+        frozen_by: user.email,
+        frozen_by_name: user.full_name,
+        status: "active",
+      });
+      await base44.entities.AuditLog.create({
+        user_email: user.email,
+        user_name: user.full_name,
+        action: `Froze parcel: ${alert.parcel_number}`,
+        entity_type: "ParcelFreeze",
+        details: `Fraud alert: ${alert.id}`,
+      });
+      toast.success("Parcel frozen");
+    }
+    qc.invalidateQueries({ queryKey: ["parcel-freezes-fraud"] });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -111,7 +164,7 @@ export default function FraudAlerts() {
         </Button>
       </div>
 
-      {/* Summary */}
+      {/* Summary cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {["open", "under_investigation", "escalated", "resolved"].map(s => (
           <Card key={s} className={`cursor-pointer border-2 ${statusFilter === s ? "border-primary" : "border-transparent"}`}
@@ -141,27 +194,42 @@ export default function FraudAlerts() {
       </div>
 
       <div className="space-y-3">
-        {filtered.map(alert => (
-          <Card key={alert.id} className={`border ${SEVERITY_COLORS[alert.severity] || ""}`}>
-            <CardContent className="p-4 flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm font-semibold">Parcel: {alert.parcel_number || alert.parcel_id}</p>
-                  <StatusBadge status={alert.severity} />
-                  <StatusBadge status={alert.status} />
+        {filtered.map(alert => {
+          const isFrozen = frozenParcelIds.has(alert.parcel_id);
+          return (
+            <Card key={alert.id} className={`border ${SEVERITY_COLORS[alert.severity] || ""}`}>
+              <CardContent className="p-4 flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-sm font-semibold">Parcel: {alert.parcel_number || alert.parcel_id}</p>
+                    <StatusBadge status={alert.severity} />
+                    <StatusBadge status={alert.status} />
+                    {isFrozen && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 border border-orange-200 flex items-center gap-1">
+                        <Lock className="w-2.5 h-2.5" /> Frozen
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground capitalize mt-1">{alert.alert_type?.replace(/_/g, " ")}</p>
+                  <p className="text-xs text-foreground mt-1 line-clamp-2">{alert.description}</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Flagged by {alert.flagged_by_name || alert.flagged_by} · {format(new Date(alert.created_date), "MMM d, yyyy h:mm a")}
+                  </p>
                 </div>
-                <p className="text-xs text-muted-foreground capitalize mt-1">{alert.alert_type?.replace(/_/g, " ")}</p>
-                <p className="text-xs text-foreground mt-1 line-clamp-2">{alert.description}</p>
-                <p className="text-[10px] text-muted-foreground mt-1">
-                  Flagged by {alert.flagged_by_name || alert.flagged_by} · {format(new Date(alert.created_date), "MMM d, yyyy h:mm a")}
-                </p>
-              </div>
-              <Button size="sm" variant="outline" onClick={() => setViewAlert(alert)} className="flex-shrink-0">
-                <Eye className="w-3.5 h-3.5 mr-1" /> Investigate
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
+                <div className="flex flex-col gap-1.5 flex-shrink-0">
+                  <Button size="sm" variant="outline" onClick={() => setViewAlert(alert)}>
+                    <Eye className="w-3.5 h-3.5 mr-1" /> Investigate
+                  </Button>
+                  <Button size="sm" variant="outline"
+                    onClick={() => handleFreezeParcel(alert)}
+                    className={isFrozen ? "text-emerald-600 border-emerald-200 hover:bg-emerald-50" : "text-orange-600 border-orange-200 hover:bg-orange-50"}>
+                    {isFrozen ? <><Unlock className="w-3 h-3 mr-1" /> Unfreeze</> : <><Lock className="w-3 h-3 mr-1" /> Freeze</>}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
         {filtered.length === 0 && (
           <Card><CardContent className="py-10 text-center text-sm text-muted-foreground">No fraud alerts found</CardContent></Card>
         )}
