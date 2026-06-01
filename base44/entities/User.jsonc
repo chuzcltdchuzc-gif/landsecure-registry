@@ -20,7 +20,7 @@
       "default": false,
       "description": "Whether the user has explicitly selected their role during onboarding"
     },
-    "status": {
+    "account_status": {
       "type": "string",
       "enum": [
         "active",
@@ -28,7 +28,7 @@
         "pending"
       ],
       "default": "active",
-      "description": "Account status"
+      "description": "Account status \u2014 use account_status consistently, never the field 'status'"
     },
     "suspension_reason": {
       "type": "string",
@@ -40,28 +40,19 @@
     },
     "suspended_at": {
       "type": "string",
-      "format": "date-time",
-      "description": "Timestamp of suspension"
-    },
-    "region": {
-      "type": "string",
-      "description": "Assigned region/state"
+      "format": "date-time"
     },
     "phone": {
-      "type": "string",
-      "description": "Phone number"
+      "type": "string"
     },
     "organization": {
-      "type": "string",
-      "description": "Organization or agency name"
+      "type": "string"
     },
     "license_number": {
-      "type": "string",
-      "description": "Professional license number for surveyors"
+      "type": "string"
     },
     "avatar_url": {
-      "type": "string",
-      "description": "Profile photo URL"
+      "type": "string"
     }
   },
   "required": []
