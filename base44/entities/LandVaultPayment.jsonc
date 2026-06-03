@@ -1,0 +1,88 @@
+{
+  "name": "LandVaultPayment",
+  "type": "object",
+  "properties": {
+    "parcel_id": {
+      "type": "string",
+      "description": "Reference to LandVaultParcel"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "lead_id": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Amount paid in NGN"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "cash",
+        "bank_transfer",
+        "mobile_money",
+        "pos",
+        "other"
+      ],
+      "default": "cash"
+    },
+    "payment_reference": {
+      "type": "string"
+    },
+    "payment_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "recorded_by_email": {
+      "type": "string"
+    },
+    "recorded_by_name": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "receipt_url": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "parcel_id",
+    "amount",
+    "payment_date"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer",
+            "field_agent"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

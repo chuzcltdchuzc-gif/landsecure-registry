@@ -1,9 +1,53 @@
 import React, { useState } from "react";
-import { Shield, User, Compass, Camera, ChevronRight, CheckCircle2 } from "lucide-react";
+import { Shield, User, Compass, Camera, ChevronRight, CheckCircle2, Vault, UserCheck, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
 
 const roles = [
+  {
+    value: "field_agent",
+    label: "Field Agent",
+    description: "Community engagement, lead creation, parcel registration, consent collection.",
+    icon: Camera,
+    color: "text-orange-600",
+    bg: "bg-orange-50",
+    border: "border-orange-200",
+    selectedBorder: "border-orange-500",
+    selectedBg: "bg-orange-50",
+  },
+  {
+    value: "licensed_surveyor",
+    label: "Licensed Surveyor",
+    description: "Accept survey assignments, upload measurements, GeoJSON, and signed plans.",
+    icon: Compass,
+    color: "text-emerald-600",
+    bg: "bg-emerald-50",
+    border: "border-emerald-200",
+    selectedBorder: "border-emerald-500",
+    selectedBg: "bg-emerald-50",
+  },
+  {
+    value: "community_validator",
+    label: "Community Validator",
+    description: "Village head, kindred head, or traditional ruler validating local land claims.",
+    icon: UserCheck,
+    color: "text-purple-600",
+    bg: "bg-purple-50",
+    border: "border-purple-200",
+    selectedBorder: "border-purple-500",
+    selectedBg: "bg-purple-50",
+  },
+  {
+    value: "government_observer",
+    label: "Government Observer",
+    description: "Read-only access to statistics and parcel records. No editing permitted.",
+    icon: Eye,
+    color: "text-slate-600",
+    bg: "bg-slate-50",
+    border: "border-slate-200",
+    selectedBorder: "border-slate-500",
+    selectedBg: "bg-slate-50",
+  },
   {
     value: "general_user",
     label: "General User",
@@ -14,28 +58,6 @@ const roles = [
     border: "border-blue-200",
     selectedBorder: "border-blue-500",
     selectedBg: "bg-blue-50",
-  },
-  {
-    value: "surveyor",
-    label: "Independent Surveyor",
-    description: "Register parcels, upload survey documents, and manage submissions.",
-    icon: Compass,
-    color: "text-emerald-600",
-    bg: "bg-emerald-50",
-    border: "border-emerald-200",
-    selectedBorder: "border-emerald-500",
-    selectedBg: "bg-emerald-50",
-  },
-  {
-    value: "field_agent",
-    label: "Field Agent",
-    description: "Submit field reports, capture GPS data, and verify parcels on-site.",
-    icon: Camera,
-    color: "text-orange-600",
-    bg: "bg-orange-50",
-    border: "border-orange-200",
-    selectedBorder: "border-orange-500",
-    selectedBg: "bg-orange-50",
   },
 ];
 
@@ -58,9 +80,9 @@ export default function RoleSelection({ onRoleSelected }) {
           <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-4">
             <Shield className="w-7 h-7 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Welcome to LandSecure Registry</h1>
+          <h1 className="text-2xl font-bold text-foreground">Welcome to Aquasavannah LandVault</h1>
           <p className="text-muted-foreground mt-2 text-sm">
-            Select your role to get started. This determines your access and features within the system.
+            Select your role to get started. This determines your access and features.
           </p>
         </div>
 
@@ -95,7 +117,7 @@ export default function RoleSelection({ onRoleSelected }) {
         </div>
 
         <p className="text-xs text-muted-foreground text-center mb-5">
-          <strong>Surveyor General</strong>, <strong>Super Admin</strong>, and <strong>Compliance Officer</strong> roles are reserved and assigned by system administrators only.
+          <strong>Super Admin</strong>, <strong>Surveyor General</strong>, and <strong>Compliance Officer</strong> roles are assigned by Aquasavannah administrators only.
         </p>
 
         <Button

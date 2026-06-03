@@ -1,0 +1,360 @@
+{
+  "name": "LandVaultParcel",
+  "type": "object",
+  "properties": {
+    "parcel_number": {
+      "type": "string",
+      "description": "System-generated. Format: ASV-EHM-WARD-000001"
+    },
+    "lead_id": {
+      "type": "string",
+      "description": "Reference to CommunityLead"
+    },
+    "community": {
+      "type": "string"
+    },
+    "village": {
+      "type": "string"
+    },
+    "ward": {
+      "type": "string"
+    },
+    "lga": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "ownership_type": {
+      "type": "string",
+      "enum": [
+        "individual",
+        "family",
+        "community",
+        "trust",
+        "institutional"
+      ],
+      "default": "individual"
+    },
+    "land_use": {
+      "type": "string",
+      "enum": [
+        "residential",
+        "commercial",
+        "agricultural",
+        "industrial",
+        "mixed_use",
+        "government"
+      ]
+    },
+    "size_sqm": {
+      "type": "number"
+    },
+    "size_hectares": {
+      "type": "number"
+    },
+    "gps_lat": {
+      "type": "number"
+    },
+    "gps_lng": {
+      "type": "number"
+    },
+    "geojson_polygon": {
+      "type": "string",
+      "description": "GeoJSON polygon string"
+    },
+    "boundary_notes": {
+      "type": "string"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_phone": {
+      "type": "string"
+    },
+    "owner_nin": {
+      "type": "string",
+      "description": "PRIVATE \u2014 National Identification Number"
+    },
+    "family_name": {
+      "type": "string"
+    },
+    "family_representative": {
+      "type": "string"
+    },
+    "founder_name": {
+      "type": "string"
+    },
+    "inheritance_notes": {
+      "type": "string"
+    },
+    "family_history_notes": {
+      "type": "string"
+    },
+    "ownership_confidence_score": {
+      "type": "number",
+      "description": "0-100"
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "unverified",
+        "field_verified",
+        "survey_verified",
+        "community_validated",
+        "fully_verified"
+      ],
+      "default": "unverified"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "submitted",
+        "survey_assigned",
+        "survey_in_progress",
+        "survey_complete",
+        "documentation_complete",
+        "certificate_ready",
+        "certificate_issued",
+        "disputed",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH"
+      ],
+      "default": "HIGH"
+    },
+    "risk_score": {
+      "type": "number",
+      "description": "0-100 automated risk score"
+    },
+    "risk_factors": {
+      "type": "string",
+      "description": "JSON array of risk factor strings"
+    },
+    "survey_plan_url": {
+      "type": "string"
+    },
+    "surveyor_id": {
+      "type": "string",
+      "description": "Reference to assigned surveyor user ID"
+    },
+    "surveyor_name": {
+      "type": "string"
+    },
+    "surveyor_licence": {
+      "type": "string"
+    },
+    "survey_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "survey_status": {
+      "type": "string",
+      "enum": [
+        "not_assigned",
+        "assigned",
+        "in_progress",
+        "completed",
+        "rejected"
+      ],
+      "default": "not_assigned"
+    },
+    "qr_code_url": {
+      "type": "string"
+    },
+    "certificate_a_url": {
+      "type": "string",
+      "description": "Survey Completion Certificate"
+    },
+    "certificate_b_url": {
+      "type": "string",
+      "description": "LandVault Documentation Certificate"
+    },
+    "certificate_c_url": {
+      "type": "string",
+      "description": "Protected Record Certificate"
+    },
+    "certificate_status": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "HELD",
+        "ACTIVE",
+        "RELEASED"
+      ],
+      "default": "PENDING"
+    },
+    "certificate_hold_reason": {
+      "type": "string"
+    },
+    "amount_paid": {
+      "type": "number",
+      "default": 0
+    },
+    "total_fee": {
+      "type": "number"
+    },
+    "outstanding_balance": {
+      "type": "number"
+    },
+    "payment_status": {
+      "type": "string",
+      "enum": [
+        "PAID",
+        "PARTIALLY_PAID",
+        "HELD",
+        "UNPAID"
+      ],
+      "default": "UNPAID"
+    },
+    "payment_history": {
+      "type": "string",
+      "description": "JSON array of payment events"
+    },
+    "field_agent_email": {
+      "type": "string"
+    },
+    "field_agent_name": {
+      "type": "string"
+    },
+    "community_validation_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "confirmed",
+        "rejected",
+        "clarification_requested"
+      ],
+      "default": "pending"
+    },
+    "community_validator_name": {
+      "type": "string"
+    },
+    "community_validator_notes": {
+      "type": "string"
+    },
+    "community_validation_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "photos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "supporting_docs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "registered_by": {
+      "type": "string"
+    },
+    "device_id": {
+      "type": "string"
+    },
+    "is_offline_created": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "community",
+    "ward",
+    "lga",
+    "state",
+    "ownership_type"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "data.field_agent_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer",
+                "licensed_surveyor",
+                "community_validator",
+                "government_observer"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}",
+          "data.status": {
+            "$nin": [
+              "certificate_issued"
+            ]
+          }
+        },
+        {
+          "data.field_agent_email": "{{user.email}}",
+          "data.status": {
+            "$nin": [
+              "certificate_issued"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer"
+              ]
+            }
+          }
+        },
+        {
+          "user_condition": {
+            "role": "licensed_surveyor"
+          },
+          "data.survey_status": {
+            "$in": [
+              "assigned",
+              "in_progress"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "community_validator"
+          },
+          "data.community_validation_status": "pending"
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

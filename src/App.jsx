@@ -52,6 +52,17 @@ import EhimeParcels from './pages/EhimeParcels';
 import EhimeParcelDetail from './pages/EhimeParcelDetail';
 import PackageManagement from './pages/ehime/PackageManagement';
 
+// LandVault pages
+import LandVaultDashboard from './pages/landvault/LandVaultDashboard';
+import LeadManagement from './pages/landvault/LeadManagement';
+import ParcelRegistry from './pages/landvault/ParcelRegistry';
+import RegisterParcel from './pages/landvault/RegisterParcel';
+import ParcelDetail from './pages/landvault/ParcelDetail';
+import SurveyorPortal from './pages/landvault/SurveyorPortal';
+import CommunityValidatorPortal from './pages/landvault/CommunityValidatorPortal';
+import GovernmentObserverPortal from './pages/landvault/GovernmentObserverPortal';
+import FieldAgentPortal from './pages/landvault/FieldAgentPortal';
+
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkUserAuth } = useAuth();
 
@@ -60,7 +71,7 @@ const AuthenticatedApp = () => {
       <div className="fixed inset-0 flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-4 border-muted border-t-primary rounded-full animate-spin"></div>
-          <p className="text-sm text-muted-foreground">Loading LandSecure Registry...</p>
+          <p className="text-sm text-muted-foreground">Loading Aquasavannah LandVault...</p>
         </div>
       </div>
     );
@@ -77,7 +88,7 @@ const AuthenticatedApp = () => {
 
   // New user with no role assigned yet — show role selection before entering the app
   // (excludes /demo which is public and doesn't need a role)
-  const GOVERNANCE_ROLES = ['surveyor_general', 'super_admin', 'compliance_officer'];
+  const GOVERNANCE_ROLES = ['surveyor_general', 'super_admin', 'compliance_officer', 'licensed_surveyor', 'community_validator', 'government_observer'];
   if (user && !user.role_confirmed && !GOVERNANCE_ROLES.includes(user.role) && window.location.pathname !== '/demo') {
     return <RoleSelection onRoleSelected={() => checkUserAuth()} />;
   }
@@ -125,6 +136,16 @@ const AuthenticatedApp = () => {
         <Route path="/ehime/register" element={<EhimeRegisterLand />} />
         <Route path="/ehime/parcel/:id" element={<EhimeParcelDetail />} />
         <Route path="/ehime/packages" element={<PackageManagement />} />
+        {/* LandVault routes */}
+        <Route path="/landvault" element={<LandVaultDashboard />} />
+        <Route path="/landvault/leads" element={<LeadManagement />} />
+        <Route path="/landvault/parcels" element={<ParcelRegistry />} />
+        <Route path="/landvault/parcels/new" element={<RegisterParcel />} />
+        <Route path="/landvault/parcels/:id" element={<ParcelDetail />} />
+        <Route path="/landvault/surveyor" element={<SurveyorPortal />} />
+        <Route path="/landvault/validator" element={<CommunityValidatorPortal />} />
+        <Route path="/landvault/observer" element={<GovernmentObserverPortal />} />
+        <Route path="/landvault/field" element={<FieldAgentPortal />} />
       </Route>
       <Route path="/demo" element={<DemoAccess />} />
       <Route path="/verify" element={<PublicVerify />} />

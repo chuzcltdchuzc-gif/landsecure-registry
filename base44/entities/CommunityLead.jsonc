@@ -1,0 +1,152 @@
+{
+  "name": "CommunityLead",
+  "type": "object",
+  "properties": {
+    "lead_number": {
+      "type": "string",
+      "description": "System-generated lead reference e.g. LEAD-EHM-000001"
+    },
+    "community": {
+      "type": "string"
+    },
+    "village": {
+      "type": "string"
+    },
+    "ward": {
+      "type": "string"
+    },
+    "lga": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "community_leader_name": {
+      "type": "string"
+    },
+    "community_leader_phone": {
+      "type": "string"
+    },
+    "community_leader_role": {
+      "type": "string",
+      "enum": [
+        "village_head",
+        "kindred_head",
+        "community_chairman",
+        "traditional_ruler",
+        "other"
+      ]
+    },
+    "family_name": {
+      "type": "string"
+    },
+    "family_representative": {
+      "type": "string"
+    },
+    "family_representative_phone": {
+      "type": "string"
+    },
+    "estimated_plots": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "NEW_LEAD",
+        "COMMUNITY_CONTACTED",
+        "FAMILY_CONTACTED",
+        "CONSENT_RECEIVED",
+        "SURVEY_SCHEDULED",
+        "SURVEY_IN_PROGRESS",
+        "SURVEY_COMPLETED",
+        "DOCUMENTATION_COMPLETE",
+        "CERTIFICATE_READY",
+        "CERTIFICATE_ISSUED"
+      ],
+      "default": "NEW_LEAD"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "field_agent_email": {
+      "type": "string"
+    },
+    "field_agent_name": {
+      "type": "string"
+    },
+    "visit_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "follow_up_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "gps_lat": {
+      "type": "number"
+    },
+    "gps_lng": {
+      "type": "number"
+    },
+    "device_id": {
+      "type": "string"
+    },
+    "is_offline_created": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "community",
+    "field_agent_email"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer",
+                "licensed_surveyor",
+                "community_validator",
+                "government_observer"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

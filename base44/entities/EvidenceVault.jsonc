@@ -1,0 +1,122 @@
+{
+  "name": "EvidenceVault",
+  "type": "object",
+  "properties": {
+    "parcel_id": {
+      "type": "string",
+      "description": "Reference to LandVaultParcel"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "lead_id": {
+      "type": "string"
+    },
+    "evidence_type": {
+      "type": "string",
+      "enum": [
+        "verbal_consent",
+        "audio_consent",
+        "signature",
+        "thumb_impression",
+        "representative_photo",
+        "witness_record",
+        "village_head_validation",
+        "supporting_document",
+        "survey_photo",
+        "boundary_photo",
+        "other"
+      ]
+    },
+    "file_url": {
+      "type": "string",
+      "description": "PRIVATE \u2014 encrypted storage URL"
+    },
+    "file_name": {
+      "type": "string"
+    },
+    "file_type": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "captured_by_email": {
+      "type": "string"
+    },
+    "captured_by_name": {
+      "type": "string"
+    },
+    "captured_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gps_lat": {
+      "type": "number"
+    },
+    "gps_lng": {
+      "type": "number"
+    },
+    "device_id": {
+      "type": "string"
+    },
+    "is_immutable": {
+      "type": "boolean",
+      "default": true,
+      "description": "Once submitted, evidence cannot be altered"
+    },
+    "witness_name": {
+      "type": "string"
+    },
+    "witness_phone": {
+      "type": "string"
+    },
+    "witness_role": {
+      "type": "string",
+      "enum": [
+        "family_witness",
+        "community_witness",
+        "village_head",
+        "kindred_head",
+        "none"
+      ]
+    },
+    "hash_fingerprint": {
+      "type": "string",
+      "description": "SHA-256 of file for integrity verification"
+    }
+  },
+  "required": [
+    "parcel_id",
+    "evidence_type",
+    "file_url"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer",
+            "licensed_surveyor",
+            "field_agent"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

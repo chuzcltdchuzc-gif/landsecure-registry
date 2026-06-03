@@ -32,6 +32,9 @@ import {
   MapPin,
   Search,
   Package,
+  Vault,
+  UserCheck,
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
@@ -46,7 +49,12 @@ const roleMenus = {
   ],
   surveyor_general: [
     { label: "Dashboard", icon: LayoutDashboard, path: "/" },
-    { label: "Executive Dashboard", icon: BarChart2, path: "/gov/executive-dashboard" },
+    { label: "── LandVault ──", icon: Vault, path: null, divider: true },
+    { label: "LandVault Dashboard", icon: Vault, path: "/landvault" },
+    { label: "Leads", icon: Users, path: "/landvault/leads" },
+    { label: "Parcel Registry", icon: MapPin, path: "/landvault/parcels" },
+    { label: "Surveyor Portal", icon: Compass, path: "/landvault/surveyor" },
+    { label: "Public Verify", icon: Search, path: "/verify" },
     { label: "── Ehime Mbano LGA ──", icon: MapPin, path: null, divider: true },
     { label: "Parcel Registry", icon: MapPin, path: "/ehime/parcels" },
     { label: "Register Parcel", icon: FileText, path: "/ehime/register" },
@@ -86,18 +94,49 @@ const roleMenus = {
   ],
   field_agent: [
     { label: "Dashboard", icon: LayoutDashboard, path: "/" },
-    { label: "── Ehime Mbano LGA ──", icon: MapPin, path: null, divider: true },
-    { label: "Parcel Registry", icon: MapPin, path: "/ehime/parcels" },
+    { label: "── LandVault ──", icon: Vault, path: null, divider: true },
+    { label: "Field Operations", icon: Camera, path: "/landvault/field" },
+    { label: "My Leads", icon: Users, path: "/landvault/leads" },
+    { label: "My Parcels", icon: MapPin, path: "/landvault/parcels" },
+    { label: "Register Parcel", icon: FileText, path: "/landvault/parcels/new" },
     { label: "Public Verify", icon: Search, path: "/verify" },
     { label: "── ──────────── ──", icon: null, path: null, divider: true },
     { label: "Field Reports", icon: Camera, path: "/field-reports" },
-    { label: "GIS Map", icon: Map, path: "/gis-map" },
     { label: "Assigned Parcels", icon: ClipboardList, path: "/assigned-parcels" },
     { label: "Notifications", icon: Bell, path: "/notifications" },
   ],
+  licensed_surveyor: [
+    { label: "Dashboard", icon: LayoutDashboard, path: "/" },
+    { label: "── LandVault ──", icon: Vault, path: null, divider: true },
+    { label: "Surveyor Portal", icon: Compass, path: "/landvault/surveyor" },
+    { label: "All Parcels", icon: MapPin, path: "/landvault/parcels" },
+    { label: "Public Verify", icon: Search, path: "/verify" },
+    { label: "Notifications", icon: Bell, path: "/notifications" },
+  ],
+  community_validator: [
+    { label: "Dashboard", icon: LayoutDashboard, path: "/" },
+    { label: "── LandVault ──", icon: Vault, path: null, divider: true },
+    { label: "Validation Queue", icon: UserCheck, path: "/landvault/validator" },
+    { label: "Parcel Registry", icon: MapPin, path: "/landvault/parcels" },
+    { label: "Public Verify", icon: Search, path: "/verify" },
+    { label: "Notifications", icon: Bell, path: "/notifications" },
+  ],
+  government_observer: [
+    { label: "Dashboard", icon: LayoutDashboard, path: "/" },
+    { label: "── LandVault ──", icon: Vault, path: null, divider: true },
+    { label: "Observer Portal", icon: Eye, path: "/landvault/observer" },
+    { label: "Public Verify", icon: Search, path: "/verify" },
+  ],
   super_admin: [
     { label: "Dashboard", icon: LayoutDashboard, path: "/" },
-    { label: "Executive Dashboard", icon: BarChart2, path: "/gov/executive-dashboard" },
+    { label: "── LandVault ──", icon: Vault, path: null, divider: true },
+    { label: "LandVault Dashboard", icon: Vault, path: "/landvault" },
+    { label: "Leads", icon: Users, path: "/landvault/leads" },
+    { label: "Parcel Registry", icon: MapPin, path: "/landvault/parcels" },
+    { label: "Surveyor Portal", icon: Compass, path: "/landvault/surveyor" },
+    { label: "Validation Queue", icon: UserCheck, path: "/landvault/validator" },
+    { label: "Observer Portal", icon: Eye, path: "/landvault/observer" },
+    { label: "Public Verify", icon: Search, path: "/verify" },
     { label: "── Ehime Mbano LGA ──", icon: MapPin, path: null, divider: true },
     { label: "Parcel Registry", icon: MapPin, path: "/ehime/parcels" },
     { label: "Register Parcel", icon: FileText, path: "/ehime/register" },
@@ -126,7 +165,12 @@ const roleMenus = {
   ],
   compliance_officer: [
     { label: "Dashboard", icon: LayoutDashboard, path: "/" },
-    { label: "Executive Dashboard", icon: BarChart2, path: "/gov/executive-dashboard" },
+    { label: "── LandVault ──", icon: Vault, path: null, divider: true },
+    { label: "LandVault Dashboard", icon: Vault, path: "/landvault" },
+    { label: "Leads", icon: Users, path: "/landvault/leads" },
+    { label: "Parcel Registry", icon: MapPin, path: "/landvault/parcels" },
+    { label: "Surveyor Portal", icon: Compass, path: "/landvault/surveyor" },
+    { label: "Public Verify", icon: Search, path: "/verify" },
     { label: "── Ehime Mbano LGA ──", icon: MapPin, path: null, divider: true },
     { label: "Parcel Registry", icon: MapPin, path: "/ehime/parcels" },
     { label: "Register Parcel", icon: FileText, path: "/ehime/register" },
@@ -169,8 +213,8 @@ export default function Sidebar({ user, collapsed, setCollapsed }) {
           </div>
           {!collapsed && (
             <div className="min-w-0">
-              <h1 className="font-bold text-sm text-foreground truncate">LandSecure</h1>
-              <p className="text-[10px] text-muted-foreground">Registry</p>
+              <h1 className="font-bold text-sm text-foreground truncate">LandVault</h1>
+              <p className="text-[10px] text-muted-foreground">Aquasavannah · Ehime Mbano</p>
             </div>
           )}
         </div>

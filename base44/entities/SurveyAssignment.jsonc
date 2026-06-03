@@ -1,0 +1,155 @@
+{
+  "name": "SurveyAssignment",
+  "type": "object",
+  "properties": {
+    "parcel_id": {
+      "type": "string",
+      "description": "Reference to LandVaultParcel"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "lead_id": {
+      "type": "string"
+    },
+    "community": {
+      "type": "string"
+    },
+    "village": {
+      "type": "string"
+    },
+    "ward": {
+      "type": "string"
+    },
+    "surveyor_email": {
+      "type": "string"
+    },
+    "surveyor_name": {
+      "type": "string"
+    },
+    "surveyor_licence": {
+      "type": "string"
+    },
+    "scheduled_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "scheduled_time": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "scheduled",
+        "accepted",
+        "in_progress",
+        "completed",
+        "cancelled",
+        "rescheduled"
+      ],
+      "default": "scheduled"
+    },
+    "accepted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "survey_plan_url": {
+      "type": "string"
+    },
+    "geojson_polygon": {
+      "type": "string"
+    },
+    "coordinates_taken": {
+      "type": "string",
+      "description": "JSON array of GPS points"
+    },
+    "measurements": {
+      "type": "string",
+      "description": "JSON of survey measurements"
+    },
+    "boundary_notes": {
+      "type": "string"
+    },
+    "signed_document_url": {
+      "type": "string"
+    },
+    "date_surveyed": {
+      "type": "string",
+      "format": "date"
+    },
+    "surveyor_notes": {
+      "type": "string"
+    },
+    "rejection_reason": {
+      "type": "string"
+    },
+    "assigned_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "parcel_id",
+    "surveyor_email",
+    "scheduled_date"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer",
+            "field_agent"
+          ]
+        }
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.surveyor_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer",
+                "field_agent"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.surveyor_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}
