@@ -10,7 +10,10 @@
         "surveyor",
         "field_agent",
         "super_admin",
-        "compliance_officer"
+        "compliance_officer",
+        "licensed_surveyor",
+        "community_validator",
+        "government_observer"
       ],
       "default": "general_user",
       "description": "User role in the system"
@@ -28,15 +31,13 @@
         "pending"
       ],
       "default": "active",
-      "description": "Account status \u2014 use account_status consistently, never the field 'status'"
+      "description": "Account status"
     },
     "suspension_reason": {
-      "type": "string",
-      "description": "Reason for account suspension"
+      "type": "string"
     },
     "suspended_by": {
-      "type": "string",
-      "description": "Email of admin who suspended the account"
+      "type": "string"
     },
     "suspended_at": {
       "type": "string",
@@ -49,10 +50,19 @@
       "type": "string"
     },
     "license_number": {
-      "type": "string"
+      "type": "string",
+      "description": "Surveyor licence number"
     },
     "avatar_url": {
       "type": "string"
+    },
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant/LGA identifier for multi-tenant deployments"
+    },
+    "lga_code": {
+      "type": "string",
+      "description": "LGA assignment for tenant scoping"
     }
   },
   "required": []

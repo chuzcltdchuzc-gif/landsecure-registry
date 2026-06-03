@@ -52,16 +52,21 @@ import EhimeParcels from './pages/EhimeParcels';
 import EhimeParcelDetail from './pages/EhimeParcelDetail';
 import PackageManagement from './pages/ehime/PackageManagement';
 
-// LandVault pages
+// LandVault
 import LandVaultDashboard from './pages/landvault/LandVaultDashboard';
-import LeadManagement from './pages/landvault/LeadManagement';
-import ParcelRegistry from './pages/landvault/ParcelRegistry';
-import RegisterParcel from './pages/landvault/RegisterParcel';
+import FieldAgentDashboard from './pages/landvault/FieldAgentDashboard';
+import LeadsList from './pages/landvault/LeadsList';
+import LeadForm from './pages/landvault/LeadForm';
+import LeadDetail from './pages/landvault/LeadDetail';
+import ParcelsList from './pages/landvault/ParcelsList';
+import ParcelForm from './pages/landvault/ParcelForm';
 import ParcelDetail from './pages/landvault/ParcelDetail';
-import SurveyorPortal from './pages/landvault/SurveyorPortal';
-import CommunityValidatorPortal from './pages/landvault/CommunityValidatorPortal';
-import GovernmentObserverPortal from './pages/landvault/GovernmentObserverPortal';
-import FieldAgentPortal from './pages/landvault/FieldAgentPortal';
+import EvidenceUpload from './pages/landvault/EvidenceUpload';
+import SurveyorDashboard from './pages/landvault/SurveyorDashboard';
+import CommunityValidatorQueue from './pages/landvault/CommunityValidatorQueue';
+import PaymentRecord from './pages/landvault/PaymentRecord';
+import GovernmentObserver from './pages/landvault/GovernmentObserver';
+import LandVaultPublicVerify from './pages/landvault/LandVaultPublicVerify';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkUserAuth } = useAuth();
@@ -136,19 +141,27 @@ const AuthenticatedApp = () => {
         <Route path="/ehime/register" element={<EhimeRegisterLand />} />
         <Route path="/ehime/parcel/:id" element={<EhimeParcelDetail />} />
         <Route path="/ehime/packages" element={<PackageManagement />} />
-        {/* LandVault routes */}
-        <Route path="/landvault" element={<LandVaultDashboard />} />
-        <Route path="/landvault/leads" element={<LeadManagement />} />
-        <Route path="/landvault/parcels" element={<ParcelRegistry />} />
-        <Route path="/landvault/parcels/new" element={<RegisterParcel />} />
-        <Route path="/landvault/parcels/:id" element={<ParcelDetail />} />
-        <Route path="/landvault/surveyor" element={<SurveyorPortal />} />
-        <Route path="/landvault/validator" element={<CommunityValidatorPortal />} />
-        <Route path="/landvault/observer" element={<GovernmentObserverPortal />} />
-        <Route path="/landvault/field" element={<FieldAgentPortal />} />
+        {/* LandVault */}
+        <Route path="/lv" element={<LandVaultDashboard />} />
+        <Route path="/lv/field" element={<FieldAgentDashboard />} />
+        <Route path="/lv/leads" element={<LeadsList />} />
+        <Route path="/lv/leads/new" element={<LeadForm />} />
+        <Route path="/lv/leads/:id" element={<LeadDetail />} />
+        <Route path="/lv/leads/:id/edit" element={<LeadForm />} />
+        <Route path="/lv/parcels" element={<ParcelsList />} />
+        <Route path="/lv/parcels/new" element={<ParcelForm />} />
+        <Route path="/lv/parcels/:id" element={<ParcelDetail />} />
+        <Route path="/lv/parcels/:id/edit" element={<ParcelForm />} />
+        <Route path="/lv/evidence" element={<EvidenceUpload />} />
+        <Route path="/lv/evidence/new" element={<EvidenceUpload />} />
+        <Route path="/lv/surveyor" element={<SurveyorDashboard />} />
+        <Route path="/lv/validate" element={<CommunityValidatorQueue />} />
+        <Route path="/lv/payments/new" element={<PaymentRecord />} />
+        <Route path="/lv/observer" element={<GovernmentObserver />} />
       </Route>
       <Route path="/demo" element={<DemoAccess />} />
       <Route path="/verify" element={<PublicVerify />} />
+      <Route path="/lv/verify" element={<LandVaultPublicVerify />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
