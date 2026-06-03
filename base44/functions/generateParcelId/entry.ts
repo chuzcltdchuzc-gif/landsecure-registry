@@ -12,13 +12,38 @@
  * Payload: { state_code, lga_code, ward_code, property_type }
  * Returns: { parcel_number, sequence_key, sequence_number }
  */
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+
+// ── Per-user rate limit store ─────────────────────────────────────────────────
+// 50 parcel ID generations per authenticated user per hour.
+// In-memory — effective for burst protection within a single isolate.
+const userRateStore = new Map();
+const PARCEL_ID_RATE_LIMIT = 50;
+const PARCEL_ID_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+
+function checkUserRateLimit(userEmail) {
+  const now = Date.now();
+  if (!userRateStore.has(userEmail)) {
+    userRateStore.set(userEmail, { count: 1, windowStart: now });
+    return { allowed: true, remaining: PARCEL_ID_RATE_LIMIT - 1 };
+  }
+  const entry = userRateStore.get(userEmail);
+  if (now - entry.windowStart > PARCEL_ID_WINDOW_MS) {
+    entry.count = 1;
+    entry.windowStart = now;
+    return { allowed: true, remaining: PARCEL_ID_RATE_LIMIT - 1 };
+  }
+  entry.count++;
+  const allowed = entry.count <= PARCEL_ID_RATE_LIMIT;
+  return { allowed, remaining: Math.max(0, PARCEL_ID_RATE_LIMIT - entry.count) };
+}
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    // Must be authenticated as a government officer
+    // Must be authenticated as a government officer.
+    // user.email is obtained from the verified session token — never from client payload.
     const user = await base44.auth.me();
     if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
@@ -26,6 +51,30 @@ Deno.serve(async (req) => {
     const allowedRoles = ['super_admin', 'surveyor_general', 'compliance_officer', 'surveyor'];
     if (!allowedRoles.includes(user.role)) {
       return Response.json({ error: 'Forbidden: only government officers can generate parcel IDs' }, { status: 403 });
+    }
+
+    // ── Rate limit check (uses session-authenticated user.email — not client-supplied) ──
+    const { allowed, remaining } = checkUserRateLimit(user.email);
+    if (!allowed) {
+      await base44.asServiceRole.entities.AuditLog.create({
+        user_email: user.email,
+        user_name: user.full_name,
+        action: 'PARCEL_ID_RATE_LIMITED',
+        entity_type: 'RateLimiter',
+        entity_id: 'generateParcelId',
+        details: JSON.stringify({ reason: 'user_rate_limit', limit: PARCEL_ID_RATE_LIMIT, window_hours: 1 }),
+      });
+      return Response.json(
+        { error: 'Rate limit exceeded. Maximum 50 parcel IDs per user per hour.' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': '3600',
+            'X-RateLimit-Limit': String(PARCEL_ID_RATE_LIMIT),
+            'X-RateLimit-Remaining': '0',
+          },
+        }
+      );
     }
 
     const body = await req.json();

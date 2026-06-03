@@ -4,7 +4,7 @@
  * Usage:
  *   import { getTenantId, scopeQuery, PILOT_TENANT } from '@/lib/tenantContext';
  *
- * The current pilot uses tenant_id = 'GFL-001' (Greenfield Local Government).
+ * The current pilot uses tenant_id = 'EHM-001' (Ehime Mbano Local Government).
  * For multi-LGA rollout, tenant_id is derived from the authenticated user's
  * assigned LGA or from the URL subdomain/path.
  *
@@ -14,7 +14,7 @@
  *   - otherwise → production
  */
 
-export const PILOT_TENANT = 'GFL-001';
+export const PILOT_TENANT = 'EHM-001';
 
 export const ENV = (() => {
   const host = typeof window !== 'undefined' ? window.location.hostname : '';
@@ -25,7 +25,7 @@ export const ENV = (() => {
 
 /**
  * Returns the tenant_id for the current user.
- * Falls back to PILOT_TENANT for the Greenfield LGA pilot.
+ * Falls back to PILOT_TENANT for the Ehime Mbano LGA pilot.
  * In a multi-LGA deployment, this reads from user.tenant_id.
  */
 export function getTenantId(user) {

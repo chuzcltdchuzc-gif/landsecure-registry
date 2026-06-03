@@ -9,16 +9,54 @@
  *   consent_photo, consent_signature, consent_audio,
  *   payment_history, outstanding_balance, registration_package_id,
  *   internal_notes, fraud_risk_score, fraud_risk_reasons,
- *   audit_logs, family beneficiaries
+ *   audit_logs, family beneficiaries, address
  */
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
+// ── In-memory IP rate limit store ────────────────────────────────────────────
+// 30 lookups per IP per 10 minutes.
+// NOTE: In-memory — does not persist across isolate restarts or parallel instances.
+// Effective for burst protection within a single Deno Deploy isolate.
+const ipRateStore = new Map();
+const RATE_LIMIT_MAX = 30;
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+
+function checkIpRateLimit(ip) {
+  const now = Date.now();
+  if (!ipRateStore.has(ip)) {
+    ipRateStore.set(ip, { count: 1, windowStart: now });
+    return { allowed: true, remaining: RATE_LIMIT_MAX - 1 };
+  }
+  const entry = ipRateStore.get(ip);
+  if (now - entry.windowStart > RATE_LIMIT_WINDOW_MS) {
+    // Window expired — reset
+    entry.count = 1;
+    entry.windowStart = now;
+    return { allowed: true, remaining: RATE_LIMIT_MAX - 1 };
+  }
+  entry.count++;
+  const allowed = entry.count <= RATE_LIMIT_MAX;
+  return { allowed, remaining: Math.max(0, RATE_LIMIT_MAX - entry.count) };
+}
+
+// Prune stale entries to prevent unbounded memory growth
+function pruneIpStore() {
+  const now = Date.now();
+  for (const [key, entry] of ipRateStore.entries()) {
+    if (now - entry.windowStart > RATE_LIMIT_WINDOW_MS * 2) {
+      ipRateStore.delete(key);
+    }
+  }
+}
+
+// ── Public field allowlist ────────────────────────────────────────────────────
+// 'address' is intentionally excluded — may disclose private residential location.
 const PUBLIC_FIELDS = [
   'parcel_number', 'status', 'state', 'lga', 'ward', 'ward_code',
   'community', 'property_type', 'size_sqm', 'size_hectares',
   'spatial_validation_status', 'verification_status', 'encumbrance_status',
   'registration_date', 'approval_date', 'updated_date', 'latitude', 'longitude',
-  'parcel_boundary', 'boundary_area', 'id', 'land_use', 'address',
+  'parcel_boundary', 'boundary_area', 'id', 'land_use',
   'ownership_type',
   'certificate_release_status',
   'registration_completed',
@@ -49,7 +87,7 @@ function computeCertificateValidity(parcel) {
   const certStatus = parcel.certificate_release_status;
 
   if (status === 'disputed' || parcel.encumbrance_status === 'dispute') return 'DISPUTED';
-  if (status === 'frozen' || status === 'frozen' || parcel.encumbrance_status === 'court_order') return 'FROZEN';
+  if (status === 'frozen' || parcel.encumbrance_status === 'court_order') return 'FROZEN';
   if (status === 'rejected') return 'REVOKED';
   if (status === 'archived') return 'SUPERSEDED';
   if (certStatus === 'released' && (status === 'approved' || status === 'approved_locked')) return 'VALID';
@@ -121,6 +159,40 @@ async function hasActiveDispute(base44, parcel_id) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+
+    // ── IP rate limiting ──────────────────────────────────────────────────────
+    // x-forwarded-for is set by the Base44/Deno Deploy edge layer.
+    // We take the first IP from the header (leftmost = original client IP).
+    const forwardedFor = req.headers.get('x-forwarded-for') || '';
+    const ip = forwardedFor.split(',')[0].trim() || req.headers.get('cf-connecting-ip') || 'unknown';
+
+    if (ip !== 'unknown') {
+      if (Math.random() < 0.05) pruneIpStore();
+      const { allowed, remaining } = checkIpRateLimit(ip);
+      if (!allowed) {
+        base44.asServiceRole.entities.AuditLog.create({
+          user_email: 'public@lookup',
+          user_name: 'Public Lookup',
+          action: 'PUBLIC_LOOKUP_RATE_LIMITED',
+          entity_type: 'RateLimiter',
+          entity_id: 'publicParcelLookup',
+          ip_address: ip,
+          details: JSON.stringify({ reason: 'ip_rate_limit', limit: RATE_LIMIT_MAX, window_minutes: 10 }),
+        }).catch(() => {});
+        return Response.json(
+          { error: 'Too many requests. Maximum 30 lookups per 10 minutes per IP.' },
+          {
+            status: 429,
+            headers: {
+              'Retry-After': '600',
+              'X-RateLimit-Limit': String(RATE_LIMIT_MAX),
+              'X-RateLimit-Remaining': '0',
+            },
+          }
+        );
+      }
+    }
+
     const body = await req.json().catch(() => ({}));
 
     const parcel_number = (body.parcel_number || '').trim().toUpperCase();
@@ -141,7 +213,6 @@ Deno.serve(async (req) => {
     const results = await base44.asServiceRole.entities.LandParcel.filter({ parcel_number });
 
     if (!results || results.length === 0) {
-      const ip = req.headers.get('x-forwarded-for') || 'unknown';
       base44.asServiceRole.entities.AuditLog.create({
         user_email: 'public@lookup',
         user_name: 'Public Lookup',
@@ -230,7 +301,6 @@ Deno.serve(async (req) => {
     safe.verified_at = new Date().toISOString();
 
     // Log successful lookup (best-effort)
-    const ip = req.headers.get('x-forwarded-for') || 'unknown';
     base44.asServiceRole.entities.AuditLog.create({
       user_email: 'public@lookup',
       user_name: 'Public Lookup',
