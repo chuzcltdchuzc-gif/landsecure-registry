@@ -135,6 +135,8 @@ const roleMenus = {
     { label: "Community Leads", icon: Users, path: "/lv/leads" },
     { label: "Parcel Registry", icon: MapPin, path: "/lv/parcels" },
     { label: "Validation Queue", icon: CheckSquare, path: "/lv/validate" },
+    { label: "Duplicate Alerts", icon: AlertTriangle, path: "/lv/duplicates" },
+    { label: "Pilot Readiness", icon: ShieldCheck, path: "/lv/readiness" },
     { label: "LV Public Verify", icon: Search, path: "/lv/verify" },
     { label: "── Ehime Mbano LGA ──", icon: MapPin, path: null, divider: true },
     { label: "Parcel Registry", icon: MapPin, path: "/ehime/parcels" },

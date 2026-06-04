@@ -25,8 +25,13 @@
         "supporting_document",
         "survey_photo",
         "boundary_photo",
+        "authority_document",
         "other"
       ]
+    },
+    "evidence_sequence": {
+      "type": "number",
+      "description": "SECTION G \u2014 Sequential number within this parcel's evidence chain"
     },
     "file_url": {
       "type": "string",
@@ -38,14 +43,58 @@
     "file_type": {
       "type": "string"
     },
+    "file_size_bytes": {
+      "type": "number"
+    },
     "description": {
       "type": "string"
+    },
+    "hash_fingerprint": {
+      "type": "string",
+      "description": "SECTION E \u2014 SHA-256 hex digest of file content for integrity verification"
+    },
+    "hash_algorithm": {
+      "type": "string",
+      "default": "SHA-256",
+      "description": "SECTION E \u2014 Hash algorithm used"
+    },
+    "hash_verified_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "SECTION E \u2014 When hash was last verified"
+    },
+    "is_immutable": {
+      "type": "boolean",
+      "default": true,
+      "description": "SECTION F \u2014 Once submitted, evidence cannot be altered"
+    },
+    "sealed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "SECTION F \u2014 Timestamp when evidence was sealed"
+    },
+    "sealed_by": {
+      "type": "string",
+      "description": "SECTION F \u2014 Email of user who submitted (sealing event)"
+    },
+    "seal_status": {
+      "type": "string",
+      "enum": [
+        "SEALED",
+        "PENDING"
+      ],
+      "default": "SEALED",
+      "description": "SECTION F \u2014 SEALED = immutable, PENDING = draft not yet submitted"
     },
     "captured_by_email": {
       "type": "string"
     },
     "captured_by_name": {
       "type": "string"
+    },
+    "captured_by_role": {
+      "type": "string",
+      "description": "SECTION G \u2014 Role of capturing user"
     },
     "captured_at": {
       "type": "string",
@@ -57,13 +106,43 @@
     "gps_lng": {
       "type": "number"
     },
+    "gps_accuracy_m": {
+      "type": "number",
+      "description": "SECTION D \u2014 GPS accuracy in metres"
+    },
+    "gps_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "SECTION D \u2014 Device GPS fix timestamp"
+    },
+    "gps_confidence": {
+      "type": "string",
+      "enum": [
+        "HIGH",
+        "MEDIUM",
+        "LOW",
+        "FAILED"
+      ]
+    },
+    "gps_inside_lga": {
+      "type": "boolean",
+      "description": "SECTION D \u2014 GPS validated inside target LGA"
+    },
+    "gps_spoofing_flag": {
+      "type": "boolean",
+      "default": false
+    },
     "device_id": {
       "type": "string"
     },
-    "is_immutable": {
-      "type": "boolean",
-      "default": true,
-      "description": "Once submitted, evidence cannot be altered"
+    "network_status": {
+      "type": "string",
+      "enum": [
+        "online",
+        "offline",
+        "synced_offline"
+      ],
+      "default": "online"
     },
     "witness_name": {
       "type": "string"
@@ -81,9 +160,9 @@
         "none"
       ]
     },
-    "hash_fingerprint": {
+    "custody_chain": {
       "type": "string",
-      "description": "SHA-256 of file for integrity verification"
+      "description": "SECTION G \u2014 IMMUTABLE JSON array of custody events: [{timestamp,actor_email,actor_role,action,gps}]. Append-only."
     }
   },
   "required": [
@@ -103,7 +182,8 @@
             "surveyor_general",
             "compliance_officer",
             "licensed_surveyor",
-            "field_agent"
+            "field_agent",
+            "community_validator"
           ]
         }
       }

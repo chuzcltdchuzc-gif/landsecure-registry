@@ -50,21 +50,16 @@ export default function LandVaultPublicVerify() {
     setLoading(true);
     setError("");
     setResult(null);
-    try {
-      const parcels = await base44.asServiceRole?.entities?.LandVaultParcel?.filter({ parcel_number: q })
-        .catch(() => null);
-      // Public endpoint — use backend function if available, else do limited lookup
-      const res = await base44.functions.invoke("publicParcelLookup", { parcel_number: q }).catch(() => null);
-      if (res?.data?.found) {
-        setResult({ found: true, parcel: res.data.parcel });
-      } else {
-        setResult({ found: false });
-      }
-    } catch {
+    // SECTION J FIX — Route 100% through backend function. Never use direct SDK in public portal.
+    const res = await base44.functions.invoke("publicLandVaultLookup", { parcel_number: q }).catch(() => null);
+    if (res?.data?.found) {
+      setResult({ found: true, parcel: res.data.parcel });
+    } else if (res?.data?.found === false) {
+      setResult({ found: false });
+    } else {
       setError("Verification service unavailable. Please try again.");
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   const parcel = result?.parcel;

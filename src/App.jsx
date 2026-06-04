@@ -67,6 +67,10 @@ import CommunityValidatorQueue from './pages/landvault/CommunityValidatorQueue';
 import PaymentRecord from './pages/landvault/PaymentRecord';
 import GovernmentObserver from './pages/landvault/GovernmentObserver';
 import LandVaultPublicVerify from './pages/landvault/LandVaultPublicVerify';
+import DuplicateAlertDashboard from './pages/landvault/DuplicateAlertDashboard';
+import EvidenceDetail from './pages/landvault/EvidenceDetail';
+import ConsentCapture from './pages/landvault/ConsentCapture';
+import PilotReadinessReport from './pages/landvault/PilotReadinessReport';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkUserAuth } = useAuth();
@@ -158,6 +162,10 @@ const AuthenticatedApp = () => {
         <Route path="/lv/validate" element={<CommunityValidatorQueue />} />
         <Route path="/lv/payments/new" element={<PaymentRecord />} />
         <Route path="/lv/observer" element={<GovernmentObserver />} />
+        <Route path="/lv/duplicates" element={<DuplicateAlertDashboard />} />
+        <Route path="/lv/evidence/:id" element={<EvidenceDetail evidenceId={null} parcelId={null} />} />
+        <Route path="/lv/consent/:parcelId" element={<ConsentCapture />} />
+        <Route path="/lv/readiness" element={<PilotReadinessReport />} />
       </Route>
       <Route path="/demo" element={<DemoAccess />} />
       <Route path="/verify" element={<PublicVerify />} />
