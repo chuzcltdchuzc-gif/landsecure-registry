@@ -1,0 +1,148 @@
+{
+  "name": "DuplicateAlert",
+  "type": "object",
+  "description": "SECTION C \u2014 Duplicate Detection Engine alerts",
+  "properties": {
+    "alert_type": {
+      "type": "string",
+      "enum": [
+        "gps_proximity",
+        "boundary_overlap",
+        "owner_duplicate",
+        "family_duplicate",
+        "survey_plan_duplicate",
+        "evidence_hash_duplicate"
+      ],
+      "description": "Type of duplicate detected"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "under_review",
+        "confirmed_duplicate",
+        "false_positive",
+        "dismissed"
+      ],
+      "default": "open"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "high"
+    },
+    "source_parcel_id": {
+      "type": "string",
+      "description": "Parcel that triggered the alert"
+    },
+    "source_parcel_number": {
+      "type": "string"
+    },
+    "conflicting_parcel_id": {
+      "type": "string",
+      "description": "Parcel that was found to conflict"
+    },
+    "conflicting_parcel_number": {
+      "type": "string"
+    },
+    "source_evidence_id": {
+      "type": "string",
+      "description": "Evidence item that triggered alert (for hash duplicates)"
+    },
+    "conflicting_evidence_id": {
+      "type": "string"
+    },
+    "detection_details": {
+      "type": "string",
+      "description": "JSON: algorithm output, threshold values, distances"
+    },
+    "gps_distance_m": {
+      "type": "number",
+      "description": "GPS distance between conflicting records in metres"
+    },
+    "overlap_percentage": {
+      "type": "number",
+      "description": "Boundary overlap percentage (0-100)"
+    },
+    "duplicate_field": {
+      "type": "string",
+      "description": "Field that matched (e.g. owner_nin, survey_plan_url)"
+    },
+    "duplicate_value_hint": {
+      "type": "string",
+      "description": "Partial/masked hint of matched value"
+    },
+    "detected_by": {
+      "type": "string",
+      "description": "System process that detected the duplicate"
+    },
+    "detected_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reviewed_by": {
+      "type": "string"
+    },
+    "reviewed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "review_notes": {
+      "type": "string"
+    },
+    "risk_score_impact": {
+      "type": "number",
+      "description": "Points added to risk score due to this alert"
+    }
+  },
+  "required": [
+    "alert_type",
+    "source_parcel_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer",
+            "field_agent"
+          ]
+        }
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

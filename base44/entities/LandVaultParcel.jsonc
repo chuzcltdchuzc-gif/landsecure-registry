@@ -30,11 +30,15 @@
       "enum": [
         "individual",
         "family",
+        "joint",
         "community",
         "trust",
+        "corporate",
+        "government",
         "institutional"
       ],
-      "default": "individual"
+      "default": "individual",
+      "description": "SECTION B \u2014 full ownership structure classification"
     },
     "land_use": {
       "type": "string",
@@ -58,6 +62,41 @@
     },
     "gps_lng": {
       "type": "number"
+    },
+    "gps_accuracy_m": {
+      "type": "number",
+      "description": "GPS accuracy in metres at time of capture"
+    },
+    "gps_captured_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Exact device GPS timestamp"
+    },
+    "gps_confidence": {
+      "type": "string",
+      "enum": [
+        "HIGH",
+        "MEDIUM",
+        "LOW",
+        "FAILED"
+      ],
+      "description": "GPS Trust Engine result"
+    },
+    "gps_confidence_score": {
+      "type": "number",
+      "description": "0-100 GPS confidence score"
+    },
+    "gps_inside_lga": {
+      "type": "boolean",
+      "description": "GPS coordinates validated inside target LGA boundary"
+    },
+    "gps_spoofing_flag": {
+      "type": "boolean",
+      "default": false,
+      "description": "Spoofing indicator from GPS Trust Engine"
+    },
+    "gps_spoofing_reason": {
+      "type": "string"
     },
     "geojson_polygon": {
       "type": "string",
@@ -90,6 +129,63 @@
     },
     "family_history_notes": {
       "type": "string"
+    },
+    "representative_name": {
+      "type": "string",
+      "description": "SECTION A \u2014 Full name of the person presenting the land"
+    },
+    "representative_role": {
+      "type": "string",
+      "enum": [
+        "owner",
+        "family_head",
+        "family_representative",
+        "executor",
+        "administrator",
+        "attorney",
+        "community_trustee",
+        "village_head",
+        "court_appointed",
+        "other"
+      ],
+      "description": "SECTION A \u2014 Role of the presenting representative"
+    },
+    "representative_capacity": {
+      "type": "string",
+      "enum": [
+        "Owner",
+        "Family Representative",
+        "Executor",
+        "Administrator",
+        "Attorney",
+        "Community Trustee",
+        "Village Head",
+        "Court Appointed Representative",
+        "Other"
+      ],
+      "description": "SECTION A \u2014 Legal capacity under which registration is being made"
+    },
+    "relationship_to_land": {
+      "type": "string",
+      "description": "SECTION A \u2014 Relationship of representative to land (e.g. first-born son, eldest wife group)"
+    },
+    "authority_basis": {
+      "type": "string",
+      "enum": [
+        "Personal Ownership",
+        "Family Resolution",
+        "Power of Attorney",
+        "Letter of Administration",
+        "Probate",
+        "Court Order",
+        "Community Endorsement",
+        "Other"
+      ],
+      "description": "SECTION A \u2014 Legal basis for the representative's authority"
+    },
+    "authority_document_url": {
+      "type": "string",
+      "description": "PRIVATE \u2014 Supporting authority document (PoA, LoA, Probate) URL"
     },
     "ownership_confidence_score": {
       "type": "number",
@@ -139,12 +235,52 @@
       "type": "string",
       "description": "JSON array of risk factor strings"
     },
+    "duplicate_flag": {
+      "type": "boolean",
+      "default": false,
+      "description": "SECTION C \u2014 Duplicate detection triggered"
+    },
+    "duplicate_type": {
+      "type": "string",
+      "enum": [
+        "gps_proximity",
+        "boundary_overlap",
+        "owner_duplicate",
+        "family_duplicate",
+        "survey_plan_duplicate",
+        "evidence_duplicate",
+        "none"
+      ],
+      "default": "none"
+    },
+    "duplicate_notes": {
+      "type": "string",
+      "description": "Details from duplicate detection engine"
+    },
+    "duplicate_reviewed": {
+      "type": "boolean",
+      "default": false
+    },
+    "duplicate_reviewed_by": {
+      "type": "string"
+    },
+    "duplicate_reviewed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "duplicate_review_outcome": {
+      "type": "string",
+      "enum": [
+        "confirmed_duplicate",
+        "false_positive",
+        "pending"
+      ]
+    },
     "survey_plan_url": {
       "type": "string"
     },
     "surveyor_id": {
-      "type": "string",
-      "description": "Reference to assigned surveyor user ID"
+      "type": "string"
     },
     "surveyor_name": {
       "type": "string"
@@ -166,6 +302,90 @@
         "rejected"
       ],
       "default": "not_assigned"
+    },
+    "consent_verbal": {
+      "type": "boolean",
+      "default": false,
+      "description": "SECTION H \u2014 Verbal consent recorded"
+    },
+    "consent_verbal_timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "consent_verbal_agent": {
+      "type": "string"
+    },
+    "consent_verbal_gps": {
+      "type": "string",
+      "description": "JSON {lat,lng} at time of verbal consent"
+    },
+    "consent_audio_captured": {
+      "type": "boolean",
+      "default": false
+    },
+    "consent_audio_declined": {
+      "type": "boolean",
+      "default": false
+    },
+    "consent_signature_captured": {
+      "type": "boolean",
+      "default": false
+    },
+    "consent_signature_declined": {
+      "type": "boolean",
+      "default": false
+    },
+    "consent_photo_captured": {
+      "type": "boolean",
+      "default": false
+    },
+    "consent_photo_declined": {
+      "type": "boolean",
+      "default": false
+    },
+    "consent_witness_name": {
+      "type": "string"
+    },
+    "consent_witness_phone": {
+      "type": "string"
+    },
+    "consent_witness_role": {
+      "type": "string",
+      "enum": [
+        "family_witness",
+        "community_witness",
+        "village_head",
+        "kindred_head",
+        "none"
+      ]
+    },
+    "consent_strength_score": {
+      "type": "number",
+      "description": "SECTION H \u2014 0-100 consent completeness"
+    },
+    "consent_confidence": {
+      "type": "string",
+      "enum": [
+        "HIGH",
+        "MEDIUM",
+        "LOW"
+      ],
+      "description": "HIGH=80+, MEDIUM=50-79, LOW<50"
+    },
+    "consent_timeline": {
+      "type": "string",
+      "description": "SECTION H \u2014 IMMUTABLE JSON array of consent events. Append-only."
+    },
+    "community_confirmed": {
+      "type": "boolean",
+      "default": false
+    },
+    "community_confirmed_by": {
+      "type": "string"
+    },
+    "community_confirmed_at": {
+      "type": "string",
+      "format": "date-time"
     },
     "qr_code_url": {
       "type": "string"
@@ -194,6 +414,10 @@
     },
     "certificate_hold_reason": {
       "type": "string"
+    },
+    "protected_in_registry": {
+      "type": "boolean",
+      "default": true
     },
     "amount_paid": {
       "type": "number",
