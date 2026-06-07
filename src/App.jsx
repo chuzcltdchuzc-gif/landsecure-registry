@@ -71,6 +71,7 @@ import DuplicateAlertDashboard from './pages/landvault/DuplicateAlertDashboard';
 import EvidenceDetail from './pages/landvault/EvidenceDetail';
 import ConsentCapture from './pages/landvault/ConsentCapture';
 import PilotReadinessReport from './pages/landvault/PilotReadinessReport';
+import DeploymentGovernanceAudit from './pages/landvault/DeploymentGovernanceAudit';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkUserAuth } = useAuth();
@@ -166,6 +167,7 @@ const AuthenticatedApp = () => {
         <Route path="/lv/evidence/:id" element={<EvidenceDetail evidenceId={null} parcelId={null} />} />
         <Route path="/lv/consent/:parcelId" element={<ConsentCapture />} />
         <Route path="/lv/readiness" element={<PilotReadinessReport />} />
+        <Route path="/lv/governance" element={<DeploymentGovernanceAudit />} />
       </Route>
       <Route path="/demo" element={<DemoAccess />} />
       <Route path="/verify" element={<PublicVerify />} />

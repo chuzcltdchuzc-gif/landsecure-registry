@@ -11,6 +11,14 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const ENTITIES_TO_BACKUP = [
+  // LandVault pilot entities (primary)
+  'LandVaultParcel',
+  'EvidenceVault',
+  'DuplicateAlert',
+  'SurveyAssignment',
+  'LandVaultPayment',
+  'CommunityLead',
+  // Legacy registry entities
   'LandParcel',
   'FamilyOwnership',
   'FamilyBeneficiary',
@@ -21,8 +29,6 @@ const ENTITIES_TO_BACKUP = [
   'AuditLog',
   'SurveyDocument',
   'FieldReport',
-  'EvidenceChain',
-  'Notification',
 ];
 
 Deno.serve(async (req) => {

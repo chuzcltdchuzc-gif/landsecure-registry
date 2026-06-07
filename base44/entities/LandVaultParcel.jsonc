@@ -7,8 +7,7 @@
       "description": "System-generated. Format: ASV-EHM-WARD-000001"
     },
     "lead_id": {
-      "type": "string",
-      "description": "Reference to CommunityLead"
+      "type": "string"
     },
     "community": {
       "type": "string"
@@ -37,8 +36,7 @@
         "government",
         "institutional"
       ],
-      "default": "individual",
-      "description": "SECTION B \u2014 full ownership structure classification"
+      "default": "individual"
     },
     "land_use": {
       "type": "string",
@@ -64,13 +62,11 @@
       "type": "number"
     },
     "gps_accuracy_m": {
-      "type": "number",
-      "description": "GPS accuracy in metres at time of capture"
+      "type": "number"
     },
     "gps_captured_at": {
       "type": "string",
-      "format": "date-time",
-      "description": "Exact device GPS timestamp"
+      "format": "date-time"
     },
     "gps_confidence": {
       "type": "string",
@@ -79,28 +75,32 @@
         "MEDIUM",
         "LOW",
         "FAILED"
-      ],
-      "description": "GPS Trust Engine result"
+      ]
     },
     "gps_confidence_score": {
-      "type": "number",
-      "description": "0-100 GPS confidence score"
+      "type": "number"
+    },
+    "gps_trust_status": {
+      "type": "string",
+      "enum": [
+        "HIGH",
+        "MEDIUM",
+        "LOW",
+        "FLAGGED"
+      ]
     },
     "gps_inside_lga": {
-      "type": "boolean",
-      "description": "GPS coordinates validated inside target LGA boundary"
+      "type": "boolean"
     },
     "gps_spoofing_flag": {
       "type": "boolean",
-      "default": false,
-      "description": "Spoofing indicator from GPS Trust Engine"
+      "default": false
     },
     "gps_spoofing_reason": {
       "type": "string"
     },
     "geojson_polygon": {
-      "type": "string",
-      "description": "GeoJSON polygon string"
+      "type": "string"
     },
     "boundary_notes": {
       "type": "string"
@@ -113,13 +113,17 @@
     },
     "owner_nin": {
       "type": "string",
-      "description": "PRIVATE \u2014 National Identification Number"
+      "description": "PRIVATE"
     },
     "family_name": {
       "type": "string"
     },
     "family_representative": {
       "type": "string"
+    },
+    "family_secondary_representative": {
+      "type": "string",
+      "description": "PHASE 4 \u2014 Secondary rep"
     },
     "founder_name": {
       "type": "string"
@@ -130,9 +134,12 @@
     "family_history_notes": {
       "type": "string"
     },
-    "representative_name": {
+    "customary_ownership_notes": {
       "type": "string",
-      "description": "SECTION A \u2014 Full name of the person presenting the land"
+      "description": "PHASE 4 \u2014 Customary tenure notes"
+    },
+    "representative_name": {
+      "type": "string"
     },
     "representative_role": {
       "type": "string",
@@ -147,8 +154,7 @@
         "village_head",
         "court_appointed",
         "other"
-      ],
-      "description": "SECTION A \u2014 Role of the presenting representative"
+      ]
     },
     "representative_capacity": {
       "type": "string",
@@ -162,12 +168,10 @@
         "Village Head",
         "Court Appointed Representative",
         "Other"
-      ],
-      "description": "SECTION A \u2014 Legal capacity under which registration is being made"
+      ]
     },
     "relationship_to_land": {
-      "type": "string",
-      "description": "SECTION A \u2014 Relationship of representative to land (e.g. first-born son, eldest wife group)"
+      "type": "string"
     },
     "authority_basis": {
       "type": "string",
@@ -180,16 +184,23 @@
         "Court Order",
         "Community Endorsement",
         "Other"
-      ],
-      "description": "SECTION A \u2014 Legal basis for the representative's authority"
+      ]
     },
     "authority_document_url": {
       "type": "string",
-      "description": "PRIVATE \u2014 Supporting authority document (PoA, LoA, Probate) URL"
+      "description": "PRIVATE"
+    },
+    "authority_confidence": {
+      "type": "string",
+      "enum": [
+        "HIGH",
+        "MEDIUM",
+        "LOW"
+      ],
+      "description": "PHASE 5 indicator"
     },
     "ownership_confidence_score": {
-      "type": "number",
-      "description": "0-100"
+      "type": "number"
     },
     "verification_status": {
       "type": "string",
@@ -228,17 +239,14 @@
       "default": "HIGH"
     },
     "risk_score": {
-      "type": "number",
-      "description": "0-100 automated risk score"
+      "type": "number"
     },
     "risk_factors": {
-      "type": "string",
-      "description": "JSON array of risk factor strings"
+      "type": "string"
     },
     "duplicate_flag": {
       "type": "boolean",
-      "default": false,
-      "description": "SECTION C \u2014 Duplicate detection triggered"
+      "default": false
     },
     "duplicate_type": {
       "type": "string",
@@ -254,8 +262,7 @@
       "default": "none"
     },
     "duplicate_notes": {
-      "type": "string",
-      "description": "Details from duplicate detection engine"
+      "type": "string"
     },
     "duplicate_reviewed": {
       "type": "boolean",
@@ -274,6 +281,18 @@
         "confirmed_duplicate",
         "false_positive",
         "pending"
+      ]
+    },
+    "dispute_readiness_score": {
+      "type": "number",
+      "description": "PHASE 8 \u2014 0-100"
+    },
+    "dispute_readiness_category": {
+      "type": "string",
+      "enum": [
+        "HIGH CONFIDENCE",
+        "MODERATE RISK",
+        "LOW RISK"
       ]
     },
     "survey_plan_url": {
@@ -305,8 +324,7 @@
     },
     "consent_verbal": {
       "type": "boolean",
-      "default": false,
-      "description": "SECTION H \u2014 Verbal consent recorded"
+      "default": false
     },
     "consent_verbal_timestamp": {
       "type": "string",
@@ -316,8 +334,7 @@
       "type": "string"
     },
     "consent_verbal_gps": {
-      "type": "string",
-      "description": "JSON {lat,lng} at time of verbal consent"
+      "type": "string"
     },
     "consent_audio_captured": {
       "type": "boolean",
@@ -360,8 +377,7 @@
       ]
     },
     "consent_strength_score": {
-      "type": "number",
-      "description": "SECTION H \u2014 0-100 consent completeness"
+      "type": "number"
     },
     "consent_confidence": {
       "type": "string",
@@ -369,12 +385,11 @@
         "HIGH",
         "MEDIUM",
         "LOW"
-      ],
-      "description": "HIGH=80+, MEDIUM=50-79, LOW<50"
+      ]
     },
     "consent_timeline": {
       "type": "string",
-      "description": "SECTION H \u2014 IMMUTABLE JSON array of consent events. Append-only."
+      "description": "IMMUTABLE JSON array of consent events"
     },
     "community_confirmed": {
       "type": "boolean",
@@ -387,20 +402,39 @@
       "type": "string",
       "format": "date-time"
     },
+    "evidence_sealed": {
+      "type": "boolean",
+      "default": false,
+      "description": "PHASE 3 \u2014 Evidence package sealed"
+    },
+    "evidence_seal_id": {
+      "type": "string"
+    },
+    "evidence_seal_timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evidence_sealed_by": {
+      "type": "string"
+    },
+    "evidence_seal_hash": {
+      "type": "string",
+      "description": "SHA-256 of all evidence fingerprints"
+    },
+    "evidence_count_at_seal": {
+      "type": "number"
+    },
     "qr_code_url": {
       "type": "string"
     },
     "certificate_a_url": {
-      "type": "string",
-      "description": "Survey Completion Certificate"
+      "type": "string"
     },
     "certificate_b_url": {
-      "type": "string",
-      "description": "LandVault Documentation Certificate"
+      "type": "string"
     },
     "certificate_c_url": {
-      "type": "string",
-      "description": "Protected Record Certificate"
+      "type": "string"
     },
     "certificate_status": {
       "type": "string",
@@ -440,8 +474,7 @@
       "default": "UNPAID"
     },
     "payment_history": {
-      "type": "string",
-      "description": "JSON array of payment events"
+      "type": "string"
     },
     "field_agent_email": {
       "type": "string"
@@ -468,6 +501,10 @@
     "community_validation_date": {
       "type": "string",
       "format": "date-time"
+    },
+    "validation_timeline": {
+      "type": "string",
+      "description": "PHASE 7 \u2014 JSON array of validation events"
     },
     "photos": {
       "type": "array",
@@ -535,6 +572,9 @@
             "$nin": [
               "certificate_issued"
             ]
+          },
+          "data.evidence_sealed": {
+            "$ne": true
           }
         },
         {
@@ -543,6 +583,9 @@
             "$nin": [
               "certificate_issued"
             ]
+          },
+          "data.evidence_sealed": {
+            "$ne": true
           }
         },
         {

@@ -164,16 +164,18 @@ Deno.serve(async (req) => {
 
     let newAlerts = [];
 
+    if (!entityId) return Response.json({ status: 'no_entity_id' });
+
     if (eventType === 'evidence') {
-      const evidenceList = await base44.asServiceRole.entities.EvidenceVault.filter({ id: entityId });
+      const evidenceList = await base44.asServiceRole.entities.EvidenceVault.filter({ id: entityId }).catch(() => []);
       const evidence = evidenceList[0];
-      if (!evidence) return Response.json({ status: 'no_record' });
+      if (!evidence) return Response.json({ status: 'no_record', entity_id: entityId });
       const allEvidence = await base44.asServiceRole.entities.EvidenceVault.list('-created_date', 2000);
       newAlerts = await runEvidenceHashCheck(base44, evidence, allEvidence);
     } else {
-      const parcelList = await base44.asServiceRole.entities.LandVaultParcel.filter({ id: entityId });
+      const parcelList = await base44.asServiceRole.entities.LandVaultParcel.filter({ id: entityId }).catch(() => []);
       const parcel = parcelList[0];
-      if (!parcel) return Response.json({ status: 'no_record' });
+      if (!parcel) return Response.json({ status: 'no_record', entity_id: entityId });
       const allParcels = await base44.asServiceRole.entities.LandVaultParcel.list('-created_date', 2000);
       newAlerts = await runParcelChecks(base44, parcel, allParcels);
     }
