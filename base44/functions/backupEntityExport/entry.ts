@@ -8,17 +8,10 @@
  *
  * Returns: { status, timestamp, files: [{entity, records, url}] }
  */
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 const ENTITIES_TO_BACKUP = [
-  // LandVault pilot entities (primary)
-  'LandVaultParcel',
-  'EvidenceVault',
-  'DuplicateAlert',
-  'SurveyAssignment',
-  'LandVaultPayment',
-  'CommunityLead',
-  // Legacy registry entities
+  // Original registry entities
   'LandParcel',
   'FamilyOwnership',
   'FamilyBeneficiary',
@@ -29,6 +22,16 @@ const ENTITIES_TO_BACKUP = [
   'AuditLog',
   'SurveyDocument',
   'FieldReport',
+  'EvidenceChain',
+  'Notification',
+  // LandVault pilot entities — added 2026-06-07
+  'LandVaultParcel',
+  'EvidenceVault',
+  'DuplicateAlert',
+  'SurveyAssignment',
+  'LandVaultPayment',
+  'CommunityLead',
+  'CommunityValidation',
 ];
 
 Deno.serve(async (req) => {
@@ -49,10 +52,8 @@ Deno.serve(async (req) => {
 
     for (const entityName of ENTITIES_TO_BACKUP) {
       try {
-        // Fetch all records
         const records = await base44.asServiceRole.entities[entityName].list('-created_date', 5000);
 
-        // Build JSON backup payload
         const payload = {
           entity: entityName,
           exported_at: timestamp,
@@ -63,33 +64,17 @@ Deno.serve(async (req) => {
         const jsonStr = JSON.stringify(payload, null, 2);
         const blob = new Blob([jsonStr], { type: 'application/json' });
 
-        // Upload to private storage
-        const { file_uri } = await base44.asServiceRole.integrations.Core.UploadPrivateFile({
-          file: blob,
-        });
+        const { file_uri } = await base44.asServiceRole.integrations.Core.UploadPrivateFile({ file: blob });
+        const { signed_url } = await base44.asServiceRole.integrations.Core.CreateFileSignedUrl({ file_uri, expires_in: 604800 });
 
-        // Create a 7-day signed URL (604800 seconds)
-        const { signed_url } = await base44.asServiceRole.integrations.Core.CreateFileSignedUrl({
-          file_uri,
-          expires_in: 604800,
-        });
-
-        results.push({
-          entity: entityName,
-          records: records.length,
-          file_uri,
-          signed_url,
-          size_kb: Math.round(jsonStr.length / 1024),
-        });
-
+        results.push({ entity: entityName, records: records.length, file_uri, signed_url, size_kb: Math.round(jsonStr.length / 1024) });
       } catch (err) {
         errors.push({ entity: entityName, error: err.message });
       }
     }
 
-    // Write backup manifest to AuditLog
     await base44.asServiceRole.entities.AuditLog.create({
-      user_email: 'system@landsecure.gov.ng',
+      user_email: 'system@landvault',
       user_name: 'Automated Backup System',
       action: 'BACKUP_EXPORT_COMPLETED',
       entity_type: 'System',
