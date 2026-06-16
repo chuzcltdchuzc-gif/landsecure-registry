@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Shield, User, Compass, Camera, ChevronRight, CheckCircle2, Vault, UserCheck, Eye } from "lucide-react";
+import { Shield, User, Compass, Camera, ChevronRight, CheckCircle2, Vault, UserCheck, Eye, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
 
@@ -25,6 +25,17 @@ const roles = [
     border: "border-emerald-200",
     selectedBorder: "border-emerald-500",
     selectedBg: "bg-emerald-50",
+  },
+  {
+    value: "surveyor_partner",
+    label: "Surveyor Partner",
+    description: "Long-term network partner — upload archive records, track portfolio, view revenue and confidence stats.",
+    icon: Building2,
+    color: "text-teal-600",
+    bg: "bg-teal-50",
+    border: "border-teal-200",
+    selectedBorder: "border-teal-500",
+    selectedBg: "bg-teal-50",
   },
   {
     value: "community_validator",

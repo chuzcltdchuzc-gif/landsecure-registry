@@ -5,6 +5,7 @@ import { base44 } from "@/api/base44Client";
 import {
   FileText, Search, MapPin, User, Calendar, ExternalLink, Filter,
   CheckCircle2, Clock, AlertTriangle, GitBranch, ShieldAlert,
+  Square, CheckSquare, XCircle, Download,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,9 @@ export default function PendingApprovals() {
   const [landUseFilter, setLandUseFilter] = useState("all");
   const [verificationFilter, setVerificationFilter] = useState("all");
   const [activeTab, setActiveTab] = useState("registrations"); // registrations | revisions | inheritance
+  const [selectedParcels, setSelectedParcels] = useState(new Set());
+  const [bulkActionOpen, setBulkActionOpen] = useState(false);
+  const [bulkNotes, setBulkNotes] = useState("");
 
   const { data: parcels = [], isLoading } = useQuery({
     queryKey: ["pending-parcels-approval"],
@@ -74,6 +78,53 @@ export default function PendingApprovals() {
       toast.success("Revision request reviewed");
     },
   });
+
+  const bulkApproveMutation = useMutation({
+    mutationFn: async ({ parcelIds, decision, notes }) => {
+      for (const parcelId of parcelIds) {
+        const parcel = parcels.find(p => p.id === parcelId);
+        await base44.entities.LandParcel.update(parcelId, {
+          status: decision === "verify" ? "approved" : "rejected",
+          verification_status: decision === "verify" ? "fully_verified" : "unverified",
+          approved_by: user?.email,
+          approval_date: new Date().toISOString(),
+          rejection_reason: decision === "reject" ? notes : undefined,
+          notes: notes ? `${parcel.notes || ""}\n[Bulk ${decision}: ${notes}]`.trim() : parcel.notes,
+        });
+        await base44.entities.AuditLog.create({
+          user_email: user?.email,
+          user_name: user?.full_name,
+          action: `Bulk ${decision === "verify" ? "verified" : "rejected"} parcel ${parcel.parcel_number}`,
+          entity_type: "LandParcel",
+          entity_id: parcelId,
+          details: notes || `Batch action: ${decision}`,
+        });
+      }
+    },
+    onSuccess: (_, { decision }) => {
+      queryClient.invalidateQueries({ queryKey: ["pending-parcels-approval"] });
+      setSelectedParcels(new Set());
+      setBulkActionOpen(false);
+      setBulkNotes("");
+      toast.success(`${selectedParcels.size} parcels ${decision === "verify" ? "verified" : "rejected"}`);
+    },
+  });
+
+  const toggleSelect = (id) => {
+    const next = new Set(selectedParcels);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setSelectedParcels(next);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedParcels.size === filtered.length) {
+      setSelectedParcels(new Set());
+    } else {
+      setSelectedParcels(new Set(filtered.map(p => p.id)));
+    }
+  };
+
+  const clearSelection = () => { setSelectedParcels(new Set()); setBulkActionOpen(false); };
 
   if (isLoading) return <LoadingSpinner text="Loading pending approvals..." />;
 
@@ -199,6 +250,53 @@ export default function PendingApprovals() {
         </Card>
       </div>
 
+      {/* Bulk Action Bar */}
+      {activeTab === "registrations" && selectedParcels.size > 0 && (
+        <div className="sticky top-0 z-10 bg-violet-50 border border-violet-300 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 shadow-lg">
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <CheckSquare className="w-5 h-5 text-violet-600" />
+            <span className="text-sm font-bold text-violet-800">{selectedParcels.size} selected</span>
+          </div>
+
+          {!bulkActionOpen ? (
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 gap-1.5 text-xs" onClick={() => setBulkActionOpen(true)}>
+                <CheckCircle2 className="w-3.5 h-3.5" /> Bulk Verify
+              </Button>
+              <Button size="sm" variant="destructive" className="gap-1.5 text-xs" onClick={() => { setBulkNotes(""); bulkApproveMutation.mutate({ parcelIds: [...selectedParcels], decision: "reject", notes: "Bulk rejected" }); }}>
+                <XCircle className="w-3.5 h-3.5" /> Bulk Reject
+              </Button>
+              <Button size="sm" variant="outline" className="gap-1.5 text-xs" onClick={clearSelection}>
+                Clear Selection
+              </Button>
+            </div>
+          ) : (
+            <div className="flex-1 space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="flex-1">
+                  <Label className="text-xs">Verification Notes (applied to all {selectedParcels.size} parcels)</Label>
+                  <Textarea
+                    placeholder="Add notes for the audit trail…"
+                    value={bulkNotes}
+                    onChange={e => setBulkNotes(e.target.value)}
+                    rows={2}
+                    className="mt-1 text-xs"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 gap-1.5 text-xs"
+                  onClick={() => bulkApproveMutation.mutate({ parcelIds: [...selectedParcels], decision: "verify", notes: bulkNotes })}
+                  disabled={bulkApproveMutation.isPending}>
+                  {bulkApproveMutation.isPending ? "Verifying…" : <><CheckCircle2 className="w-3.5 h-3.5" /> Confirm Bulk Verify</>}
+                </Button>
+                <Button size="sm" variant="ghost" className="text-xs" onClick={clearSelection}>Cancel</Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Filters — registration tab only */}
       {activeTab === "registrations" && <Card>
         <CardContent className="p-4">
@@ -250,6 +348,10 @@ export default function PendingApprovals() {
             <FileText className="w-4 h-4 text-blue-600" />
             Documents Submitted — Ready for Review
             <Badge className="bg-blue-100 text-blue-700 border-blue-200">{withDocs.length}</Badge>
+            <button onClick={toggleSelectAll} className="ml-auto text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
+              {selectedParcels.size === filtered.length && filtered.length > 0 ? <CheckSquare className="w-3.5 h-3.5 text-violet-600" /> : <Square className="w-3.5 h-3.5" />}
+              {selectedParcels.size === filtered.length ? "Deselect All" : "Select All"}
+            </button>
           </h2>
           <div className="space-y-3">
             {withDocs.map(parcel => (
@@ -259,6 +361,8 @@ export default function PendingApprovals() {
                 hasDocs={true}
                 pendingDocCount={surveyDocs.filter(d => d.parcel_id === parcel.id).length}
                 verificationColor={verificationColor}
+                isSelected={selectedParcels.has(parcel.id)}
+                onToggleSelect={() => toggleSelect(parcel.id)}
               />
             ))}
           </div>
@@ -281,6 +385,8 @@ export default function PendingApprovals() {
                 hasDocs={false}
                 pendingDocCount={0}
                 verificationColor={verificationColor}
+                isSelected={selectedParcels.has(parcel.id)}
+                onToggleSelect={() => toggleSelect(parcel.id)}
               />
             ))}
           </div>
@@ -429,11 +535,15 @@ function RevisionRow({ revision, onReview, isLoading }) {
   );
 }
 
-function ParcelRow({ parcel, hasDocs, pendingDocCount, verificationColor }) {
+function ParcelRow({ parcel, hasDocs, pendingDocCount, verificationColor, isSelected, onToggleSelect }) {
   return (
-    <Card className={`border ${hasDocs ? "border-blue-200" : "border-border"}`}>
+    <Card className={`border ${hasDocs ? "border-blue-200" : "border-border"} ${isSelected ? "ring-2 ring-violet-400" : ""}`}>
       <CardContent className="p-4">
         <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+          {/* Checkbox */}
+          <button onClick={onToggleSelect} className="flex-shrink-0 mt-0.5 text-muted-foreground hover:text-violet-600 transition-colors">
+            {isSelected ? <CheckSquare className="w-5 h-5 text-violet-600" /> : <Square className="w-5 h-5" />}
+          </button>
           {/* Parcel info */}
           <div className="flex-1 min-w-0 space-y-1.5">
             <div className="flex items-center gap-2 flex-wrap">

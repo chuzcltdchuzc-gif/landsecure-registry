@@ -19,6 +19,13 @@ const RISK_CONFIG = {
   HIGH: { color: "bg-red-100 text-red-700", icon: XCircle },
 };
 
+const EVIDENCE_CONFIDENCE_CONFIG = {
+  VERIFIED: { color: "bg-emerald-100 text-emerald-700", icon: CheckCircle2, barColor: "bg-emerald-500" },
+  STRONG: { color: "bg-blue-100 text-blue-700", icon: CheckCircle2, barColor: "bg-blue-500" },
+  MODERATE: { color: "bg-yellow-100 text-yellow-700", icon: AlertTriangle, barColor: "bg-yellow-500" },
+  LIMITED: { color: "bg-red-100 text-red-700", icon: AlertTriangle, barColor: "bg-red-500" },
+};
+
 const CERT_STATUS = {
   PENDING: "bg-gray-100 text-gray-700",
   HELD: "bg-yellow-100 text-yellow-800",
@@ -130,6 +137,18 @@ export default function ParcelDetail() {
               <Badge className="text-[10px] px-2 py-0 rounded-full bg-emerald-100 text-emerald-700">
                 SEALED
               </Badge>
+            )}
+            {parcel.evidence_confidence_level && (
+              (() => {
+                const ec = EVIDENCE_CONFIDENCE_CONFIG[parcel.evidence_confidence_level] || {};
+                const EIcon = ec.icon;
+                return (
+                  <Badge className={`text-[10px] px-2 py-0 rounded-full ${ec.color || ""}`}>
+                    {EIcon && <EIcon className="w-3 h-3 mr-1 inline" />}
+                    {parcel.evidence_confidence_level} ({parcel.evidence_confidence_score || "—"})
+                  </Badge>
+                );
+              })()
             )}
           </div>
         </div>

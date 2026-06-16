@@ -2,7 +2,7 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, MapPin, CheckCircle2, FileText, TrendingUp, AlertTriangle, Building2, UserCheck } from "lucide-react";
+import { Users, MapPin, CheckCircle2, FileText, TrendingUp, AlertTriangle, Building2, UserCheck, Shield, Award } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { useOutletContext } from "react-router-dom";
 
@@ -23,6 +23,12 @@ export default function LandVaultDashboard() {
   const uniqueFamilies = [...new Set(parcels.map(p => p.family_name).filter(Boolean))].length;
   const activeAgents = [...new Set(leads.map(l => l.field_agent_email).filter(Boolean))].length;
   const activeSurveyors = [...new Set(surveys.map(s => s.surveyor_email).filter(Boolean))].length;
+
+  const avgEvidenceConfidence = parcels.length > 0
+    ? Math.round(parcels.reduce((s, p) => s + (p.evidence_confidence_score || 0), 0) / parcels.length)
+    : 0;
+  const verifiedParcels = parcels.filter(p => p.evidence_confidence_level === "VERIFIED").length;
+  const strongParcels = parcels.filter(p => p.evidence_confidence_level === "STRONG").length;
 
   // Monthly growth (last 6 months)
   const now = new Date();
@@ -47,6 +53,8 @@ export default function LandVaultDashboard() {
     { label: "Pending Validation", value: pendingValidation, icon: AlertTriangle, color: "text-orange-600", bg: "bg-orange-50" },
     { label: "Field Agents", value: activeAgents, icon: UserCheck, color: "text-pink-600", bg: "bg-pink-50" },
     { label: "Surveyors", value: activeSurveyors, icon: UserCheck, color: "text-indigo-600", bg: "bg-indigo-50" },
+    { label: "Evidence Confidence", value: `${avgEvidenceConfidence}%`, icon: Shield, color: "text-violet-600", bg: "bg-violet-50" },
+    { label: "VERIFIED Parcels", value: verifiedParcels, icon: Award, color: "text-emerald-600", bg: "bg-emerald-50" },
   ];
 
   return (

@@ -118,6 +118,14 @@ const roleMenus = {
     { label: "Verify Parcel", icon: Search, path: "/lv/verify" },
     { label: "Notifications", icon: Bell, path: "/notifications" },
   ],
+  surveyor_partner: [
+    { label: "── LandVault ──────", icon: null, path: null, divider: true },
+    { label: "Partner Portal", icon: LayoutDashboard, path: "/lv/surveyor" },
+    { label: "Parcel Registry", icon: MapPin, path: "/lv/parcels" },
+    { label: "Duplicate Alerts", icon: AlertTriangle, path: "/lv/duplicates" },
+    { label: "Verify Parcel", icon: Search, path: "/lv/verify" },
+    { label: "Notifications", icon: Bell, path: "/notifications" },
+  ],
   community_validator: [
     { label: "── LandVault ──────", icon: null, path: null, divider: true },
     { label: "Validation Queue", icon: CheckSquare, path: "/lv/validate" },

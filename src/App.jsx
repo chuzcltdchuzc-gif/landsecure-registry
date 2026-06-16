@@ -98,7 +98,7 @@ const AuthenticatedApp = () => {
 
   // New user with no role assigned yet — show role selection before entering the app
   // (excludes /demo which is public and doesn't need a role)
-  const GOVERNANCE_ROLES = ['surveyor_general', 'super_admin', 'compliance_officer', 'licensed_surveyor', 'community_validator', 'government_observer'];
+  const GOVERNANCE_ROLES = ['surveyor_general', 'super_admin', 'compliance_officer', 'licensed_surveyor', 'surveyor_partner', 'community_validator', 'government_observer'];
   if (user && !user.role_confirmed && !GOVERNANCE_ROLES.includes(user.role) && window.location.pathname !== '/demo') {
     return <RoleSelection onRoleSelected={() => checkUserAuth()} />;
   }
