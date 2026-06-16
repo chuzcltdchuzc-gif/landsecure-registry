@@ -1,0 +1,92 @@
+{
+  "name": "UsageEvent",
+  "type": "object",
+  "description": "PRIORITY 5 \u2014 Usage tracking foundation for future monetization. Records platform events with credit consumption.",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "User who performed the action"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "user_role": {
+      "type": "string"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "parcel_search",
+        "verification_request",
+        "certificate_download",
+        "archive_upload",
+        "due_diligence_request",
+        "community_confirmation",
+        "generate_verification_report",
+        "evidence_upload",
+        "consent_capture",
+        "parcel_registration",
+        "survey_submission",
+        "duplicate_review",
+        "public_lookup"
+      ],
+      "description": "Type of platform event"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "parcel_id": {
+      "type": "string"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "credits_consumed": {
+      "type": "number",
+      "default": 0,
+      "description": "Credits consumed by this event (0 for now)"
+    },
+    "metadata": {
+      "type": "string",
+      "description": "JSON: additional event context"
+    },
+    "tenant_id": {
+      "type": "string"
+    },
+    "ip_address": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "user_id",
+    "event_type",
+    "timestamp"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

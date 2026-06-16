@@ -12,6 +12,7 @@
         "super_admin",
         "compliance_officer",
         "licensed_surveyor",
+        "surveyor_partner",
         "community_validator",
         "government_observer"
       ],
