@@ -14,22 +14,31 @@
         "pdf_generation",
         "bulk_import",
         "report_export",
-        "backup"
+        "backup",
+        "duplicate_scan",
+        "evidence_hashing",
+        "archive_import",
+        "verification_report",
+        "ocr_processing",
+        "qr_certificate_generation",
+        "pdf_certificate_generation"
       ],
       "description": "Type of background job"
     },
     "status": {
       "type": "string",
       "enum": [
+        "pending",
         "queued",
+        "processing",
         "running",
         "completed",
         "failed",
         "retrying",
         "cancelled"
       ],
-      "default": "queued",
-      "description": "Current job status"
+      "default": "pending",
+      "description": "Current job status. pending=awaiting pickup, processing=actively executing"
     },
     "payload": {
       "type": "string",
@@ -74,6 +83,23 @@
         "critical"
       ],
       "default": "normal"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "description": "Unique key to prevent duplicate job creation for the same operation"
+    },
+    "progress_pct": {
+      "type": "number",
+      "default": 0,
+      "description": "Progress percentage 0-100 for long-running jobs"
+    },
+    "job_id": {
+      "type": "string",
+      "description": "Human-readable job identifier"
+    },
+    "result_reference": {
+      "type": "string",
+      "description": "Reference to job result (parcel_id, file_uri, etc.)"
     }
   },
   "required": [
@@ -86,21 +112,33 @@
           "$in": [
             "super_admin",
             "surveyor_general",
-            "compliance_officer"
+            "compliance_officer",
+            "licensed_surveyor",
+            "surveyor_partner",
+            "field_agent"
           ]
         }
       }
     },
     "read": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "super_admin",
-            "surveyor_general",
-            "compliance_officer"
-          ]
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer",
+                "licensed_surveyor",
+                "surveyor_partner"
+              ]
+            }
+          }
         }
-      }
+      ]
     },
     "update": {
       "user_condition": {
