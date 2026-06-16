@@ -1,7 +1,7 @@
 {
   "name": "DuplicateAlert",
   "type": "object",
-  "description": "SECTION C \u2014 Duplicate Detection Engine alerts",
+  "description": "SECTION C \u2014 Duplicate Detection Engine alerts with confidence scoring",
   "properties": {
     "alert_type": {
       "type": "string",
@@ -11,7 +11,9 @@
         "owner_duplicate",
         "family_duplicate",
         "survey_plan_duplicate",
-        "evidence_hash_duplicate"
+        "evidence_hash_duplicate",
+        "parcel_reference_duplicate",
+        "survey_reference_duplicate"
       ],
       "description": "Type of duplicate detected"
     },
@@ -35,6 +37,19 @@
         "critical"
       ],
       "default": "high"
+    },
+    "confidence_score": {
+      "type": "number",
+      "description": "Duplicate confidence score 0-100. 90-100=HIGH, 70-89=MEDIUM, 0-69=LOW"
+    },
+    "confidence_level": {
+      "type": "string",
+      "enum": [
+        "HIGH",
+        "MEDIUM",
+        "LOW"
+      ],
+      "description": "Derived from confidence_score"
     },
     "source_parcel_id": {
       "type": "string",
@@ -98,6 +113,14 @@
     "risk_score_impact": {
       "type": "number",
       "description": "Points added to risk score due to this alert"
+    },
+    "duplicate_review_outcome": {
+      "type": "string",
+      "enum": [
+        "confirmed_duplicate",
+        "false_positive",
+        "pending"
+      ]
     }
   },
   "required": [
@@ -123,7 +146,9 @@
           "$in": [
             "super_admin",
             "surveyor_general",
-            "compliance_officer"
+            "compliance_officer",
+            "licensed_surveyor",
+            "surveyor_partner"
           ]
         }
       }
