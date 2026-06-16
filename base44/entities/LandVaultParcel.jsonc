@@ -202,6 +202,20 @@
     "ownership_confidence_score": {
       "type": "number"
     },
+    "evidence_confidence_score": {
+      "type": "number",
+      "description": "PHASE 2 \u2014 Evidence confidence score 0-100. Auto-calculated by lvEvidenceConfidence."
+    },
+    "evidence_confidence_level": {
+      "type": "string",
+      "enum": [
+        "VERIFIED",
+        "STRONG",
+        "MODERATE",
+        "LIMITED"
+      ],
+      "description": "PHASE 2 \u2014 Derived from evidence_confidence_score"
+    },
     "verification_status": {
       "type": "string",
       "enum": [
@@ -257,6 +271,8 @@
         "family_duplicate",
         "survey_plan_duplicate",
         "evidence_duplicate",
+        "parcel_reference_duplicate",
+        "survey_reference_duplicate",
         "none"
       ],
       "default": "none"
@@ -556,6 +572,7 @@
                 "surveyor_general",
                 "compliance_officer",
                 "licensed_surveyor",
+                "surveyor_partner",
                 "community_validator",
                 "government_observer"
               ]
@@ -601,13 +618,18 @@
         },
         {
           "user_condition": {
-            "role": "licensed_surveyor"
-          },
-          "data.survey_status": {
-            "$in": [
-              "assigned",
-              "in_progress"
-            ]
+            "role": {
+              "$in": [
+                "licensed_surveyor",
+                "surveyor_partner"
+              ]
+            },
+            "data.survey_status": {
+              "$in": [
+                "assigned",
+                "in_progress"
+              ]
+            }
           }
         },
         {
