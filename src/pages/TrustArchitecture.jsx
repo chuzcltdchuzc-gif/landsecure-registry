@@ -291,6 +291,25 @@ export default function TrustArchitecture() {
               <p className="text-xs text-muted-foreground italic">Higher confidence means stronger evidence preservation and verification activity. Higher confidence does not imply legal ownership.</p>
             </CardContent>
           </Card>
+
+          {/* Attestation Depth Breakdown */}
+          <div className="mt-6 grid grid-cols-2 md:grid-cols-5 gap-3">
+            {[
+              { label: "DEEP", count: parcels.filter(p => p.attestation_level === "DEEP").length, color: "bg-emerald-200 text-emerald-800", desc: "4+ attestation layers" },
+              { label: "STRONG", count: parcels.filter(p => p.attestation_level === "STRONG").length, color: "bg-blue-200 text-blue-800", desc: "3 attestation layers" },
+              { label: "MODERATE", count: parcels.filter(p => p.attestation_level === "MODERATE").length, color: "bg-amber-200 text-amber-800", desc: "2 attestation layers" },
+              { label: "LIGHT", count: parcels.filter(p => p.attestation_level === "LIGHT").length, color: "bg-gray-200 text-gray-700", desc: "1 attestation layer" },
+              { label: "NONE", count: parcels.filter(p => !p.community_confirmed).length, color: "bg-red-100 text-red-700", desc: "No attestation yet" },
+            ].map(a => (
+              <Card key={a.label} className="border-0 shadow-sm text-center">
+                <CardContent className="p-3">
+                  <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${a.color}`}>{a.label}</span>
+                  <p className="text-xl font-bold mt-1">{a.count}</p>
+                  <p className="text-[10px] text-muted-foreground">{a.desc}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -333,6 +352,11 @@ export default function TrustArchitecture() {
             <MetricCard label="Surveyor Verified" value={svVerifiedCount} icon={Shield} />
             <MetricCard label="Alerts Resolved" value={duplicatesResolved} icon={AlertTriangle} />
             <MetricCard label="Avg Confidence" value={`${avgConfidence}%`} icon={TrendingUp} />
+            <MetricCard label="Attested Parcels" value={parcels.filter(p => p.community_confirmed).length} icon={Users} />
+            <MetricCard label="Attestation Layers" value={parcels.reduce((s, p) => s + (p.attestation_layer_count || 0), 0)} icon={Layers} />
+            <MetricCard label="DEEP Attestation" value={parcels.filter(p => p.attestation_level === "DEEP").length} icon={Shield} />
+            <MetricCard label="Traditional Auth" value={parcels.filter(p => (p.attestation_score || 0) >= 60).length} icon={Landmark} />
+            <MetricCard label="Avg Attestation" value={Math.round(parcels.reduce((s, p) => s + (p.attestation_score || 0), 0) / Math.max(1, parcels.length)) + "%"} icon={BarChart3} />
           </div>
           <div className="space-y-2 text-center text-sm text-emerald-700 font-medium">
             <p>Every verified record strengthens the network.</p>
