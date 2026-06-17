@@ -77,6 +77,10 @@ import EvidenceDetail from './pages/landvault/EvidenceDetail';
 import ConsentCapture from './pages/landvault/ConsentCapture';
 import PilotReadinessReport from './pages/landvault/PilotReadinessReport';
 import DeploymentGovernanceAudit from './pages/landvault/DeploymentGovernanceAudit';
+// Community Attestation Engine
+import CommunityAttestationDashboard from './pages/landvault/CommunityAttestationDashboard';
+import CommunityAttestationForm from './pages/landvault/CommunityAttestationForm';
+import CommunityAttestationReview from './pages/landvault/CommunityAttestationReview';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkUserAuth } = useAuth();
@@ -176,6 +180,12 @@ const AuthenticatedApp = () => {
         <Route path="/lv/surveyor-network" element={<SurveyorNetwork />} />
         <Route path="/lv/archive-import" element={<ArchiveImportWizard />} />
         <Route path="/lv/surveyor/:id" element={<SurveyorPublicProfile />} />
+        {/* Community Attestation Engine */}
+        <Route path="/community-attestation" element={<CommunityAttestationDashboard />} />
+        <Route path="/community-attestation/new" element={<CommunityAttestationForm />} />
+        <Route path="/community-attestation/review" element={<CommunityAttestationReview />} />
+        <Route path="/community-attestation/review/:id" element={<CommunityAttestationReview />} />
+        <Route path="/community-attestation/:id" element={<CommunityAttestationReview />} />
       </Route>
       <Route path="/demo" element={<DemoAccess />} />
       <Route path="/verify" element={<PublicVerify />} />

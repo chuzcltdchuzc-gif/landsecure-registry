@@ -1,0 +1,200 @@
+{
+  "name": "CommunityAttestation",
+  "type": "object",
+  "description": "Community stakeholder attestation of parcel evidence \u2014 preserved local knowledge, not ownership determination",
+  "properties": {
+    "attestation_id": {
+      "type": "string",
+      "description": "Auto-generated unique reference: ATTEST-EHM-000001"
+    },
+    "parcel_id": {
+      "type": "string",
+      "description": "Linked LandVaultParcel ID"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "attestor_name": {
+      "type": "string"
+    },
+    "attestor_role": {
+      "type": "string",
+      "enum": [
+        "FAMILY_HEAD",
+        "KINDRED_HEAD",
+        "VILLAGE_CHAIRMAN",
+        "TRADITIONAL_RULER",
+        "COMMUNITY_DEVELOPMENT_UNION",
+        "LAND_COMMITTEE_MEMBER",
+        "RELIGIOUS_LEADER",
+        "SURVEYOR_WITNESS",
+        "COMMUNITY_WITNESS"
+      ]
+    },
+    "community_name": {
+      "type": "string"
+    },
+    "ward": {
+      "type": "string"
+    },
+    "lga": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "phone_number": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "relationship_to_land": {
+      "type": "string"
+    },
+    "years_of_knowledge": {
+      "type": "number"
+    },
+    "attestation_statement": {
+      "type": "string"
+    },
+    "supporting_evidence_notes": {
+      "type": "string"
+    },
+    "signature_file": {
+      "type": "string"
+    },
+    "photo_file": {
+      "type": "string"
+    },
+    "supporting_documents": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "voice_recording": {
+      "type": "string"
+    },
+    "video_recording": {
+      "type": "string"
+    },
+    "evidence_review_checklist": {
+      "type": "string",
+      "description": "JSON array of completed checklist items"
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "APPROVED",
+        "REJECTED",
+        "CLARIFICATION_REQUIRED"
+      ],
+      "default": "PENDING"
+    },
+    "reviewed_by": {
+      "type": "string"
+    },
+    "reviewed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "review_notes": {
+      "type": "string"
+    },
+    "rejection_reason": {
+      "type": "string",
+      "enum": [
+        "Insufficient Evidence",
+        "Role Not Verified",
+        "Community Not Verified",
+        "Conflicting Evidence",
+        "Need More Information",
+        "Other"
+      ]
+    },
+    "confidence_impact": {
+      "type": "number",
+      "default": 0,
+      "description": "Points added to parcel evidence confidence score when approved (0-10)"
+    },
+    "consensus_contribution": {
+      "type": "string",
+      "enum": [
+        "SUPPORTING",
+        "NEUTRAL",
+        "CONFLICTING"
+      ],
+      "default": "SUPPORTING"
+    },
+    "traditional_institution_verified": {
+      "type": "boolean",
+      "default": false
+    },
+    "special_badge": {
+      "type": "string",
+      "enum": [
+        "COMMUNITY_ENDORSED",
+        "TRADITIONAL_INSTITUTION_VERIFIED",
+        "NONE"
+      ],
+      "default": "NONE"
+    },
+    "additional_notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "parcel_id",
+    "attestor_name",
+    "attestor_role",
+    "attestation_statement",
+    "relationship_to_land"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer",
+            "licensed_surveyor",
+            "surveyor_partner",
+            "field_agent",
+            "community_validator",
+            "government_observer"
+          ]
+        }
+      }
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}",
+          "data.verification_status": "CLARIFICATION_REQUIRED"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

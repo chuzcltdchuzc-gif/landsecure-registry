@@ -13,6 +13,7 @@ import EvidenceSealPanel from "@/components/landvault/EvidenceSealPanel";
 import DisputeReadinessPanel from "@/components/landvault/DisputeReadinessPanel";
 import OwnershipStructurePanel from "@/components/landvault/OwnershipStructurePanel";
 import EvidenceDetail from "./EvidenceDetail";
+import CommunityAttestationPanel from "@/components/community/CommunityAttestationPanel";
 
 const RISK_CONFIG = {
   LOW: { color: "bg-emerald-100 text-emerald-700", icon: CheckCircle2 },
@@ -203,10 +204,11 @@ export default function ParcelDetail() {
 
       {/* Tabs */}
       <Tabs defaultValue="overview">
-        <TabsList className="w-full grid grid-cols-4 h-9">
+        <TabsList className="w-full grid grid-cols-5 h-9">
           <TabsTrigger value="overview" className="text-xs">Overview</TabsTrigger>
           <TabsTrigger value="evidence" className="text-xs">Evidence ({evidence.length})</TabsTrigger>
           <TabsTrigger value="readiness" className="text-xs">Readiness</TabsTrigger>
+          <TabsTrigger value="community" className="text-xs">Community</TabsTrigger>
           <TabsTrigger value="report" className="text-xs">Report</TabsTrigger>
         </TabsList>
 
@@ -378,6 +380,11 @@ export default function ParcelDetail() {
               <Row label="Reviewed" value={parcel.duplicate_reviewed ? `Yes — ${parcel.duplicate_review_outcome?.replace(/_/g," ")}` : "Not yet reviewed"} />
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* COMMUNITY ATTESTATIONS TAB */}
+        <TabsContent value="community" className="mt-4">
+          <CommunityAttestationPanel parcelId={id} />
         </TabsContent>
 
         {/* BANK/LAWYER REPORT TAB — PHASE 9 */}
