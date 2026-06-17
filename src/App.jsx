@@ -57,6 +57,8 @@ import LandVaultDashboard from './pages/landvault/LandVaultDashboard';
 import SurveyorNetwork from './pages/landvault/SurveyorNetwork';
 import ArchiveImportWizard from './pages/landvault/ArchiveImportWizard';
 import SurveyorPublicProfile from './pages/landvault/SurveyorPublicProfile';
+// Trust Architecture (public)
+import TrustArchitecture from './pages/TrustArchitecture';
 import FieldAgentDashboard from './pages/landvault/FieldAgentDashboard';
 import LeadsList from './pages/landvault/LeadsList';
 import LeadForm from './pages/landvault/LeadForm';
@@ -178,6 +180,7 @@ const AuthenticatedApp = () => {
       <Route path="/demo" element={<DemoAccess />} />
       <Route path="/verify" element={<PublicVerify />} />
       <Route path="/lv/verify" element={<LandVaultPublicVerify />} />
+      <Route path="/trust" element={<TrustArchitecture />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
