@@ -1,0 +1,127 @@
+{
+  "name": "RevenueTransaction",
+  "type": "object",
+  "description": "Revenue tracking for surveyor partner monetization",
+  "properties": {
+    "surveyor_partner_id": {
+      "type": "string",
+      "description": "Reference to SurveyorPartner"
+    },
+    "surveyor_email": {
+      "type": "string"
+    },
+    "parcel_id": {
+      "type": "string"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "transaction_type": {
+      "type": "string",
+      "enum": [
+        "VERIFICATION_SEARCH",
+        "CERTIFICATE_DOWNLOAD",
+        "DUE_DILIGENCE_REQUEST",
+        "BANK_VERIFICATION",
+        "CONSULTATION_REQUEST"
+      ]
+    },
+    "amount": {
+      "type": "number",
+      "default": 0
+    },
+    "revenue_share_pct": {
+      "type": "number",
+      "default": 30,
+      "description": "Surveyor revenue share percentage"
+    },
+    "surveyor_earned": {
+      "type": "number",
+      "default": 0,
+      "description": "Amount earned by surveyor (amount * revenue_share_pct / 100)"
+    },
+    "platform_fee": {
+      "type": "number",
+      "default": 0,
+      "description": "Platform retained amount"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "EARNED",
+        "PAID",
+        "CANCELLED"
+      ],
+      "default": "PENDING"
+    },
+    "transaction_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "paid_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "requestor_email": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "surveyor_email",
+    "transaction_type",
+    "amount"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "data.surveyor_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

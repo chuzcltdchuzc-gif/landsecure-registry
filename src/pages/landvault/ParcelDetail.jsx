@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Shield, Camera, FileText, CheckCircle2, AlertTriangle, XCircle, Download, Loader2 } from "lucide-react";
+import { ArrowLeft, Shield, Camera, FileText, CheckCircle2, AlertTriangle, XCircle, Download, Loader2, Database, Award } from "lucide-react";
+import TrustBadge from "@/components/landvault/TrustBadge";
 import EvidenceSealPanel from "@/components/landvault/EvidenceSealPanel";
 import DisputeReadinessPanel from "@/components/landvault/DisputeReadinessPanel";
 import OwnershipStructurePanel from "@/components/landvault/OwnershipStructurePanel";
@@ -150,6 +151,13 @@ export default function ParcelDetail() {
                 );
               })()
             )}
+            {/* Trust Badge — Surveyor Network */}
+            {parcel.surveyor_name && (
+              <TrustBadge badge={
+                parcel.community_validation_status === "confirmed" ? "GREEN" :
+                parcel.survey_status === "completed" ? "BLUE" : "GREY"
+              } />
+            )}
           </div>
         </div>
         <Link to={`/lv/parcels/${id}/edit`}>
@@ -259,12 +267,22 @@ export default function ParcelDetail() {
             </CardContent>
           </Card>
 
-          {/* Survey */}
+          {/* Survey + Trust Badge */}
           <Card className="border-0 shadow-sm">
-            <CardHeader className="pb-2"><CardTitle className="text-sm">Survey</CardTitle></CardHeader>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm">Survey</CardTitle>
+                {parcel.surveyor_name && (
+                  <TrustBadge badge={
+                    parcel.community_validation_status === "confirmed" ? "GREEN" :
+                    parcel.survey_status === "completed" ? "BLUE" : "GREY"
+                  } />
+                )}
+              </div>
+            </CardHeader>
             <CardContent>
               <Row label="Surveyor" value={parcel.surveyor_name} />
-              <Row label="Licence" value={parcel.surveyor_licence} />
+              <Row label="Survey Reference" value={parcel.surveyor_licence} />
               <Row label="Date Surveyed" value={parcel.survey_date} />
               <Row label="Assignments" value={surveys.length > 0 ? `${surveys.length} assignment(s)` : null} />
               {parcel.survey_plan_url && (

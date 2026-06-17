@@ -1,0 +1,211 @@
+{
+  "name": "ArchiveRecord",
+  "type": "object",
+  "description": "Historical survey archive record imported by surveyor partners",
+  "properties": {
+    "archive_reference": {
+      "type": "string",
+      "description": "System-generated archive ID: ASV-ARCH-XXXXXX"
+    },
+    "survey_reference": {
+      "type": "string",
+      "description": "Original survey reference number from surveyor's records"
+    },
+    "survey_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of original survey"
+    },
+    "community": {
+      "type": "string"
+    },
+    "village": {
+      "type": "string"
+    },
+    "ward": {
+      "type": "string"
+    },
+    "lga": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "survey_plan_url": {
+      "type": "string",
+      "description": "Uploaded survey plan file URL"
+    },
+    "coordinate_file_url": {
+      "type": "string",
+      "description": "Coordinate file URL (CAD, CSV, GeoJSON)"
+    },
+    "supporting_docs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Additional supporting document URLs"
+    },
+    "photos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Site photos"
+    },
+    "classification": {
+      "type": "string",
+      "enum": [
+        "ARCHIVE_ONLY",
+        "SURVEYOR_VERIFIED",
+        "COMMUNITY_VERIFIED"
+      ],
+      "default": "ARCHIVE_ONLY",
+      "description": "Trust classification level"
+    },
+    "trust_badge": {
+      "type": "string",
+      "enum": [
+        "GREY",
+        "BLUE",
+        "GREEN"
+      ],
+      "default": "GREY",
+      "description": "Visual trust badge: GREY=Archive, BLUE=Surveyor Verified, GREEN=Community Verified"
+    },
+    "surveyor_partner_id": {
+      "type": "string",
+      "description": "Reference to SurveyorPartner record"
+    },
+    "surveyor_email": {
+      "type": "string"
+    },
+    "surveyor_name": {
+      "type": "string"
+    },
+    "landsurveyor_parcel_id": {
+      "type": "string",
+      "description": "Linked LandVaultParcel if promoted"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "gps_lat": {
+      "type": "number"
+    },
+    "gps_lng": {
+      "type": "number"
+    },
+    "gps_accuracy_m": {
+      "type": "number"
+    },
+    "client_consent_status": {
+      "type": "string",
+      "enum": [
+        "obtained",
+        "not_obtained",
+        "not_applicable"
+      ],
+      "default": "not_applicable"
+    },
+    "allocation_letter_url": {
+      "type": "string"
+    },
+    "family_agreement_url": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "PENDING_REVIEW",
+        "FLAGGED",
+        "ARCHIVED"
+      ],
+      "default": "ACTIVE"
+    },
+    "import_batch_id": {
+      "type": "string",
+      "description": "Batch identifier for bulk imports"
+    },
+    "import_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "hash_fingerprint": {
+      "type": "string",
+      "description": "SHA-256 of survey plan for integrity"
+    },
+    "duplicate_checked": {
+      "type": "boolean",
+      "default": false
+    },
+    "duplicate_alert_id": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "survey_reference",
+    "surveyor_email",
+    "classification"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}",
+      "user_condition": {
+        "role": "surveyor_partner"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "data.surveyor_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer",
+                "licensed_surveyor"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "data.surveyor_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

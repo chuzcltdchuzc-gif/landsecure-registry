@@ -1,0 +1,173 @@
+{
+  "name": "SurveyorPartner",
+  "type": "object",
+  "description": "Surveyor Network Partner profile with credential, portfolio and revenue tracking",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Linked user account email"
+    },
+    "full_name": {
+      "type": "string"
+    },
+    "firm_name": {
+      "type": "string"
+    },
+    "surcon_number": {
+      "type": "string",
+      "description": "SURCON registration number"
+    },
+    "license_number": {
+      "type": "string",
+      "description": "Licensed Surveyor number"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "office_address": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "lga_coverage": {
+      "type": "string"
+    },
+    "years_of_experience": {
+      "type": "number"
+    },
+    "biography": {
+      "type": "string"
+    },
+    "profile_photo_url": {
+      "type": "string"
+    },
+    "professional_certifications": {
+      "type": "string",
+      "description": "JSON array of certification strings"
+    },
+    "specialization_areas": {
+      "type": "string",
+      "description": "JSON array of specialization areas"
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "PENDING_VERIFICATION",
+        "VERIFIED_SURVEYOR",
+        "SUSPENDED"
+      ],
+      "default": "PENDING_VERIFICATION"
+    },
+    "total_records_uploaded": {
+      "type": "number",
+      "default": 0
+    },
+    "archive_records": {
+      "type": "number",
+      "default": 0
+    },
+    "surveyor_verified_records": {
+      "type": "number",
+      "default": 0
+    },
+    "community_verified_records": {
+      "type": "number",
+      "default": 0
+    },
+    "verification_searches": {
+      "type": "number",
+      "default": 0
+    },
+    "certificates_generated": {
+      "type": "number",
+      "default": 0
+    },
+    "duplicate_alerts_received": {
+      "type": "number",
+      "default": 0
+    },
+    "revenue_earned": {
+      "type": "number",
+      "default": 0
+    },
+    "revenue_available_for_withdrawal": {
+      "type": "number",
+      "default": 0
+    },
+    "revenue_paid": {
+      "type": "number",
+      "default": 0
+    },
+    "created_by_email": {
+      "type": "string"
+    },
+    "last_active_date": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "user_email",
+    "full_name",
+    "license_number"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}",
+      "user_condition": {
+        "role": "surveyor_partner"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

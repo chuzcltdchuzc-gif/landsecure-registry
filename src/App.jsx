@@ -54,6 +54,9 @@ import PackageManagement from './pages/ehime/PackageManagement';
 
 // LandVault
 import LandVaultDashboard from './pages/landvault/LandVaultDashboard';
+import SurveyorNetwork from './pages/landvault/SurveyorNetwork';
+import ArchiveImportWizard from './pages/landvault/ArchiveImportWizard';
+import SurveyorPublicProfile from './pages/landvault/SurveyorPublicProfile';
 import FieldAgentDashboard from './pages/landvault/FieldAgentDashboard';
 import LeadsList from './pages/landvault/LeadsList';
 import LeadForm from './pages/landvault/LeadForm';
@@ -168,6 +171,9 @@ const AuthenticatedApp = () => {
         <Route path="/lv/consent/:parcelId" element={<ConsentCapture />} />
         <Route path="/lv/readiness" element={<PilotReadinessReport />} />
         <Route path="/lv/governance" element={<DeploymentGovernanceAudit />} />
+        <Route path="/lv/surveyor-network" element={<SurveyorNetwork />} />
+        <Route path="/lv/archive-import" element={<ArchiveImportWizard />} />
+        <Route path="/lv/surveyor/:id" element={<SurveyorPublicProfile />} />
       </Route>
       <Route path="/demo" element={<DemoAccess />} />
       <Route path="/verify" element={<PublicVerify />} />

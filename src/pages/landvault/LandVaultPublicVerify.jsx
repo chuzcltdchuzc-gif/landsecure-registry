@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Shield, Search, CheckCircle2, AlertTriangle, XCircle, MapPin, Loader2, QrCode } from "lucide-react";
+import { Shield, Search, CheckCircle2, AlertTriangle, XCircle, MapPin, Loader2, QrCode, Database, Award } from "lucide-react";
+import TrustBadge from "@/components/landvault/TrustBadge";
 
 const CERT_STATUS_CONFIG = {
   PENDING: { label: "Pending", color: "bg-gray-100 text-gray-700", icon: AlertTriangle },
@@ -164,6 +165,12 @@ export default function LandVaultPublicVerify() {
                   <DetailRow label="Surveyor Licence" value={parcel.surveyor_licence} />
                   <DetailRow label="Land Use" value={parcel.land_use?.replace(/_/g," ")} />
                   <DetailRow label="Ownership Type" value={parcel.ownership_type} />
+                  <div className="pt-2">
+                    <TrustBadge badge={
+                      parcel.community_confirmed ? "GREEN" :
+                      parcel.survey_completed ? "BLUE" : "GREY"
+                    } />
+                  </div>
                 </div>
 
                 <div>
