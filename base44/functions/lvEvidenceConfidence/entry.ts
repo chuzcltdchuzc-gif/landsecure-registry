@@ -74,24 +74,10 @@ function calcEvidenceConfidence(parcel, evidenceItems) {
     reasons.push('witness_recorded');
   }
 
-  // Community attested — weighted by attestation depth
-  // DEEP attestation = +25, STRONG = +20, MODERATE = +15, LIGHT = +10
-  // Uses attestation_score calculated by lvCommunityAttestationScore
-  if (parcel.community_confirmed) {
-    const attestationScore = parcel.attestation_score || 0;
-    if (attestationScore >= 85) {
-      score += 25;
-      reasons.push('community_attestation_deep');
-    } else if (attestationScore >= 60) {
-      score += 20;
-      reasons.push('community_attestation_strong');
-    } else if (attestationScore >= 35) {
-      score += 15;
-      reasons.push('community_attestation_moderate');
-    } else {
-      score += 10;
-      reasons.push('community_attestation_light');
-    }
+  // Community confirmed (+10)
+  if (parcel.community_validation_status === 'confirmed') {
+    score += 10;
+    reasons.push('community_confirmed');
   }
 
   // Evidence hash generated — check if any sealed evidence exists (+5)

@@ -216,27 +216,6 @@
       ],
       "description": "PHASE 2 \u2014 Derived from evidence_confidence_score"
     },
-    "attestation_score": {
-      "type": "number",
-      "description": "PRIORITY 2 \u2014 Community attestation score 0-100. Auto-calculated by lvCommunityAttestationScore."
-    },
-    "attestation_level": {
-      "type": "string",
-      "enum": [
-        "DEEP",
-        "STRONG",
-        "MODERATE",
-        "LIGHT",
-        "NONE"
-      ],
-      "default": "NONE",
-      "description": "PRIORITY 2 \u2014 Derived from attestation_score. DEEP=85+, STRONG=60-84, MODERATE=35-59, LIGHT=15-34, NONE=0-14"
-    },
-    "attestation_layer_count": {
-      "type": "number",
-      "default": 0,
-      "description": "PRIORITY 2 \u2014 Number of distinct attestation layers completed"
-    },
     "verification_status": {
       "type": "string",
       "enum": [
