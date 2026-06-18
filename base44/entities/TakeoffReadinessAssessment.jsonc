@@ -1,0 +1,139 @@
+{
+  "name": "TakeoffReadinessAssessment",
+  "type": "object",
+  "description": "Pilot takeoff readiness assessment \u2014 calculates platform readiness from infrastructure, trust, security, evidence integrity, community participation, verification quality, surveyor adoption, disaster recovery, fraud resilience, and operational health.",
+  "properties": {
+    "assessment_id": {
+      "type": "string",
+      "description": "Auto-generated: TORA-EHM-000001"
+    },
+    "overall_score": {
+      "type": "number",
+      "description": "0-100 overall takeoff readiness score"
+    },
+    "readiness_level": {
+      "type": "string",
+      "enum": [
+        "NOT_READY",
+        "EARLY_PILOT",
+        "PILOT_READY",
+        "TAKEOFF_READY",
+        "SCALE_READY"
+      ],
+      "default": "NOT_READY"
+    },
+    "infrastructure_score": {
+      "type": "number"
+    },
+    "trust_score": {
+      "type": "number"
+    },
+    "security_score": {
+      "type": "number"
+    },
+    "evidence_integrity_score": {
+      "type": "number"
+    },
+    "community_participation_score": {
+      "type": "number"
+    },
+    "verification_quality_score": {
+      "type": "number"
+    },
+    "surveyor_adoption_score": {
+      "type": "number"
+    },
+    "disaster_recovery_score": {
+      "type": "number"
+    },
+    "fraud_resilience_score": {
+      "type": "number"
+    },
+    "operational_health_score": {
+      "type": "number"
+    },
+    "total_parcels": {
+      "type": "number"
+    },
+    "verified_parcels": {
+      "type": "number"
+    },
+    "total_attestations": {
+      "type": "number"
+    },
+    "approved_attestations": {
+      "type": "number"
+    },
+    "active_surveyors": {
+      "type": "number"
+    },
+    "evidence_locks_active": {
+      "type": "number"
+    },
+    "hash_chains_valid": {
+      "type": "number"
+    },
+    "open_security_incidents": {
+      "type": "number"
+    },
+    "fraud_signals_open": {
+      "type": "number"
+    },
+    "recovery_tests_passed": {
+      "type": "number"
+    },
+    "penetration_tests_passed": {
+      "type": "number"
+    },
+    "penetration_tests_failed": {
+      "type": "number"
+    },
+    "gaps": {
+      "type": "string",
+      "description": "JSON with identified gaps and recommendations"
+    },
+    "assessed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "assessed_by": {
+      "type": "string"
+    },
+    "assessment_version": {
+      "type": "string",
+      "default": "1.0.0"
+    }
+  },
+  "required": [
+    "assessed_by"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer",
+            "licensed_surveyor",
+            "surveyor_partner",
+            "government_observer"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

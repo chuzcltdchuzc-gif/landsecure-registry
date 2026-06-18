@@ -85,6 +85,7 @@ import CommunityTransparency from './pages/landvault/CommunityTransparency';
 import OperationsDashboard from './pages/OperationsDashboard';
 import SecurityDashboard from './pages/SecurityDashboard';
 import SecurityTesting from './pages/SecurityTesting';
+import SecurityOperations from './pages/SecurityOperations';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkUserAuth } = useAuth();
@@ -199,6 +200,7 @@ const AuthenticatedApp = () => {
       <Route path="/operations" element={<OperationsDashboard />} />
       <Route path="/security" element={<SecurityDashboard />} />
       <Route path="/security/testing" element={<SecurityTesting />} />
+      <Route path="/security/operations" element={<SecurityOperations />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

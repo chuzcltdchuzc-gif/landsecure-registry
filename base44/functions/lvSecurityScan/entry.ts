@@ -54,6 +54,43 @@ Deno.serve(async (req) => {
       results.trust_score = trustResult;
     } catch (e) { results.trust_score = { error: e.message }; }
 
+    // 7. Fraud Resilience Scan
+    try {
+      const fraudResilienceResult = await base44.asServiceRole.functions.invoke('lvFraudResilience', { mode: 'batch' });
+      results.fraud_resilience = fraudResilienceResult;
+    } catch (e) { results.fraud_resilience = { error: e.message }; }
+
+    // 8. Hash Chain Verification
+    try {
+      const chainResult = await base44.asServiceRole.entities.HashChainEntry.list('-created_date', 500);
+      const broken = chainResult.filter(c => ['CHAIN_BREAK', 'HASH_MISMATCH', 'MISSING_LINK'].includes(c.verification_status));
+      results.hash_chain = { total: chainResult.length, valid: chainResult.length - broken.length, broken: broken.length };
+      if (broken.length > 0) {
+        for (const b of broken) {
+          await base44.asServiceRole.entities.SecurityIncident.create({
+            incident_type: 'DATA_CORRUPTION',
+            severity: 'CRITICAL',
+            status: 'OPEN',
+            detected_by: 'lvSecurityScan',
+            description: `Hash chain integrity broken: ${b.entity_type}/${b.entity_id} — status: ${b.verification_status}`,
+            opened_at: new Date().toISOString(),
+          });
+        }
+      }
+    } catch (e) { results.hash_chain = { error: e.message }; }
+
+    // 9. Penetration Testing
+    try {
+      const pentestResult = await base44.asServiceRole.functions.invoke('lvPenetrationTest', { test_name: 'all' });
+      results.penetration_test = pentestResult;
+    } catch (e) { results.penetration_test = { error: e.message }; }
+
+    // 10. Takeoff Readiness Assessment
+    try {
+      const readinessResult = await base44.asServiceRole.functions.invoke('lvTakeoffReadiness', {});
+      results.takeoff_readiness = readinessResult;
+    } catch (e) { results.takeoff_readiness = { error: e.message }; }
+
     // Log completion
     await base44.asServiceRole.entities.AuditLog.create({
       user_email: 'system@landvault',

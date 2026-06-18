@@ -1,0 +1,122 @@
+{
+  "name": "PenetrationTestResult",
+  "type": "object",
+  "description": "Automated penetration test results \u2014 tests for unauthorized access, privilege escalation, broken object references, file upload abuse, mass assignment, route protection, audit tampering, certificate forgery, and evidence manipulation.",
+  "properties": {
+    "result_id": {
+      "type": "string",
+      "description": "Auto-generated: PEN-EHM-000001"
+    },
+    "test_name": {
+      "type": "string",
+      "enum": [
+        "UNAUTHORIZED_RECORD_ACCESS",
+        "PRIVILEGE_ESCALATION",
+        "BROKEN_OBJECT_REFERENCES",
+        "FILE_UPLOAD_ABUSE",
+        "MASS_ASSIGNMENT",
+        "ROUTE_PROTECTION",
+        "AUDIT_TAMPERING",
+        "CERTIFICATE_FORGERY",
+        "EVIDENCE_MANIPULATION",
+        "SURVEY_PLAN_TAMPERING",
+        "COMMUNITY_ATTESTATION_ABUSE"
+      ]
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "CRITICAL"
+      ],
+      "default": "MEDIUM"
+    },
+    "result": {
+      "type": "string",
+      "enum": [
+        "PASSED",
+        "FAILED",
+        "DISCOVERED",
+        "NOT_TESTED"
+      ],
+      "default": "NOT_TESTED"
+    },
+    "evidence": {
+      "type": "string",
+      "description": "JSON with test evidence and reproduction steps"
+    },
+    "vulnerability": {
+      "type": "string",
+      "description": "Description of discovered vulnerability"
+    },
+    "tested_by": {
+      "type": "string"
+    },
+    "tested_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "incident_id": {
+      "type": "string",
+      "description": "Linked SecurityIncident if vulnerability discovered"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "FIXED",
+        "ACCEPTED_RISK",
+        "WONT_FIX"
+      ],
+      "default": "OPEN"
+    },
+    "fixed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "fixed_by": {
+      "type": "string"
+    },
+    "retest_result": {
+      "type": "string",
+      "enum": [
+        "PASSED",
+        "FAILED",
+        "PENDING"
+      ],
+      "default": "PENDING"
+    }
+  },
+  "required": [
+    "test_name",
+    "result"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

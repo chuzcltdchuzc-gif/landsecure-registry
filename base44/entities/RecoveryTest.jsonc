@@ -1,0 +1,101 @@
+{
+  "name": "RecoveryTest",
+  "type": "object",
+  "description": "Disaster recovery validation \u2014 tests database recovery, evidence recovery, certificate recovery, audit recovery, and job queue recovery. Pass criteria: >95% success, <60 min recovery time.",
+  "properties": {
+    "test_id": {
+      "type": "string",
+      "description": "Auto-generated: REC-EHM-000001"
+    },
+    "test_type": {
+      "type": "string",
+      "enum": [
+        "DATABASE_RECOVERY",
+        "EVIDENCE_RECOVERY",
+        "CERTIFICATE_RECOVERY",
+        "AUDIT_RECOVERY",
+        "JOB_QUEUE_RECOVERY",
+        "FULL_SYSTEM_RECOVERY"
+      ],
+      "description": "Type of recovery test"
+    },
+    "executed_by": {
+      "type": "string"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "duration_minutes": {
+      "type": "number",
+      "description": "Actual recovery duration in minutes"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PASSED",
+        "FAILED",
+        "IN_PROGRESS",
+        "ERROR"
+      ],
+      "default": "IN_PROGRESS"
+    },
+    "success_rate": {
+      "type": "number",
+      "description": "Percentage success rate 0-100"
+    },
+    "items_checked": {
+      "type": "number"
+    },
+    "items_recovered": {
+      "type": "number"
+    },
+    "items_failed": {
+      "type": "number"
+    },
+    "results": {
+      "type": "string",
+      "description": "JSON with detailed test results"
+    },
+    "error_details": {
+      "type": "string"
+    },
+    "recommendations": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "test_type",
+    "executed_by"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

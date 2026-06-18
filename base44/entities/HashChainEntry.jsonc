@@ -1,0 +1,114 @@
+{
+  "name": "HashChainEntry",
+  "type": "object",
+  "description": "Blockchain-style audit linkage for evidence, attestations, certificates, verification events, and audit entries. Every record references the previous hash \u2014 any modification breaks chain integrity.",
+  "properties": {
+    "chain_id": {
+      "type": "string",
+      "description": "Auto-generated: CHAIN-EHM-000001"
+    },
+    "entity_type": {
+      "type": "string",
+      "enum": [
+        "EvidenceVault",
+        "CommunityAttestation",
+        "LandVaultParcel",
+        "CertificateIntegrityCheck",
+        "EvidenceIntegrityCheck",
+        "AuditLog",
+        "CommunityAttestationAudit",
+        "EvidenceTimelineEvent",
+        "SurveyDocument",
+        "ArchiveRecord"
+      ],
+      "description": "Type of the chained entity"
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "ID of the chained entity"
+    },
+    "parcel_id": {
+      "type": "string"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "previous_hash": {
+      "type": "string",
+      "description": "SHA-256 of the previous chain entry in this entity's sequence"
+    },
+    "current_hash": {
+      "type": "string",
+      "description": "SHA-256 of the current entity's critical fields"
+    },
+    "chain_position": {
+      "type": "number",
+      "description": "Sequential position in the chain for this entity type"
+    },
+    "chain_parent_id": {
+      "type": "string",
+      "description": "ID of the parent chain entry"
+    },
+    "data_snapshot": {
+      "type": "string",
+      "description": "JSON snapshot of critical fields at time of chaining"
+    },
+    "computed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "VALID",
+        "CHAIN_BREAK",
+        "HASH_MISMATCH",
+        "MISSING_LINK",
+        "UNVERIFIED"
+      ],
+      "default": "UNVERIFIED"
+    },
+    "verified_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "entity_type",
+    "entity_id",
+    "current_hash",
+    "chain_position"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer",
+            "licensed_surveyor",
+            "surveyor_partner",
+            "government_observer"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

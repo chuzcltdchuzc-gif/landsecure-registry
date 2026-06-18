@@ -1,0 +1,128 @@
+{
+  "name": "EvidenceLock",
+  "type": "object",
+  "description": "Immutable evidence preservation lock. Automatically created when survey plans are approved, attestations approved, verification reports issued, or certificates generated. Prevents direct editing \u2014 corrections require new versions.",
+  "properties": {
+    "lock_id": {
+      "type": "string",
+      "description": "Auto-generated: LOCK-EHM-000001"
+    },
+    "entity_type": {
+      "type": "string",
+      "enum": [
+        "EvidenceVault",
+        "CommunityAttestation",
+        "SurveyDocument",
+        "LandVaultParcel",
+        "CertificateIntegrityCheck",
+        "ArchiveRecord"
+      ],
+      "description": "Type of locked entity"
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "ID of the locked entity"
+    },
+    "parcel_id": {
+      "type": "string"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "evidence_hash": {
+      "type": "string",
+      "description": "SHA-256 hash at time of locking"
+    },
+    "locked_by": {
+      "type": "string",
+      "description": "User or system that created the lock"
+    },
+    "locked_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "lock_reason": {
+      "type": "string",
+      "enum": [
+        "SURVEY_PLAN_APPROVED",
+        "ATTESTATION_APPROVED",
+        "VERIFICATION_REPORT_ISSUED",
+        "CERTIFICATE_GENERATED",
+        "EVIDENCE_SEALED",
+        "ARCHIVE_IMPORTED",
+        "MANUAL_LOCK"
+      ],
+      "description": "Trigger event that created this lock"
+    },
+    "verification_hash": {
+      "type": "string",
+      "description": "Secondary verification hash"
+    },
+    "previous_lock_id": {
+      "type": "string",
+      "description": "ID of previous lock version (for version chain)"
+    },
+    "version_number": {
+      "type": "number",
+      "default": 1,
+      "description": "Sequential version number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "SUPERSEDED",
+        "REVOKED"
+      ],
+      "default": "ACTIVE"
+    },
+    "superseded_by": {
+      "type": "string",
+      "description": "ID of lock that supersedes this one"
+    },
+    "revoked_by": {
+      "type": "string"
+    },
+    "revoked_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revocation_reason": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "entity_type",
+    "entity_id",
+    "evidence_hash",
+    "lock_reason"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer",
+            "licensed_surveyor",
+            "surveyor_partner"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

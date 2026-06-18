@@ -1,0 +1,123 @@
+{
+  "name": "RoleChangeApproval",
+  "type": "object",
+  "description": "Two-person approval workflow for role escalations. No direct role promotion \u2014 requires Super Admin review, audit logging, and notification generation.",
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "description": "Auto-generated: RCA-EHM-000001"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "User whose role is being changed"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "current_role": {
+      "type": "string"
+    },
+    "requested_role": {
+      "type": "string"
+    },
+    "requested_by": {
+      "type": "string",
+      "description": "User who requested the change"
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "request_reason": {
+      "type": "string"
+    },
+    "first_approver": {
+      "type": "string"
+    },
+    "first_approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "second_approver": {
+      "type": "string",
+      "description": "Must be Super Admin"
+    },
+    "second_approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "FIRST_APPROVED",
+        "APPROVED",
+        "REJECTED",
+        "CANCELLED"
+      ],
+      "default": "PENDING"
+    },
+    "rejection_reason": {
+      "type": "string"
+    },
+    "emergency_override": {
+      "type": "boolean",
+      "default": false
+    },
+    "emergency_reason": {
+      "type": "string"
+    },
+    "audit_log_id": {
+      "type": "string"
+    },
+    "notification_sent": {
+      "type": "boolean",
+      "default": false
+    },
+    "applied_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "user_id",
+    "current_role",
+    "requested_role",
+    "requested_by"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}
