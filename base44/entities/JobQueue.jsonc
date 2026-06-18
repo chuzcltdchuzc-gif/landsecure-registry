@@ -2,9 +2,9 @@
   "name": "JobQueue",
   "type": "object",
   "properties": {
-    "tenant_id": {
+    "job_id": {
       "type": "string",
-      "description": "Tenant scoping for job queue isolation"
+      "description": "Human-readable job identifier"
     },
     "job_type": {
       "type": "string",
@@ -21,7 +21,9 @@
         "verification_report",
         "ocr_processing",
         "qr_certificate_generation",
-        "pdf_certificate_generation"
+        "pdf_certificate_generation",
+        "confidence_recalculation",
+        "notification"
       ],
       "description": "Type of background job"
     },
@@ -37,8 +39,19 @@
         "retrying",
         "cancelled"
       ],
-      "default": "pending",
-      "description": "Current job status. pending=awaiting pickup, processing=actively executing"
+      "default": "pending"
+    },
+    "entity_type": {
+      "type": "string",
+      "description": "Target entity type (e.g. LandVaultParcel, EvidenceVault)"
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "Target entity ID"
+    },
+    "created_by": {
+      "type": "string",
+      "description": "User email who created the job"
     },
     "payload": {
       "type": "string",
@@ -52,27 +65,19 @@
       "type": "string",
       "description": "Error details if job failed"
     },
-    "retry_count": {
+    "attempts": {
       "type": "number",
       "default": 0,
-      "description": "Number of retry attempts made"
+      "description": "Number of attempts made (including current)"
     },
-    "max_retries": {
+    "max_attempts": {
       "type": "number",
       "default": 3,
-      "description": "Maximum retry attempts allowed"
+      "description": "Maximum attempts before marking as FAILED"
     },
-    "started_at": {
+    "idempotency_key": {
       "type": "string",
-      "format": "date-time"
-    },
-    "completed_at": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "created_by_email": {
-      "type": "string",
-      "description": "User who enqueued the job"
+      "description": "Unique key to prevent duplicate job creation for the same operation"
     },
     "priority": {
       "type": "string",
@@ -84,22 +89,22 @@
       ],
       "default": "normal"
     },
-    "idempotency_key": {
-      "type": "string",
-      "description": "Unique key to prevent duplicate job creation for the same operation"
-    },
     "progress_pct": {
       "type": "number",
       "default": 0,
-      "description": "Progress percentage 0-100 for long-running jobs"
+      "description": "Progress percentage 0-100"
     },
-    "job_id": {
+    "started_at": {
       "type": "string",
-      "description": "Human-readable job identifier"
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
     },
     "result_reference": {
       "type": "string",
-      "description": "Reference to job result (parcel_id, file_uri, etc.)"
+      "description": "Reference to job result (parcel_id, file_uri, certificate_url)"
     }
   },
   "required": [

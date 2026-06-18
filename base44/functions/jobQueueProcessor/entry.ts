@@ -164,6 +164,27 @@ async function processJob(base44, job) {
       return { success: true, qr_code_url: qrUrl, parcel_number: parcel.parcel_number };
     }
 
+    case 'confidence_recalculation': {
+      const { entity_id: confEntityId } = payload;
+      if (!confEntityId) throw new Error('confidence_recalculation requires entity_id');
+      await base44.asServiceRole.functions.invoke('lvEvidenceConfidence', {
+        entity_id: confEntityId,
+        mode: 'single',
+      });
+      return { success: true, entity_id: confEntityId };
+    }
+
+    case 'notification': {
+      const { recipient, type, message, entity_id: notifEntityId, entity_type: notifEntityType } = payload;
+      if (!recipient || !type) throw new Error('notification requires recipient and type');
+      await base44.asServiceRole.functions.invoke('lvGenerateNotification', {
+        recipient, type, message,
+        parcel_id: notifEntityId || null,
+        parcel_number: payload.parcel_number || null,
+      });
+      return { success: true, recipient, type };
+    }
+
     case 'ocr_processing': {
       const { file_url, parcel_id } = payload;
       if (!file_url) throw new Error('ocr_processing requires file_url');
@@ -276,13 +297,13 @@ Deno.serve(async (req) => {
         results.push({ id: job.id, type: job.job_type, status: 'completed' });
 
       } catch (err) {
-        const retryCount = (job.retry_count || 0) + 1;
-        const maxRetries = job.max_retries || MAX_RETRIES;
+        const retryCount = (job.attempts || job.retry_count || 0) + 1;
+        const maxRetries = job.max_attempts || job.max_retries || MAX_RETRIES;
 
         if (retryCount < maxRetries) {
           await base44.asServiceRole.entities.JobQueue.update(job.id, {
             status: 'retrying',
-            retry_count: retryCount,
+            attempts: retryCount,
             error_message: `Attempt ${retryCount}/${maxRetries}: ${err.message}`,
           });
           // Reset to pending so next run picks it up
