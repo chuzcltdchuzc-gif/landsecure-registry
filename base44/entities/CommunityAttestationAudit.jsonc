@@ -62,18 +62,7 @@
   ],
   "rls": {
     "create": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "super_admin",
-            "surveyor_general",
-            "compliance_officer",
-            "field_agent",
-            "surveyor_partner",
-            "community_validator"
-          ]
-        }
-      }
+      "created_by": "{{user.email}}"
     },
     "read": {
       "user_condition": {
