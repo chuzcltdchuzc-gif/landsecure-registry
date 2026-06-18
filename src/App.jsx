@@ -81,6 +81,7 @@ import DeploymentGovernanceAudit from './pages/landvault/DeploymentGovernanceAud
 import CommunityAttestationDashboard from './pages/landvault/CommunityAttestationDashboard';
 import CommunityAttestationForm from './pages/landvault/CommunityAttestationForm';
 import CommunityAttestationReview from './pages/landvault/CommunityAttestationReview';
+import CommunityTransparency from './pages/landvault/CommunityTransparency';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkUserAuth } = useAuth();
@@ -191,6 +192,7 @@ const AuthenticatedApp = () => {
       <Route path="/verify" element={<PublicVerify />} />
       <Route path="/lv/verify" element={<LandVaultPublicVerify />} />
       <Route path="/trust" element={<TrustArchitecture />} />
+      <Route path="/community-transparency" element={<CommunityTransparency />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

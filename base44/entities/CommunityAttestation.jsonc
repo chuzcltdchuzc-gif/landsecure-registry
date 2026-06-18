@@ -58,6 +58,16 @@
     "attestation_statement": {
       "type": "string"
     },
+    "attestation_position": {
+      "type": "string",
+      "enum": [
+        "SUPPORTING",
+        "NEUTRAL",
+        "CONFLICTING"
+      ],
+      "default": "SUPPORTING",
+      "description": "Position of this attestation relative to parcel claims"
+    },
     "supporting_evidence_notes": {
       "type": "string"
     },
@@ -76,8 +86,35 @@
     "voice_recording": {
       "type": "string"
     },
+    "voice_recording_file_type": {
+      "type": "string"
+    },
+    "voice_recording_file_size": {
+      "type": "number"
+    },
+    "voice_recording_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of voice recording file for integrity verification"
+    },
     "video_recording": {
       "type": "string"
+    },
+    "video_recording_file_type": {
+      "type": "string"
+    },
+    "video_recording_file_size": {
+      "type": "number"
+    },
+    "video_recording_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of video recording file for integrity verification"
+    },
+    "media_uploaded_by": {
+      "type": "string"
+    },
+    "media_uploaded_at": {
+      "type": "string",
+      "format": "date-time"
     },
     "evidence_review_checklist": {
       "type": "string",

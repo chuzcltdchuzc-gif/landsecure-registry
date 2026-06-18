@@ -1,0 +1,112 @@
+{
+  "name": "EvidenceTimelineEvent",
+  "type": "object",
+  "description": "Chronological, immutable record of all evidence-related events on a parcel",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Auto-generated: ETE-EHM-000001"
+    },
+    "parcel_id": {
+      "type": "string"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "ATTESTATION_SUBMITTED",
+        "ATTESTATION_APPROVED",
+        "ATTESTATION_REJECTED",
+        "ATTESTATION_CLARIFICATION",
+        "CONFLICT_DETECTED",
+        "ALERT_CREATED",
+        "FLAG_CREATED",
+        "ENDORSEMENT_ADDED",
+        "CONSENSUS_UPDATED",
+        "CONFIDENCE_UPDATED",
+        "AUDIT_RECORDED"
+      ]
+    },
+    "event_source": {
+      "type": "string",
+      "description": "System or user that generated the event"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "user": {
+      "type": "string",
+      "description": "User email who triggered the event"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Human-readable event summary"
+    },
+    "related_record": {
+      "type": "string",
+      "description": "ID of related entity (attestation, alert, flag, endorsement)"
+    },
+    "related_type": {
+      "type": "string",
+      "description": "Entity type of related_record"
+    },
+    "visibility": {
+      "type": "string",
+      "enum": [
+        "PUBLIC",
+        "ADMIN_ONLY",
+        "INTERNAL"
+      ],
+      "default": "INTERNAL"
+    }
+  },
+  "required": [
+    "parcel_id",
+    "event_type",
+    "summary"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer",
+            "field_agent",
+            "surveyor_partner"
+          ]
+        }
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer",
+            "surveyor_partner",
+            "licensed_surveyor",
+            "field_agent",
+            "community_validator",
+            "government_observer"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

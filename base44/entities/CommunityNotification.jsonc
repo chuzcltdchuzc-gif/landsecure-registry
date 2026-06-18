@@ -1,0 +1,115 @@
+{
+  "name": "CommunityNotification",
+  "type": "object",
+  "description": "Notifications generated from community attestation events for admins and stakeholders",
+  "properties": {
+    "notification_id": {
+      "type": "string",
+      "description": "Auto-generated: CN-EHM-000001"
+    },
+    "recipient": {
+      "type": "string",
+      "description": "User email to notify"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "ATTESTATION_SUBMITTED",
+        "ATTESTATION_APPROVED",
+        "ATTESTATION_REJECTED",
+        "CONFLICT_DETECTED",
+        "CONSENSUS_CHANGED",
+        "TRADITIONAL_ENDORSEMENT_ADDED",
+        "MANUAL_REVIEW_REQUIRED",
+        "FLAG_CREATED"
+      ]
+    },
+    "message": {
+      "type": "string"
+    },
+    "parcel_id": {
+      "type": "string"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "related_record": {
+      "type": "string"
+    },
+    "related_type": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "UNREAD",
+        "READ",
+        "ARCHIVED"
+      ],
+      "default": "UNREAD"
+    },
+    "read_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "recipient",
+    "type",
+    "message"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.recipient": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.recipient": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

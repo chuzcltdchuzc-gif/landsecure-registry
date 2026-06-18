@@ -216,6 +216,40 @@
       ],
       "description": "PHASE 2 \u2014 Derived from evidence_confidence_score"
     },
+    "consensus_percentage": {
+      "type": "number",
+      "description": "Percentage of supporting attestations: supporting / total \u00d7 100"
+    },
+    "consensus_level": {
+      "type": "string",
+      "enum": [
+        "STRONG_CONSENSUS",
+        "MODERATE_CONSENSUS",
+        "WEAK_CONSENSUS",
+        "MIXED_OPINIONS"
+      ],
+      "description": "Derived from consensus_percentage"
+    },
+    "supporting_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of supporting attestations"
+    },
+    "neutral_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of neutral attestations"
+    },
+    "conflicting_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of conflicting attestations"
+    },
+    "last_consensus_calculated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When consensus was last recalculated"
+    },
     "verification_status": {
       "type": "string",
       "enum": [

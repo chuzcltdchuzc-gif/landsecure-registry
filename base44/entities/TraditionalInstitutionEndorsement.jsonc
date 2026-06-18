@@ -1,0 +1,117 @@
+{
+  "name": "TraditionalInstitutionEndorsement",
+  "type": "object",
+  "description": "Formal endorsement of community attestations by traditional institutions",
+  "properties": {
+    "endorsement_id": {
+      "type": "string",
+      "description": "Auto-generated: TIE-EHM-000001"
+    },
+    "parcel_id": {
+      "type": "string"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "attestation_id": {
+      "type": "string",
+      "description": "Linked CommunityAttestation"
+    },
+    "institution_name": {
+      "type": "string"
+    },
+    "institution_type": {
+      "type": "string",
+      "enum": [
+        "TRADITIONAL_RULER",
+        "TRADITIONAL_COUNCIL",
+        "VILLAGE_ASSEMBLY",
+        "TOWN_UNION",
+        "COMMUNITY_LAND_COMMITTEE"
+      ]
+    },
+    "representative_name": {
+      "type": "string"
+    },
+    "representative_title": {
+      "type": "string"
+    },
+    "endorsement_statement": {
+      "type": "string"
+    },
+    "endorsement_document": {
+      "type": "string",
+      "description": "File URL of signed endorsement document"
+    },
+    "endorsement_status": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "APPROVED",
+        "REJECTED"
+      ],
+      "default": "PENDING"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "approved_by": {
+      "type": "string"
+    },
+    "badge_generated": {
+      "type": "string",
+      "enum": [
+        "COMMUNITY_ENDORSED",
+        "TRADITIONAL_INSTITUTION_VERIFIED",
+        "NONE"
+      ],
+      "default": "NONE"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "parcel_id",
+    "institution_name",
+    "institution_type"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer",
+            "surveyor_partner",
+            "licensed_surveyor",
+            "field_agent",
+            "community_validator",
+            "government_observer"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}
