@@ -138,7 +138,13 @@
     },
     "update": {
       "user_condition": {
-        "role": "super_admin"
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
       }
     },
     "delete": {
