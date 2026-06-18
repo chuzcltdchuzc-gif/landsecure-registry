@@ -112,18 +112,7 @@
   ],
   "rls": {
     "create": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "super_admin",
-            "surveyor_general",
-            "compliance_officer",
-            "licensed_surveyor",
-            "surveyor_partner",
-            "field_agent"
-          ]
-        }
-      }
+      "created_by": "{{user.email}}"
     },
     "read": {
       "$or": [
