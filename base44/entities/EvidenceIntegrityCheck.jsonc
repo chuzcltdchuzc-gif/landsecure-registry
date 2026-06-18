@@ -1,0 +1,113 @@
+{
+  "name": "EvidenceIntegrityCheck",
+  "type": "object",
+  "description": "Cryptographic integrity verification of evidence files. Automatically run on upload, download, certificate generation, and report generation.",
+  "properties": {
+    "check_id": {
+      "type": "string",
+      "description": "Auto-generated: EIC-EHM-000001"
+    },
+    "parcel_id": {
+      "type": "string"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "evidence_id": {
+      "type": "string"
+    },
+    "evidence_type": {
+      "type": "string"
+    },
+    "evidence_hash_original": {
+      "type": "string",
+      "description": "SHA-256 hash at time of sealing"
+    },
+    "evidence_hash_current": {
+      "type": "string",
+      "description": "Hash computed during verification"
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "VALID",
+        "MODIFIED",
+        "CORRUPTED",
+        "MISSING",
+        "UNVERIFIED"
+      ],
+      "default": "UNVERIFIED"
+    },
+    "verification_method": {
+      "type": "string",
+      "enum": [
+        "SHA-256",
+        "AUTOMATED",
+        "MANUAL"
+      ],
+      "default": "SHA-256"
+    },
+    "checked_by": {
+      "type": "string",
+      "description": "System or user who triggered check"
+    },
+    "trigger_event": {
+      "type": "string",
+      "enum": [
+        "UPLOAD",
+        "DOWNLOAD",
+        "CERTIFICATE_GENERATION",
+        "REPORT_GENERATION",
+        "PARCEL_VIEW",
+        "EVIDENCE_UPDATE",
+        "ARCHIVE_IMPORT",
+        "SCHEDULED_SCAN"
+      ]
+    },
+    "last_verified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "hash_algorithm": {
+      "type": "string",
+      "default": "SHA-256"
+    },
+    "mismatch_details": {
+      "type": "string",
+      "description": "Details if verification failed"
+    }
+  },
+  "required": [
+    "parcel_id",
+    "evidence_id",
+    "evidence_hash_original"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer",
+            "licensed_surveyor",
+            "surveyor_partner"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

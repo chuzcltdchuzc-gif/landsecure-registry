@@ -1,0 +1,124 @@
+{
+  "name": "SecurityIncident",
+  "type": "object",
+  "description": "Security incident management \u2014 tracks hash mismatches, audit tampering, unauthorized access, fraud attempts, and suspicious activity.",
+  "properties": {
+    "incident_id": {
+      "type": "string",
+      "description": "Auto-generated: INC-EHM-000001"
+    },
+    "incident_type": {
+      "type": "string",
+      "enum": [
+        "HASH_MISMATCH",
+        "AUDIT_TAMPERING",
+        "ROLE_ESCALATION",
+        "UNAUTHORIZED_ACCESS",
+        "CERTIFICATE_FRAUD",
+        "DUPLICATE_ABUSE",
+        "DATA_CORRUPTION",
+        "SUSPICIOUS_ACTIVITY",
+        "BULK_MANIPULATION"
+      ]
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "CRITICAL"
+      ],
+      "default": "MEDIUM"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "INVESTIGATING",
+        "RESOLVED",
+        "FALSE_POSITIVE"
+      ],
+      "default": "OPEN"
+    },
+    "entity_type": {
+      "type": "string"
+    },
+    "entity_id": {
+      "type": "string"
+    },
+    "parcel_id": {
+      "type": "string"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "reported_by": {
+      "type": "string"
+    },
+    "detected_by": {
+      "type": "string",
+      "description": "System component that detected the incident"
+    },
+    "description": {
+      "type": "string"
+    },
+    "resolution_notes": {
+      "type": "string"
+    },
+    "assigned_to": {
+      "type": "string"
+    },
+    "opened_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "resolved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "risk_score_impact": {
+      "type": "number",
+      "description": "Points added to risk score from this incident"
+    },
+    "related_alert_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "incident_type",
+    "severity"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

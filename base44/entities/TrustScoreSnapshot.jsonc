@@ -1,0 +1,99 @@
+{
+  "name": "TrustScoreSnapshot",
+  "type": "object",
+  "description": "Periodic trust score snapshot \u2014 tracks platform trust over time. Never overwrites historical snapshots.",
+  "properties": {
+    "snapshot_id": {
+      "type": "string",
+      "description": "Auto-generated: TSS-EHM-000001"
+    },
+    "trust_score": {
+      "type": "number",
+      "description": "0-100 overall trust score"
+    },
+    "integrity_score": {
+      "type": "number",
+      "description": "Evidence integrity sub-score"
+    },
+    "audit_score": {
+      "type": "number",
+      "description": "Audit trail integrity sub-score"
+    },
+    "fraud_score": {
+      "type": "number",
+      "description": "Fraud activity sub-score (inverted: 100 = no fraud)"
+    },
+    "certificate_score": {
+      "type": "number",
+      "description": "Certificate validity sub-score"
+    },
+    "system_score": {
+      "type": "number",
+      "description": "System availability/security sub-score"
+    },
+    "trust_level": {
+      "type": "string",
+      "enum": [
+        "TRUSTED",
+        "STRONG",
+        "MONITORED",
+        "AT_RISK"
+      ],
+      "default": "MONITORED"
+    },
+    "total_parcels": {
+      "type": "number"
+    },
+    "verified_parcels": {
+      "type": "number"
+    },
+    "open_incidents": {
+      "type": "number"
+    },
+    "open_alerts": {
+      "type": "number"
+    },
+    "snapshot_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "calculation_version": {
+      "type": "string",
+      "default": "1.0.0"
+    }
+  },
+  "required": [
+    "trust_score"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer",
+            "licensed_surveyor",
+            "surveyor_partner",
+            "field_agent",
+            "community_validator",
+            "government_observer"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

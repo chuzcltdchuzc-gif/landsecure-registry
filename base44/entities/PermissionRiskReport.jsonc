@@ -1,0 +1,110 @@
+{
+  "name": "PermissionRiskReport",
+  "type": "object",
+  "description": "Automated role and permission audit \u2014 detects privilege escalation, excessive rights, overlapping permissions, and broken RLS policies.",
+  "properties": {
+    "report_id": {
+      "type": "string",
+      "description": "Auto-generated: PRR-EHM-000001"
+    },
+    "role_audited": {
+      "type": "string"
+    },
+    "risk_score": {
+      "type": "number",
+      "description": "0-100 permission risk score"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "CRITICAL"
+      ],
+      "default": "LOW"
+    },
+    "issues_found": {
+      "type": "number",
+      "default": 0
+    },
+    "issues": {
+      "type": "string",
+      "description": "JSON array of detected issues"
+    },
+    "create_rights_summary": {
+      "type": "string"
+    },
+    "read_rights_summary": {
+      "type": "string"
+    },
+    "update_rights_summary": {
+      "type": "string"
+    },
+    "delete_rights_summary": {
+      "type": "string"
+    },
+    "approval_rights_summary": {
+      "type": "string"
+    },
+    "escalation_detected": {
+      "type": "boolean",
+      "default": false
+    },
+    "overlapping_permissions": {
+      "type": "boolean",
+      "default": false
+    },
+    "excessive_privileges": {
+      "type": "boolean",
+      "default": false
+    },
+    "unauthorized_access_paths": {
+      "type": "boolean",
+      "default": false
+    },
+    "broken_rls_detected": {
+      "type": "boolean",
+      "default": false
+    },
+    "remediation_suggestions": {
+      "type": "string"
+    },
+    "audit_timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "audited_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "role_audited"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

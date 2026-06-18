@@ -1,0 +1,119 @@
+{
+  "name": "SecuritySession",
+  "type": "object",
+  "description": "Login and session security tracking \u2014 monitors failed logins, concurrent sessions, location anomalies, and account lockout states.",
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "description": "Auto-generated: SESS-EHM-000001"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "LOGIN_SUCCESS",
+        "LOGIN_FAILURE",
+        "LOGOUT",
+        "SESSION_TIMEOUT",
+        "PASSWORD_RESET",
+        "ACCOUNT_LOCKOUT",
+        "BRUTE_FORCE_DETECTED",
+        "CONCURRENT_SESSION",
+        "IMPOSSIBLE_TRAVEL"
+      ]
+    },
+    "ip_address": {
+      "type": "string"
+    },
+    "device_fingerprint": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string",
+      "description": "City/Country from IP"
+    },
+    "browser": {
+      "type": "string"
+    },
+    "login_attempts": {
+      "type": "number",
+      "default": 0
+    },
+    "consecutive_failures": {
+      "type": "number",
+      "default": 0
+    },
+    "account_locked": {
+      "type": "boolean",
+      "default": false
+    },
+    "lockout_until": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "session_start": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "session_end": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "security_alert_generated": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "user_email",
+    "event_type"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

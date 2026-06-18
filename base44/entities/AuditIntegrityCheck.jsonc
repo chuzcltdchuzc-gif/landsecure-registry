@@ -1,0 +1,94 @@
+{
+  "name": "AuditIntegrityCheck",
+  "type": "object",
+  "description": "Verifies audit trail integrity \u2014 detects missing records, modifications, timeline gaps, and broken chain of custody.",
+  "properties": {
+    "check_id": {
+      "type": "string",
+      "description": "Auto-generated: AIC-EHM-000001"
+    },
+    "audit_log_id": {
+      "type": "string"
+    },
+    "entity_type": {
+      "type": "string"
+    },
+    "entity_id": {
+      "type": "string"
+    },
+    "check_type": {
+      "type": "string",
+      "enum": [
+        "MISSING_RECORD",
+        "MODIFIED_RECORD",
+        "TIMELINE_GAP",
+        "TIMESTAMP_MANIPULATION",
+        "DELETED_ENTRY",
+        "BROKEN_CHAIN_OF_CUSTODY",
+        "SEQUENCE_BREAK"
+      ]
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "CRITICAL"
+      ],
+      "default": "HIGH"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "CLEAN",
+        "ISSUE_DETECTED",
+        "RESOLVED"
+      ],
+      "default": "CLEAN"
+    },
+    "details": {
+      "type": "string"
+    },
+    "checked_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "checked_by": {
+      "type": "string"
+    },
+    "incident_id": {
+      "type": "string",
+      "description": "Linked SecurityIncident if issue detected"
+    }
+  },
+  "required": [
+    "check_type"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

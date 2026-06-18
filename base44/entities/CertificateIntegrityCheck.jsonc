@@ -1,0 +1,113 @@
+{
+  "name": "CertificateIntegrityCheck",
+  "type": "object",
+  "description": "Verifies certificate authenticity \u2014 checks parcel existence, QR codes, hashes, and revocation status.",
+  "properties": {
+    "certificate_id": {
+      "type": "string"
+    },
+    "certificate_number": {
+      "type": "string"
+    },
+    "parcel_id": {
+      "type": "string"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "certificate_type": {
+      "type": "string",
+      "enum": [
+        "CERTIFICATE_A",
+        "CERTIFICATE_B",
+        "CERTIFICATE_C",
+        "QR_CERTIFICATE"
+      ]
+    },
+    "verification_code": {
+      "type": "string",
+      "description": "Unique verification code embedded in certificate"
+    },
+    "qr_hash": {
+      "type": "string",
+      "description": "SHA-256 of QR code data"
+    },
+    "certificate_hash": {
+      "type": "string",
+      "description": "SHA-256 of certificate file"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "VALID",
+        "INVALID",
+        "SUSPICIOUS",
+        "REVOKED",
+        "EXPIRED"
+      ],
+      "default": "VALID"
+    },
+    "checked_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "checked_by": {
+      "type": "string"
+    },
+    "verified_parcel_exists": {
+      "type": "boolean"
+    },
+    "verified_qr_matches": {
+      "type": "boolean"
+    },
+    "verified_hash_matches": {
+      "type": "boolean"
+    },
+    "verified_not_revoked": {
+      "type": "boolean"
+    },
+    "result_details": {
+      "type": "string",
+      "description": "JSON with full check results"
+    }
+  },
+  "required": [
+    "parcel_id",
+    "certificate_type"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer",
+                "licensed_surveyor",
+                "surveyor_partner"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

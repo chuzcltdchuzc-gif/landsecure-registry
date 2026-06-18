@@ -83,6 +83,8 @@ import CommunityAttestationForm from './pages/landvault/CommunityAttestationForm
 import CommunityAttestationReview from './pages/landvault/CommunityAttestationReview';
 import CommunityTransparency from './pages/landvault/CommunityTransparency';
 import OperationsDashboard from './pages/OperationsDashboard';
+import SecurityDashboard from './pages/SecurityDashboard';
+import SecurityTesting from './pages/SecurityTesting';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkUserAuth } = useAuth();
@@ -195,6 +197,8 @@ const AuthenticatedApp = () => {
       <Route path="/trust" element={<TrustArchitecture />} />
       <Route path="/community-transparency" element={<CommunityTransparency />} />
       <Route path="/operations" element={<OperationsDashboard />} />
+      <Route path="/security" element={<SecurityDashboard />} />
+      <Route path="/security/testing" element={<SecurityTesting />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

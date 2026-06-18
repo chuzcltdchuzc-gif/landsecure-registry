@@ -1,0 +1,129 @@
+{
+  "name": "FraudSignal",
+  "type": "object",
+  "description": "Behavioural fraud detection signals \u2014 detects mass uploads, bulk requests, fake endorsements, attestation abuse, and certificate fraud patterns.",
+  "properties": {
+    "signal_id": {
+      "type": "string",
+      "description": "Auto-generated: FS-EHM-000001"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "signal_type": {
+      "type": "string",
+      "enum": [
+        "MULTIPLE_ATTESTATIONS_SAME_DEVICE",
+        "MULTIPLE_ATTESTATIONS_SAME_PHONE",
+        "MULTIPLE_ATTESTATIONS_SAME_EMAIL",
+        "MASS_PARCEL_UPLOAD",
+        "BULK_CERTIFICATE_REQUEST",
+        "BULK_VERIFICATION_REQUEST",
+        "FAKE_COMMUNITY_ENDORSEMENT",
+        "REPEATED_EVIDENCE_UPLOAD",
+        "CERTIFICATE_ABUSE",
+        "SURVEYOR_ABUSE",
+        "COMMUNITY_MANIPULATION",
+        "IMPOSSIBLE_TRAVEL",
+        "BRUTE_FORCE_ATTEMPT",
+        "CONCURRENT_SESSION_ABUSE"
+      ]
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "CRITICAL"
+      ],
+      "default": "MEDIUM"
+    },
+    "risk_score": {
+      "type": "number",
+      "description": "0-100 fraud risk score"
+    },
+    "parcel_id": {
+      "type": "string"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "evidence_id": {
+      "type": "string"
+    },
+    "details": {
+      "type": "string",
+      "description": "JSON with detection evidence"
+    },
+    "count": {
+      "type": "number",
+      "description": "Number of occurrences detected"
+    },
+    "window_minutes": {
+      "type": "number",
+      "description": "Detection time window in minutes"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "UNDER_REVIEW",
+        "RESOLVED",
+        "DISMISSED"
+      ],
+      "default": "OPEN"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reviewed_by": {
+      "type": "string"
+    },
+    "reviewed_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "signal_type",
+    "user_email",
+    "severity"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}
