@@ -1,0 +1,150 @@
+{
+  "name": "TrustValidationRun",
+  "type": "object",
+  "description": "Immutable trust validation run record. Produced by lvTrustValidationEngine. Never modified, never deleted. Permanent audit evidence of platform trustworthiness.",
+  "properties": {
+    "validation_id": {
+      "type": "string",
+      "description": "Auto-generated: TVR-EHM-000001"
+    },
+    "validation_type": {
+      "type": "string",
+      "enum": [
+        "FULL_PLATFORM",
+        "EVIDENCE_LAYER",
+        "AUDIT_LAYER",
+        "PERMISSION_LAYER",
+        "SECURITY_LAYER",
+        "FRAUD_LAYER",
+        "CERTIFICATE_LAYER",
+        "COMMUNITY_LAYER",
+        "BACKGROUND_JOB_LAYER",
+        "RECOVERY_LAYER"
+      ]
+    },
+    "validation_scope": {
+      "type": "string",
+      "description": "Description of validation scope"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "duration_seconds": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "RUNNING",
+        "COMPLETED",
+        "FAILED",
+        "PARTIAL"
+      ],
+      "default": "RUNNING"
+    },
+    "passed_tests": {
+      "type": "number",
+      "default": 0
+    },
+    "failed_tests": {
+      "type": "number",
+      "default": 0
+    },
+    "warning_tests": {
+      "type": "number",
+      "default": 0
+    },
+    "overall_score": {
+      "type": "number",
+      "description": "0-100 operational trust score"
+    },
+    "trust_grade": {
+      "type": "string",
+      "enum": [
+        "A_PLUS",
+        "A",
+        "B",
+        "C",
+        "D",
+        "FAIL"
+      ],
+      "default": "D"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "LOW",
+        "MODERATE",
+        "HIGH",
+        "CRITICAL"
+      ],
+      "default": "HIGH"
+    },
+    "generated_by": {
+      "type": "string",
+      "description": "System component or user that triggered this run"
+    },
+    "validation_report_json": {
+      "type": "string",
+      "description": "Complete JSON report of all sub-validations and scores"
+    },
+    "recommendation": {
+      "type": "string"
+    },
+    "subscores": {
+      "type": "string",
+      "description": "JSON with individual validation engine scores and details"
+    },
+    "blocking_issues": {
+      "type": "string",
+      "description": "JSON array of blocking issues found"
+    },
+    "pilot_recommendation": {
+      "type": "string",
+      "enum": [
+        "GO",
+        "GO_WITH_MONITORING",
+        "NOT_READY",
+        "CRITICAL_REMEDIATION_REQUIRED"
+      ],
+      "default": "NOT_READY"
+    }
+  },
+  "required": [
+    "validation_type"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer",
+            "licensed_surveyor",
+            "surveyor_partner",
+            "government_observer"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

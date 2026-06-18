@@ -86,6 +86,7 @@ import OperationsDashboard from './pages/OperationsDashboard';
 import SecurityDashboard from './pages/SecurityDashboard';
 import SecurityTesting from './pages/SecurityTesting';
 import SecurityOperations from './pages/SecurityOperations';
+import TrustValidationCenter from './pages/TrustValidationCenter';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkUserAuth } = useAuth();
@@ -201,6 +202,7 @@ const AuthenticatedApp = () => {
       <Route path="/security" element={<SecurityDashboard />} />
       <Route path="/security/testing" element={<SecurityTesting />} />
       <Route path="/security/operations" element={<SecurityOperations />} />
+      <Route path="/trust-validation" element={<TrustValidationCenter />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
