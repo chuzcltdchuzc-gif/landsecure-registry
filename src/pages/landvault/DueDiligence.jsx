@@ -74,28 +74,23 @@ export default function DueDiligence() {
       const service = services.find(s => s.id === selectedService);
       if (!service) throw new Error("Please select a service");
 
-      const req = await base44.entities.ServiceRequest.create({
-        request_reference: `SR-EHM-${Date.now().toString(36).toUpperCase()}`,
-        requestor: (await base44.auth.me()).email,
-        requestor_id: (await base44.auth.me()).id,
+      // Billing enforcement: authorize → reserve → create request
+      const response = await base44.functions.invoke("lvServiceBilling", {
+        action: "initiate",
         service_id: service.id,
-        service_name: service.service_name,
-        service_category: service.service_category,
         parcel_id: selectedParcelId || null,
-        parcel_number: parcels.find(p => p.id === selectedParcelId)?.parcel_number || null,
-        status: service.requires_review ? "UNDER_REVIEW" : "PROCESSING",
-        submitted_at: new Date().toISOString(),
         priority,
-        credits_consumed: service.credit_cost,
-        cash_amount: service.cash_price,
         notes,
       });
-      return req;
+
+      if (response.data.error) {
+        throw new Error(response.data.error);
+      }
+      return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["service-requests"] });
-      queryClient.invalidateQueries({ queryKey: ["usage-ledger"] });
-      toast.success("Service request submitted successfully");
+      toast.success(`${data.service_name} — ${data.credits_reserved} credits reserved. Request: ${data.request_reference}`);
       setSelectedService("");
       setSelectedParcelId("");
       setNotes("");

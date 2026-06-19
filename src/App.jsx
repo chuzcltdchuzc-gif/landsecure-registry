@@ -90,6 +90,7 @@ import TrustValidationCenter from './pages/TrustValidationCenter';
 import DueDiligence from './pages/landvault/DueDiligence';
 import RevenueAnalytics from './pages/landvault/RevenueAnalytics';
 import PilotEconomics from './pages/landvault/PilotEconomics';
+import EconomicsOperations from './pages/EconomicsOperations';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkUserAuth } = useAuth();
@@ -210,6 +211,7 @@ const AuthenticatedApp = () => {
       <Route path="/due-diligence" element={<DueDiligence />} />
       <Route path="/revenue" element={<RevenueAnalytics />} />
       <Route path="/pilot-economics" element={<PilotEconomics />} />
+      <Route path="/economics/operations" element={<EconomicsOperations />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

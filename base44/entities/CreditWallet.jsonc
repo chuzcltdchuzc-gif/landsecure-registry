@@ -1,7 +1,7 @@
 {
   "name": "CreditWallet",
   "type": "object",
-  "description": "Platform credit wallet per user. All monetized activities consume credits. No negative balances allowed. Every movement creates a UsageLedger entry.",
+  "description": "Platform credit wallet per user. All monetized activities consume credits. No negative balances. Every movement creates an EconomicAuditEntry. Supports reservation for pending operations.",
   "properties": {
     "wallet_id": {
       "type": "string",
@@ -18,6 +18,11 @@
       "type": "number",
       "default": 0,
       "description": "Current available credits"
+    },
+    "reserved_credits": {
+      "type": "number",
+      "default": 0,
+      "description": "Credits held for pending service requests. Available = balance - reserved."
     },
     "credits_consumed": {
       "type": "number",
@@ -39,9 +44,24 @@
       "enum": [
         "ACTIVE",
         "SUSPENDED",
+        "FROZEN",
         "CLOSED"
       ],
       "default": "ACTIVE"
+    },
+    "frozen_reason": {
+      "type": "string"
+    },
+    "frozen_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "frozen_by": {
+      "type": "string"
+    },
+    "organization_wallet_id": {
+      "type": "string",
+      "description": "Optional \u2014 linked OrganizationWallet for institutional users"
     }
   },
   "required": [

@@ -1,0 +1,110 @@
+{
+  "name": "EconomicAuditEntry",
+  "type": "object",
+  "description": "Immutable audit trail for every economic event in the platform. Credits, billing, invoicing, fraud detection \u2014 all recorded here. Never modified. Never deleted.",
+  "properties": {
+    "audit_id": {
+      "type": "string",
+      "description": "Auto-generated: EAE-EHM-000001"
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "CREDIT_AUTHORIZED",
+        "CREDIT_RESERVED",
+        "CREDIT_CONSUMED",
+        "CREDIT_REFUNDED",
+        "CREDIT_TRANSFERRED",
+        "CREDIT_GRANTED",
+        "CREDIT_PURCHASED",
+        "WALLET_CREATED",
+        "WALLET_FROZEN",
+        "WALLET_UNFROZEN",
+        "SERVICE_BILLED",
+        "SERVICE_COMPLETED",
+        "SERVICE_REFUNDED",
+        "INVOICE_GENERATED",
+        "INVOICE_PAID",
+        "INVOICE_CANCELLED",
+        "FRAUD_DETECTED",
+        "QUOTA_EXCEEDED",
+        "OVERAGE_CHARGED"
+      ]
+    },
+    "entity_type": {
+      "type": "string",
+      "description": "Entity affected (CreditWallet, OrganizationWallet, ServiceRequest, Invoice)"
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "ID of the affected entity"
+    },
+    "actor_email": {
+      "type": "string"
+    },
+    "actor_id": {
+      "type": "string"
+    },
+    "before_state": {
+      "type": "string",
+      "description": "JSON snapshot of state before change"
+    },
+    "after_state": {
+      "type": "string",
+      "description": "JSON snapshot of state after change"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "reference": {
+      "type": "string",
+      "description": "Service request reference, invoice number, or other linking ID"
+    },
+    "amount": {
+      "type": "number",
+      "default": 0,
+      "description": "Credit amount involved in this event"
+    },
+    "ip_address": {
+      "type": "string"
+    },
+    "device_info": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "action_type",
+    "entity_type",
+    "actor_email"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}
