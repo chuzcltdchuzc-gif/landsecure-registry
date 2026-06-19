@@ -1,11 +1,10 @@
 {
   "name": "EconomicAuditEntry",
   "type": "object",
-  "description": "Immutable audit trail for every economic event in the platform. Credits, billing, invoicing, fraud detection \u2014 all recorded here. Never modified. Never deleted.",
+  "description": "Immutable audit trail for every economic event. Never modified. Never deleted.",
   "properties": {
     "audit_id": {
-      "type": "string",
-      "description": "Auto-generated: EAE-EHM-000001"
+      "type": "string"
     },
     "action_type": {
       "type": "string",
@@ -32,12 +31,10 @@
       ]
     },
     "entity_type": {
-      "type": "string",
-      "description": "Entity affected (CreditWallet, OrganizationWallet, ServiceRequest, Invoice)"
+      "type": "string"
     },
     "entity_id": {
-      "type": "string",
-      "description": "ID of the affected entity"
+      "type": "string"
     },
     "actor_email": {
       "type": "string"
@@ -46,24 +43,20 @@
       "type": "string"
     },
     "before_state": {
-      "type": "string",
-      "description": "JSON snapshot of state before change"
+      "type": "string"
     },
     "after_state": {
-      "type": "string",
-      "description": "JSON snapshot of state after change"
+      "type": "string"
     },
     "reason": {
       "type": "string"
     },
     "reference": {
-      "type": "string",
-      "description": "Service request reference, invoice number, or other linking ID"
+      "type": "string"
     },
     "amount": {
       "type": "number",
-      "default": 0,
-      "description": "Credit amount involved in this event"
+      "default": 0
     },
     "ip_address": {
       "type": "string"
@@ -86,15 +79,22 @@
       "created_by": "{{user.email}}"
     },
     "read": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "super_admin",
-            "surveyor_general",
-            "compliance_officer"
-          ]
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer"
+              ]
+            }
+          }
         }
-      }
+      ]
     },
     "update": {
       "user_condition": {
