@@ -1,18 +1,16 @@
 {
   "name": "InstitutionPlan",
   "type": "object",
-  "description": "Recurring institutional access plans for banks, law firms, survey firms, local governments, developers, and insurers. Institutions become predictable recurring revenue customers.",
+  "description": "Recurring institutional access plans for banks, law firms, survey firms, local governments, developers, and insurers.",
   "properties": {
     "plan_id": {
-      "type": "string",
-      "description": "Auto-generated: PLN-EHM-000001"
+      "type": "string"
     },
     "plan_name": {
       "type": "string"
     },
     "plan_code": {
-      "type": "string",
-      "description": "Unique slug (e.g. BANK_STANDARD, LAW_PREMIUM)"
+      "type": "string"
     },
     "plan_type": {
       "type": "string",
@@ -27,38 +25,31 @@
     },
     "monthly_fee": {
       "type": "number",
-      "default": 0,
-      "description": "Monthly subscription fee in NGN"
+      "default": 0
     },
     "included_credits": {
       "type": "number",
-      "default": 0,
-      "description": "Monthly credit allocation"
+      "default": 0
     },
     "overage_rate": {
       "type": "number",
-      "default": 0,
-      "description": "Cost per additional credit beyond included"
+      "default": 0
     },
     "api_access": {
       "type": "boolean",
-      "default": false,
-      "description": "Includes API access for integration"
+      "default": false
     },
     "report_access": {
       "type": "boolean",
-      "default": false,
-      "description": "Includes access to premium reports"
+      "default": false
     },
     "priority_processing": {
       "type": "boolean",
-      "default": false,
-      "description": "Priority queue for service requests"
+      "default": false
     },
     "max_users": {
       "type": "number",
-      "default": 5,
-      "description": "Maximum number of concurrent users"
+      "default": 5
     },
     "description": {
       "type": "string"
@@ -83,22 +74,7 @@
     "create": {
       "created_by": "{{user.email}}"
     },
-    "read": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "super_admin",
-            "surveyor_general",
-            "compliance_officer",
-            "licensed_surveyor",
-            "surveyor_partner",
-            "field_agent",
-            "community_validator",
-            "government_observer"
-          ]
-        }
-      }
-    },
+    "read": {},
     "update": {
       "user_condition": {
         "role": {
