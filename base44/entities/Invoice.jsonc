@@ -1,15 +1,13 @@
 {
   "name": "Invoice",
   "type": "object",
-  "description": "Automated invoice generation for all monetized service deliveries. Supports PDF generation via background jobs.",
+  "description": "Automated invoice generation for all monetized service deliveries.",
   "properties": {
     "invoice_id": {
-      "type": "string",
-      "description": "Auto-generated ID"
+      "type": "string"
     },
     "invoice_number": {
-      "type": "string",
-      "description": "Auto-generated: INV-EHM-000001"
+      "type": "string"
     },
     "customer_id": {
       "type": "string"
@@ -21,8 +19,7 @@
       "type": "string"
     },
     "service_request": {
-      "type": "string",
-      "description": "Linked ServiceRequest reference"
+      "type": "string"
     },
     "amount": {
       "type": "number",
@@ -30,8 +27,7 @@
     },
     "tax": {
       "type": "number",
-      "default": 0,
-      "description": "VAT/tax amount"
+      "default": 0
     },
     "total_amount": {
       "type": "number",
@@ -65,8 +61,7 @@
       "format": "date"
     },
     "invoice_url": {
-      "type": "string",
-      "description": "URL to downloadable PDF invoice"
+      "type": "string"
     },
     "notes": {
       "type": "string"
@@ -81,38 +76,8 @@
     "create": {
       "created_by": "{{user.email}}"
     },
-    "read": {
-      "$or": [
-        {
-          "data.customer_email": "{{user.email}}"
-        },
-        {
-          "created_by": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": {
-              "$in": [
-                "super_admin",
-                "surveyor_general",
-                "compliance_officer"
-              ]
-            }
-          }
-        }
-      ]
-    },
-    "update": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "super_admin",
-            "surveyor_general",
-            "compliance_officer"
-          ]
-        }
-      }
-    },
+    "read": {},
+    "update": {},
     "delete": {
       "user_condition": {
         "role": "super_admin"
