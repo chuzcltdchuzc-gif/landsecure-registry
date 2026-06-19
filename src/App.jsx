@@ -87,6 +87,9 @@ import SecurityDashboard from './pages/SecurityDashboard';
 import SecurityTesting from './pages/SecurityTesting';
 import SecurityOperations from './pages/SecurityOperations';
 import TrustValidationCenter from './pages/TrustValidationCenter';
+import DueDiligence from './pages/landvault/DueDiligence';
+import RevenueAnalytics from './pages/landvault/RevenueAnalytics';
+import PilotEconomics from './pages/landvault/PilotEconomics';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkUserAuth } = useAuth();
@@ -203,6 +206,10 @@ const AuthenticatedApp = () => {
       <Route path="/security/testing" element={<SecurityTesting />} />
       <Route path="/security/operations" element={<SecurityOperations />} />
       <Route path="/trust-validation" element={<TrustValidationCenter />} />
+      {/* Economic Operating System */}
+      <Route path="/due-diligence" element={<DueDiligence />} />
+      <Route path="/revenue" element={<RevenueAnalytics />} />
+      <Route path="/pilot-economics" element={<PilotEconomics />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

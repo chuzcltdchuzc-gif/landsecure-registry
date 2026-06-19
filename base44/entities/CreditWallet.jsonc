@@ -1,0 +1,100 @@
+{
+  "name": "CreditWallet",
+  "type": "object",
+  "description": "Platform credit wallet per user. All monetized activities consume credits. No negative balances allowed. Every movement creates a UsageLedger entry.",
+  "properties": {
+    "wallet_id": {
+      "type": "string",
+      "description": "Auto-generated: WAL-EHM-000001"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "Linked user account ID"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "credit_balance": {
+      "type": "number",
+      "default": 0,
+      "description": "Current available credits"
+    },
+    "credits_consumed": {
+      "type": "number",
+      "default": 0,
+      "description": "Lifetime credits consumed"
+    },
+    "credits_purchased": {
+      "type": "number",
+      "default": 0,
+      "description": "Lifetime credits purchased"
+    },
+    "credits_granted": {
+      "type": "number",
+      "default": 0,
+      "description": "Lifetime credits granted (free/promotional)"
+    },
+    "wallet_status": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "SUSPENDED",
+        "CLOSED"
+      ],
+      "default": "ACTIVE"
+    }
+  },
+  "required": [
+    "user_id",
+    "user_email"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

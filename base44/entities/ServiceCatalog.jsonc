@@ -1,0 +1,117 @@
+{
+  "name": "ServiceCatalog",
+  "type": "object",
+  "description": "Monetizable services offered by the LandVault Evidence Infrastructure Platform. Verification, due diligence, preservation, compliance, and institutional access.",
+  "properties": {
+    "service_id": {
+      "type": "string",
+      "description": "Auto-generated: SVC-EHM-000001"
+    },
+    "service_name": {
+      "type": "string",
+      "description": "Human-readable service name"
+    },
+    "service_code": {
+      "type": "string",
+      "description": "Unique service code slug (e.g. PARCEL_VERIFY, DD_REPORT)"
+    },
+    "service_category": {
+      "type": "string",
+      "enum": [
+        "PARCEL_VERIFICATION",
+        "SURVEY_PLAN_VERIFICATION",
+        "COMMUNITY_EVIDENCE_REPORT",
+        "DUE_DILIGENCE_REPORT",
+        "CERTIFICATE_GENERATION",
+        "ARCHIVE_DIGITIZATION",
+        "SURVEYOR_VALIDATION",
+        "LEGAL_SEARCH_PACKAGE",
+        "BANK_SEARCH_PACKAGE",
+        "INSTITUTIONAL_ACCESS",
+        "API_ACCESS",
+        "COMPLIANCE_REPORT"
+      ]
+    },
+    "service_description": {
+      "type": "string"
+    },
+    "credit_cost": {
+      "type": "number",
+      "default": 0,
+      "description": "Cost in platform credits"
+    },
+    "cash_price": {
+      "type": "number",
+      "default": 0,
+      "description": "Cash price in NGN"
+    },
+    "service_status": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "INACTIVE",
+        "DEPRECATED"
+      ],
+      "default": "ACTIVE"
+    },
+    "estimated_delivery_time": {
+      "type": "string",
+      "description": "e.g. '24 hours', '3-5 business days'"
+    },
+    "requires_review": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether a compliance review is required before delivery"
+    }
+  },
+  "required": [
+    "service_name",
+    "service_code",
+    "service_category"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer",
+            "licensed_surveyor",
+            "surveyor_partner",
+            "field_agent",
+            "community_validator",
+            "government_observer"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

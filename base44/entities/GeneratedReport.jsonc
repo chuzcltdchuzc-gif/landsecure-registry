@@ -1,0 +1,136 @@
+{
+  "name": "GeneratedReport",
+  "type": "object",
+  "description": "Deliverable intelligence reports \u2014 primary revenue product. Includes parcel verification, community evidence, surveyor history, trust scoring, risk assessment, bank packages, legal packages, and due diligence reports.",
+  "properties": {
+    "report_id": {
+      "type": "string",
+      "description": "Auto-generated: RPT-EHM-000001"
+    },
+    "report_type": {
+      "type": "string",
+      "enum": [
+        "PARCEL_VERIFICATION",
+        "COMMUNITY_EVIDENCE",
+        "SURVEYOR_HISTORY",
+        "TRUST_REPORT",
+        "RISK_REPORT",
+        "BANK_REPORT",
+        "LEGAL_REPORT",
+        "DUE_DILIGENCE_REPORT",
+        "COMPLIANCE_REPORT",
+        "ARCHIVE_DIGITIZATION"
+      ]
+    },
+    "parcel_id": {
+      "type": "string"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "service_request": {
+      "type": "string",
+      "description": "Linked ServiceRequest reference"
+    },
+    "generated_by": {
+      "type": "string",
+      "description": "System or user that generated the report"
+    },
+    "generated_timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "confidence_snapshot": {
+      "type": "string",
+      "description": "JSON \u2014 evidence confidence state at generation time"
+    },
+    "community_snapshot": {
+      "type": "string",
+      "description": "JSON \u2014 community attestation state at generation time"
+    },
+    "duplicate_snapshot": {
+      "type": "string",
+      "description": "JSON \u2014 duplicate alert state at generation time"
+    },
+    "verification_snapshot": {
+      "type": "string",
+      "description": "JSON \u2014 verification state at generation time"
+    },
+    "trust_snapshot": {
+      "type": "string",
+      "description": "JSON \u2014 trust score state at generation time"
+    },
+    "download_url": {
+      "type": "string",
+      "description": "URL to downloadable report file (PDF)"
+    },
+    "hash": {
+      "type": "string",
+      "description": "SHA-256 of report content for integrity verification"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "GENERATING",
+        "COMPLETED",
+        "FAILED",
+        "EXPIRED"
+      ],
+      "default": "GENERATING"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Reports have limited validity for due diligence"
+    }
+  },
+  "required": [
+    "report_type",
+    "generated_by"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "data.generated_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer",
+                "licensed_surveyor",
+                "surveyor_partner",
+                "government_observer"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

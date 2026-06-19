@@ -1,0 +1,108 @@
+{
+  "name": "UsageLedger",
+  "type": "object",
+  "description": "Immutable audit trail of every credit-consuming activity. Nothing bypasses the ledger. Every service request, report generation, and verification action creates a ledger entry.",
+  "properties": {
+    "usage_id": {
+      "type": "string",
+      "description": "Auto-generated: USE-EHM-000001"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "parcel_id": {
+      "type": "string",
+      "description": "Optional \u2014 linked parcel if applicable"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "service_id": {
+      "type": "string",
+      "description": "Linked ServiceCatalog ID"
+    },
+    "service_name": {
+      "type": "string"
+    },
+    "service_category": {
+      "type": "string"
+    },
+    "credits_used": {
+      "type": "number",
+      "default": 0
+    },
+    "cash_value": {
+      "type": "number",
+      "default": 0,
+      "description": "NGN equivalent of credits consumed"
+    },
+    "request_reference": {
+      "type": "string",
+      "description": "Linked ServiceRequest reference"
+    },
+    "usage_timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "COMPLETED",
+        "PENDING",
+        "REFUNDED",
+        "CANCELLED"
+      ],
+      "default": "COMPLETED"
+    }
+  },
+  "required": [
+    "user_id",
+    "service_id",
+    "credits_used"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

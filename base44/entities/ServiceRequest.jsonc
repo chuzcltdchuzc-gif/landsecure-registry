@@ -1,0 +1,159 @@
+{
+  "name": "ServiceRequest",
+  "type": "object",
+  "description": "Customer-initiated service request. Creates background jobs, consumes credits, generates ledger entries, and may produce reports or certificates.",
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "description": "Auto-generated ID"
+    },
+    "request_reference": {
+      "type": "string",
+      "description": "Auto-generated: SR-EHM-000001"
+    },
+    "requestor": {
+      "type": "string",
+      "description": "User email who submitted the request"
+    },
+    "requestor_id": {
+      "type": "string"
+    },
+    "service_id": {
+      "type": "string",
+      "description": "Linked ServiceCatalog ID"
+    },
+    "service_name": {
+      "type": "string"
+    },
+    "service_category": {
+      "type": "string"
+    },
+    "parcel_id": {
+      "type": "string",
+      "description": "Optional \u2014 linked parcel"
+    },
+    "parcel_number": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "SUBMITTED",
+        "UNDER_REVIEW",
+        "PROCESSING",
+        "COMPLETED",
+        "DELIVERED",
+        "CANCELLED"
+      ],
+      "default": "SUBMITTED"
+    },
+    "submitted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "assigned_to": {
+      "type": "string"
+    },
+    "job_reference": {
+      "type": "string",
+      "description": "Linked JobQueue ID"
+    },
+    "invoice_reference": {
+      "type": "string",
+      "description": "Linked Invoice ID"
+    },
+    "delivery_reference": {
+      "type": "string",
+      "description": "Linked GeneratedReport or Certificate ID"
+    },
+    "credits_consumed": {
+      "type": "number",
+      "default": 0
+    },
+    "cash_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "STANDARD",
+        "PRIORITY",
+        "URGENT"
+      ],
+      "default": "STANDARD"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "requestor",
+    "service_id"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.requestor": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer",
+                "licensed_surveyor",
+                "surveyor_partner",
+                "government_observer"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "super_admin",
+                "surveyor_general",
+                "compliance_officer"
+              ]
+            }
+          }
+        },
+        {
+          "created_by": "{{user.email}}",
+          "data.status": {
+            "$in": [
+              "SUBMITTED"
+            ]
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

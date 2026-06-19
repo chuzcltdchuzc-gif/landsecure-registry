@@ -1,0 +1,127 @@
+{
+  "name": "InstitutionPlan",
+  "type": "object",
+  "description": "Recurring institutional access plans for banks, law firms, survey firms, local governments, developers, and insurers. Institutions become predictable recurring revenue customers.",
+  "properties": {
+    "plan_id": {
+      "type": "string",
+      "description": "Auto-generated: PLN-EHM-000001"
+    },
+    "plan_name": {
+      "type": "string"
+    },
+    "plan_code": {
+      "type": "string",
+      "description": "Unique slug (e.g. BANK_STANDARD, LAW_PREMIUM)"
+    },
+    "plan_type": {
+      "type": "string",
+      "enum": [
+        "BANK",
+        "LAW_FIRM",
+        "SURVEY_FIRM",
+        "LOCAL_GOVERNMENT",
+        "DEVELOPER",
+        "INSURANCE_PROVIDER"
+      ]
+    },
+    "monthly_fee": {
+      "type": "number",
+      "default": 0,
+      "description": "Monthly subscription fee in NGN"
+    },
+    "included_credits": {
+      "type": "number",
+      "default": 0,
+      "description": "Monthly credit allocation"
+    },
+    "overage_rate": {
+      "type": "number",
+      "default": 0,
+      "description": "Cost per additional credit beyond included"
+    },
+    "api_access": {
+      "type": "boolean",
+      "default": false,
+      "description": "Includes API access for integration"
+    },
+    "report_access": {
+      "type": "boolean",
+      "default": false,
+      "description": "Includes access to premium reports"
+    },
+    "priority_processing": {
+      "type": "boolean",
+      "default": false,
+      "description": "Priority queue for service requests"
+    },
+    "max_users": {
+      "type": "number",
+      "default": 5,
+      "description": "Maximum number of concurrent users"
+    },
+    "description": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "INACTIVE",
+        "DRAFT"
+      ],
+      "default": "ACTIVE"
+    }
+  },
+  "required": [
+    "plan_name",
+    "plan_code",
+    "plan_type",
+    "monthly_fee"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer",
+            "licensed_surveyor",
+            "surveyor_partner",
+            "field_agent",
+            "community_validator",
+            "government_observer"
+          ]
+        }
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "super_admin",
+            "surveyor_general",
+            "compliance_officer"
+          ]
+        }
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}
