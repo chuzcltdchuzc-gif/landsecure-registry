@@ -1,19 +1,17 @@
 {
   "name": "ServiceCatalog",
   "type": "object",
-  "description": "Monetizable services offered by the LandVault Evidence Infrastructure Platform. Verification, due diligence, preservation, compliance, and institutional access.",
+  "description": "Monetizable services offered by the LandVault Evidence Infrastructure Platform.",
   "properties": {
     "service_id": {
       "type": "string",
       "description": "Auto-generated: SVC-EHM-000001"
     },
     "service_name": {
-      "type": "string",
-      "description": "Human-readable service name"
+      "type": "string"
     },
     "service_code": {
-      "type": "string",
-      "description": "Unique service code slug (e.g. PARCEL_VERIFY, DD_REPORT)"
+      "type": "string"
     },
     "service_category": {
       "type": "string",
@@ -37,13 +35,11 @@
     },
     "credit_cost": {
       "type": "number",
-      "default": 0,
-      "description": "Cost in platform credits"
+      "default": 0
     },
     "cash_price": {
       "type": "number",
-      "default": 0,
-      "description": "Cash price in NGN"
+      "default": 0
     },
     "service_status": {
       "type": "string",
@@ -55,13 +51,11 @@
       "default": "ACTIVE"
     },
     "estimated_delivery_time": {
-      "type": "string",
-      "description": "e.g. '24 hours', '3-5 business days'"
+      "type": "string"
     },
     "requires_review": {
       "type": "boolean",
-      "default": false,
-      "description": "Whether a compliance review is required before delivery"
+      "default": false
     }
   },
   "required": [
@@ -73,22 +67,7 @@
     "create": {
       "created_by": "{{user.email}}"
     },
-    "read": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "super_admin",
-            "surveyor_general",
-            "compliance_officer",
-            "licensed_surveyor",
-            "surveyor_partner",
-            "field_agent",
-            "community_validator",
-            "government_observer"
-          ]
-        }
-      }
-    },
+    "read": {},
     "update": {
       "user_condition": {
         "role": {
