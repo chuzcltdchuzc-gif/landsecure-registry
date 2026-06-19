@@ -1,7 +1,7 @@
 {
   "name": "CreditWallet",
   "type": "object",
-  "description": "Platform credit wallet per user. All monetized activities consume credits. No negative balances. Every movement creates an EconomicAuditEntry. Supports reservation for pending operations.",
+  "description": "Platform credit wallet per user. All monetized activities consume credits.",
   "properties": {
     "wallet_id": {
       "type": "string",
@@ -16,28 +16,23 @@
     },
     "credit_balance": {
       "type": "number",
-      "default": 0,
-      "description": "Current available credits"
+      "default": 0
     },
     "reserved_credits": {
       "type": "number",
-      "default": 0,
-      "description": "Credits held for pending service requests. Available = balance - reserved."
+      "default": 0
     },
     "credits_consumed": {
       "type": "number",
-      "default": 0,
-      "description": "Lifetime credits consumed"
+      "default": 0
     },
     "credits_purchased": {
       "type": "number",
-      "default": 0,
-      "description": "Lifetime credits purchased"
+      "default": 0
     },
     "credits_granted": {
       "type": "number",
-      "default": 0,
-      "description": "Lifetime credits granted (free/promotional)"
+      "default": 0
     },
     "wallet_status": {
       "type": "string",
@@ -60,8 +55,7 @@
       "type": "string"
     },
     "organization_wallet_id": {
-      "type": "string",
-      "description": "Optional \u2014 linked OrganizationWallet for institutional users"
+      "type": "string"
     }
   },
   "required": [
@@ -72,27 +66,7 @@
     "create": {
       "created_by": "{{user.email}}"
     },
-    "read": {
-      "$or": [
-        {
-          "data.user_email": "{{user.email}}"
-        },
-        {
-          "created_by": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": {
-              "$in": [
-                "super_admin",
-                "surveyor_general",
-                "compliance_officer"
-              ]
-            }
-          }
-        }
-      ]
-    },
+    "read": {},
     "update": {
       "$or": [
         {
