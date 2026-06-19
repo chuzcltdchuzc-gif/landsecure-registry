@@ -1,11 +1,10 @@
 {
   "name": "UsageLedger",
   "type": "object",
-  "description": "Immutable audit trail of every credit-consuming activity. Nothing bypasses the ledger. Every service request, report generation, and verification action creates a ledger entry.",
+  "description": "Immutable audit trail of every credit-consuming activity.",
   "properties": {
     "usage_id": {
-      "type": "string",
-      "description": "Auto-generated: USE-EHM-000001"
+      "type": "string"
     },
     "user_id": {
       "type": "string"
@@ -14,15 +13,13 @@
       "type": "string"
     },
     "parcel_id": {
-      "type": "string",
-      "description": "Optional \u2014 linked parcel if applicable"
+      "type": "string"
     },
     "parcel_number": {
       "type": "string"
     },
     "service_id": {
-      "type": "string",
-      "description": "Linked ServiceCatalog ID"
+      "type": "string"
     },
     "service_name": {
       "type": "string"
@@ -36,12 +33,10 @@
     },
     "cash_value": {
       "type": "number",
-      "default": 0,
-      "description": "NGN equivalent of credits consumed"
+      "default": 0
     },
     "request_reference": {
-      "type": "string",
-      "description": "Linked ServiceRequest reference"
+      "type": "string"
     },
     "usage_timestamp": {
       "type": "string",
@@ -67,27 +62,7 @@
     "create": {
       "created_by": "{{user.email}}"
     },
-    "read": {
-      "$or": [
-        {
-          "data.user_email": "{{user.email}}"
-        },
-        {
-          "created_by": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": {
-              "$in": [
-                "super_admin",
-                "surveyor_general",
-                "compliance_officer"
-              ]
-            }
-          }
-        }
-      ]
-    },
+    "read": {},
     "update": {
       "user_condition": {
         "role": {
