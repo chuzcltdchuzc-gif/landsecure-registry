@@ -1,11 +1,10 @@
 {
   "name": "OrganizationWallet",
   "type": "object",
-  "description": "Institutional shared wallet. Banks, law firms, survey firms, LGAs, developers pool credits here. Department budgets tracked via department_allocations JSON.",
+  "description": "Institutional shared wallet for banks, law firms, survey firms, LGAs, developers.",
   "properties": {
     "wallet_id": {
-      "type": "string",
-      "description": "Auto-generated: OWL-EHM-000001"
+      "type": "string"
     },
     "organization_name": {
       "type": "string"
@@ -22,8 +21,7 @@
       ]
     },
     "plan_id": {
-      "type": "string",
-      "description": "Linked InstitutionPlan ID"
+      "type": "string"
     },
     "plan_code": {
       "type": "string"
@@ -52,27 +50,22 @@
     },
     "monthly_allocation": {
       "type": "number",
-      "default": 0,
-      "description": "Monthly credit allocation from plan"
+      "default": 0
     },
     "allocation_remaining": {
       "type": "number",
-      "default": 0,
-      "description": "Credits remaining in current billing cycle"
+      "default": 0
     },
     "overage_credits": {
       "type": "number",
-      "default": 0,
-      "description": "Credits consumed beyond monthly allocation"
+      "default": 0
     },
     "overage_cost": {
       "type": "number",
-      "default": 0,
-      "description": "Total overage cost in NGN"
+      "default": 0
     },
     "department_allocations": {
-      "type": "string",
-      "description": "JSON array: [{dept, budget, used, remaining}]"
+      "type": "string"
     },
     "wallet_status": {
       "type": "string",
@@ -103,8 +96,7 @@
       "format": "date"
     },
     "member_emails": {
-      "type": "string",
-      "description": "JSON array of authorized member emails"
+      "type": "string"
     }
   },
   "required": [
@@ -114,45 +106,10 @@
   ],
   "rls": {
     "create": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "super_admin",
-            "surveyor_general",
-            "compliance_officer"
-          ]
-        }
-      }
+      "created_by": "{{user.email}}"
     },
-    "read": {
-      "$or": [
-        {
-          "data.contact_email": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": {
-              "$in": [
-                "super_admin",
-                "surveyor_general",
-                "compliance_officer"
-              ]
-            }
-          }
-        }
-      ]
-    },
-    "update": {
-      "user_condition": {
-        "role": {
-          "$in": [
-            "super_admin",
-            "surveyor_general",
-            "compliance_officer"
-          ]
-        }
-      }
-    },
+    "read": {},
+    "update": {},
     "delete": {
       "user_condition": {
         "role": "super_admin"
