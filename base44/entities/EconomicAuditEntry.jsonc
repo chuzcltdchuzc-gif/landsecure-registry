@@ -78,24 +78,7 @@
     "create": {
       "created_by": "{{user.email}}"
     },
-    "read": {
-      "$or": [
-        {
-          "created_by": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": {
-              "$in": [
-                "super_admin",
-                "surveyor_general",
-                "compliance_officer"
-              ]
-            }
-          }
-        }
-      ]
-    },
+    "read": {},
     "update": {
       "user_condition": {
         "role": "super_admin"
