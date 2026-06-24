@@ -72,10 +72,9 @@ Deno.serve(async (req) => {
           }, { status: 402 });
         }
 
-        // 6. RESERVE credits
+        // 6. RESERVE credits — ATOMIC $inc to prevent race conditions
         const beforeWallet = { credit_balance: wallet.credit_balance, reserved_credits: wallet.reserved_credits };
-        const newReserved = (wallet.reserved_credits || 0) + creditCost;
-        await sr.entities.CreditWallet.update(wallet.id, { reserved_credits: newReserved });
+        await sr.entities.CreditWallet.updateMany({ id: wallet.id }, { $inc: { reserved_credits: creditCost } });
 
         // 7. Create ServiceRequest
         const requestRef = genId('SR');
@@ -130,12 +129,16 @@ Deno.serve(async (req) => {
 
         const creditAmount = serviceReq.credits_consumed || 0;
         const beforeWallet = { credit_balance: wallet.credit_balance, reserved_credits: wallet.reserved_credits, credits_consumed: wallet.credits_consumed };
-        const newBalance = (wallet.credit_balance || 0) - creditAmount;
-        const newReserved = Math.max(0, (wallet.reserved_credits || 0) - creditAmount);
-        const newConsumed = (wallet.credits_consumed || 0) + creditAmount;
 
-        // Deduct credits
-        await sr.entities.CreditWallet.update(wallet.id, { credit_balance: newBalance, reserved_credits: newReserved, credits_consumed: newConsumed });
+        // ATOMIC $inc — prevents race conditions under concurrent load
+        await sr.entities.CreditWallet.updateMany({ id: wallet.id }, {
+          $inc: { credit_balance: -creditAmount, reserved_credits: -creditAmount, credits_consumed: creditAmount }
+        });
+
+        // Re-read wallet for accurate after_state
+        const updatedWallets = await sr.entities.CreditWallet.filter({ user_email: serviceReq.requestor });
+        const updatedWallet = updatedWallets[0];
+        const afterWallet = { credit_balance: updatedWallet.credit_balance, reserved_credits: updatedWallet.reserved_credits, credits_consumed: updatedWallet.credits_consumed };
 
         // Update request
         await sr.entities.ServiceRequest.update(serviceReq.id, {
@@ -157,10 +160,29 @@ Deno.serve(async (req) => {
 
         // Audit
         await auditEntry('SERVICE_COMPLETED', 'CreditWallet', wallet.id,
-          beforeWallet, { credit_balance: newBalance, reserved_credits: newReserved, credits_consumed: newConsumed },
+          beforeWallet, afterWallet,
           creditAmount, `Service completed: ${serviceReq.service_name}`, serviceReq.request_reference);
 
-        return Response.json({ success: true, consumed: creditAmount, new_balance: newBalance, request_reference: serviceReq.request_reference });
+        // Auto-generate invoice
+        const invoiceNumber = `INV-${Date.now().toString(36).toUpperCase()}`;
+        const invoice = await sr.entities.Invoice.create({
+          invoice_id: genId('INV'), invoice_number: invoiceNumber,
+          customer_id: serviceReq.requestor_id, customer_email: serviceReq.requestor,
+          customer_name: serviceReq.requestor,
+          service_request: serviceReq.id,
+          amount: serviceReq.cash_amount || 0, tax: 0,
+          total_amount: serviceReq.cash_amount || 0,
+          currency: 'NGN', status: 'ISSUED',
+          generated_at: ts(),
+          due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+          notes: `Auto-generated for ${serviceReq.service_name} (${serviceReq.request_reference})`,
+        });
+        await sr.entities.ServiceRequest.update(serviceReq.id, { invoice_reference: invoice.invoice_number });
+        await auditEntry('INVOICE_GENERATED', 'Invoice', invoice.id,
+          {}, { invoice_number: invoice.invoice_number, amount: serviceReq.cash_amount || 0, status: 'ISSUED' },
+          serviceReq.cash_amount || 0, `Invoice auto-generated: ${invoice.invoice_number}`, serviceReq.request_reference);
+
+        return Response.json({ success: true, consumed: creditAmount, new_balance: afterWallet.credit_balance, invoice_number: invoice.invoice_number, request_reference: serviceReq.request_reference });
       }
 
       // ===== FAIL: Refund reserved credits on failure =====
@@ -176,10 +198,14 @@ Deno.serve(async (req) => {
 
         const creditAmount = serviceReq.credits_consumed || 0;
         const beforeWallet = { reserved_credits: wallet.reserved_credits };
-        const newReserved = Math.max(0, (wallet.reserved_credits || 0) - creditAmount);
 
-        // Release reservation
-        await sr.entities.CreditWallet.update(wallet.id, { reserved_credits: newReserved });
+        // ATOMIC $inc — release reservation
+        await sr.entities.CreditWallet.updateMany({ id: wallet.id }, { $inc: { reserved_credits: -creditAmount } });
+
+        // Re-read for accurate after_state
+        const refundedWallets = await sr.entities.CreditWallet.filter({ user_email: serviceReq.requestor });
+        const refundedWallet = refundedWallets[0];
+        const afterWallet = { reserved_credits: refundedWallet.reserved_credits };
 
         // Cancel request
         await sr.entities.ServiceRequest.update(serviceReq.id, {
@@ -189,7 +215,7 @@ Deno.serve(async (req) => {
 
         // Audit
         await auditEntry('SERVICE_REFUNDED', 'CreditWallet', wallet.id,
-          beforeWallet, { reserved_credits: newReserved },
+          beforeWallet, afterWallet,
           creditAmount, `Service failed: ${serviceReq.service_name} — ${failure_reason || 'Unknown'}`, serviceReq.request_reference);
 
         return Response.json({ success: true, refunded: creditAmount, request_reference: serviceReq.request_reference });

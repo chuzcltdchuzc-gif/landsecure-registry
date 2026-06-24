@@ -58,8 +58,8 @@ Deno.serve(async (req) => {
         const available = (wallet.credit_balance || 0) - (wallet.reserved_credits || 0);
         if (available < amount) return Response.json({ error: 'Insufficient credits', available, required: amount }, { status: 402 });
         const before = { credit_balance: wallet.credit_balance, reserved_credits: wallet.reserved_credits };
+        await sr.entities.CreditWallet.updateMany({ id: wallet.id }, { $inc: { reserved_credits: amount } });
         const newReserved = (wallet.reserved_credits || 0) + amount;
-        await sr.entities.CreditWallet.update(wallet.id, { reserved_credits: newReserved });
         await audit('CREDIT_RESERVED', 'CreditWallet', wallet.id, before, { ...before, reserved_credits: newReserved }, amount);
         return Response.json({ success: true, reserved: amount, wallet_id: wallet.id, new_available: (wallet.credit_balance || 0) - newReserved });
       }
@@ -69,11 +69,11 @@ Deno.serve(async (req) => {
         const wallet = await findWallet();
         if (!wallet) return Response.json({ error: 'Wallet not found' }, { status: 404 });
         const before = { credit_balance: wallet.credit_balance, reserved_credits: wallet.reserved_credits, credits_consumed: wallet.credits_consumed };
+        if ((wallet.credit_balance || 0) - amount < 0) return Response.json({ error: 'Balance would go negative', balance: wallet.credit_balance, amount }, { status: 402 });
+        await sr.entities.CreditWallet.updateMany({ id: wallet.id }, { $inc: { credit_balance: -amount, reserved_credits: -amount, credits_consumed: amount } });
         const newBalance = (wallet.credit_balance || 0) - amount;
         const newReserved = Math.max(0, (wallet.reserved_credits || 0) - amount);
         const newConsumed = (wallet.credits_consumed || 0) + amount;
-        if (newBalance < 0) return Response.json({ error: 'Balance would go negative', balance: wallet.credit_balance, amount }, { status: 402 });
-        await sr.entities.CreditWallet.update(wallet.id, { credit_balance: newBalance, reserved_credits: newReserved, credits_consumed: newConsumed });
         await audit('CREDIT_CONSUMED', 'CreditWallet', wallet.id, before, { credit_balance: newBalance, reserved_credits: newReserved, credits_consumed: newConsumed }, amount);
         return Response.json({ success: true, consumed: amount, new_balance: newBalance });
       }
@@ -83,8 +83,8 @@ Deno.serve(async (req) => {
         const wallet = await findWallet();
         if (!wallet) return Response.json({ error: 'Wallet not found' }, { status: 404 });
         const before = { reserved_credits: wallet.reserved_credits };
+        await sr.entities.CreditWallet.updateMany({ id: wallet.id }, { $inc: { reserved_credits: -amount } });
         const newReserved = Math.max(0, (wallet.reserved_credits || 0) - amount);
-        await sr.entities.CreditWallet.update(wallet.id, { reserved_credits: newReserved });
         await audit('CREDIT_REFUNDED', 'CreditWallet', wallet.id, before, { reserved_credits: newReserved }, amount);
         return Response.json({ success: true, refunded: amount, wallet_id: wallet.id });
       }
@@ -97,9 +97,9 @@ Deno.serve(async (req) => {
         const wallet = await findWallet();
         if (!wallet) return Response.json({ error: 'Wallet not found' }, { status: 404 });
         const before = { credit_balance: wallet.credit_balance, credits_granted: wallet.credits_granted };
+        await sr.entities.CreditWallet.updateMany({ id: wallet.id }, { $inc: { credit_balance: amount, credits_granted: amount } });
         const newBalance = (wallet.credit_balance || 0) + amount;
         const newGranted = (wallet.credits_granted || 0) + amount;
-        await sr.entities.CreditWallet.update(wallet.id, { credit_balance: newBalance, credits_granted: newGranted });
         await audit('CREDIT_GRANTED', 'CreditWallet', wallet.id, before, { credit_balance: newBalance, credits_granted: newGranted }, amount);
         return Response.json({ success: true, granted: amount, new_balance: newBalance });
       }
@@ -109,9 +109,9 @@ Deno.serve(async (req) => {
         const wallet = await findWallet();
         if (!wallet) return Response.json({ error: 'Wallet not found' }, { status: 404 });
         const before = { credit_balance: wallet.credit_balance, credits_purchased: wallet.credits_purchased };
+        await sr.entities.CreditWallet.updateMany({ id: wallet.id }, { $inc: { credit_balance: amount, credits_purchased: amount } });
         const newBalance = (wallet.credit_balance || 0) + amount;
         const newPurchased = (wallet.credits_purchased || 0) + amount;
-        await sr.entities.CreditWallet.update(wallet.id, { credit_balance: newBalance, credits_purchased: newPurchased });
         await audit('CREDIT_PURCHASED', 'CreditWallet', wallet.id, before, { credit_balance: newBalance, credits_purchased: newPurchased }, amount);
         return Response.json({ success: true, purchased: amount, new_balance: newBalance });
       }
@@ -129,8 +129,8 @@ Deno.serve(async (req) => {
         const available = (sourceWallet.credit_balance || 0) - (sourceWallet.reserved_credits || 0);
         if (available < amount) return Response.json({ error: 'Insufficient available credits', available }, { status: 402 });
 
-        await sr.entities.CreditWallet.update(sourceWallet.id, { credit_balance: (sourceWallet.credit_balance || 0) - amount });
-        await sr.entities.CreditWallet.update(targetWallet.id, { credit_balance: (targetWallet.credit_balance || 0) + amount });
+        await sr.entities.CreditWallet.updateMany({ id: sourceWallet.id }, { $inc: { credit_balance: -amount } });
+        await sr.entities.CreditWallet.updateMany({ id: targetWallet.id }, { $inc: { credit_balance: amount } });
         await audit('CREDIT_TRANSFERRED', 'CreditWallet', sourceWallet.id,
           { source_balance: sourceWallet.credit_balance }, { source_balance: (sourceWallet.credit_balance || 0) - amount, target_email: target_user_email }, amount);
         return Response.json({ success: true, transferred: amount, from: sourceWallet.user_email, to: target_user_email });
