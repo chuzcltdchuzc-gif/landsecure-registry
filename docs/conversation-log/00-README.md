@@ -43,6 +43,11 @@ already the record of truth elsewhere).
 6. [`06-phase1-adr023-and-gd006.md`](06-phase1-adr023-and-gd006.md) — raising ADR-023 (Registry
    Ownership and Status History), its revision against four review requirements, and GD-006
    regularising the administrative notes added to already-ratified documents.
+7. [`07-landvault-web-preview-and-defensive-rendering-fix.md`](07-landvault-web-preview-and-defensive-rendering-fix.md)
+   — a separate thread: the Replit-added `landvault-web` frontend discovered on `origin/main`,
+   restoring the governed backend to root without touching it, an inspection-only preview of the
+   existing UI, and a scoped rendering-safety fix for a dashboard crash traced to a malformed
+   "successful" API response rather than a failed one.
 
 ## A note on what's deliberately not resolved here
 
