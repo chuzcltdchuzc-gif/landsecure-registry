@@ -22,6 +22,9 @@ already the record of truth elsewhere).
 - `aquasavannah-landvault` — the real, actively-developed LandVault platform (Python/FastAPI +
   Next.js, DDD bounded contexts, 148 real passing backend tests at time of writing). Where the
   governance reconciliation and Phase 1 engineering work actually landed.
+- `chuzcltdchuzc-gif/Development-Plan` — a third, unrelated repository, referenced only in entry 8
+  (a GitHub PR review/merge-gate audit). Not part of the LandVault Bible programme; logged here only
+  because this directory is where the session's conversation history is kept.
 
 ## Contents
 
@@ -48,6 +51,11 @@ already the record of truth elsewhere).
    restoring the governed backend to root without touching it, an inspection-only preview of the
    existing UI, and a scoped rendering-safety fix for a dashboard crash traced to a malformed
    "successful" API response rather than a failed one.
+8. [`08-development-plan-pr12-review-verification.md`](08-development-plan-pr12-review-verification.md)
+   — a read-only GitHub human-review and merge-gate audit of `Development-Plan` PR #12 (B5.3),
+   done via unauthenticated public API access after finding no `gh` CLI or GitHub auth in the
+   environment; a follow-up found a new approving review whose reviewer-permission eligibility and a
+   fresh merge-conflict state both remain unverified/unresolved.
 
 ## A note on what's deliberately not resolved here
 
