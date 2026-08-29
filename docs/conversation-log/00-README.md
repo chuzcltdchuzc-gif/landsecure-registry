@@ -22,9 +22,11 @@ already the record of truth elsewhere).
 - `aquasavannah-landvault` — the real, actively-developed LandVault platform (Python/FastAPI +
   Next.js, DDD bounded contexts, 148 real passing backend tests at time of writing). Where the
   governance reconciliation and Phase 1 engineering work actually landed.
-- `chuzcltdchuzc-gif/Development-Plan` — a third, unrelated repository, referenced only in entry 8
-  (a GitHub PR review/merge-gate audit). Not part of the LandVault Bible programme; logged here only
-  because this directory is where the session's conversation history is kept.
+- `chuzcltdchuzc-gif/Development-Plan` — a third, unrelated repository (entries 8–12). Not part of
+  the LandVault Bible programme; logged here only because this directory is where the session's
+  conversation history is kept. What started as a single PR audit (entry 8) grew into a full status
+  assessment and a multi-slice Integrated MVP build programme (entries 10–12) — by far the largest
+  body of work this log covers under a single outside repository.
 
 ## Contents
 
@@ -56,6 +58,29 @@ already the record of truth elsewhere).
    done via unauthenticated public API access after finding no `gh` CLI or GitHub auth in the
    environment; a follow-up found a new approving review whose reviewer-permission eligibility and a
    fresh merge-conflict state both remain unverified/unresolved.
+9. [`09-development-plan-replit-tooling-audit-and-removal.md`](09-development-plan-replit-tooling-audit-and-removal.md)
+   — a read-only Replit-tooling audit of `Development-Plan`'s Node/pnpm workspace, then an approved
+   removal (six files, a dependency, three Vite plugins) that surfaced a recurring Windows native-
+   binary gap in `pnpm-workspace.yaml`'s platform overrides, worked around locally each time without
+   touching the tracked workspace-wide decision that causes it.
+10. [`10-development-plan-software-status-and-next-build-report.md`](10-development-plan-software-status-and-next-build-report.md)
+    — a full evidence-based status assessment of `Development-Plan`, run via three parallel research
+    agents; found the frontend's entire API contract traced back to the pre-rebuild Base44 product
+    rather than the governed backend, scored the platform at Stage 4 of 8 and ~30% pilot-ready, and
+    recommended the contract-and-auth integration work the next two entries carry out.
+11. [`11-development-plan-imvp-1-and-imvp-2.md`](11-development-plan-imvp-1-and-imvp-2.md) — the
+    Integrated MVP Programme's first two governed slices: contract reconciliation (escalating the
+    `trust_score`/field-naming/geometry decisions rather than making them), then the frontend
+    stabilization that executed Governance Authority's resulting decisions; includes the discovery,
+    mid-session, that B5.3's code was already on `main` via an undisclosed branch-protection bypass —
+    corrected in the record rather than left standing — and a separately-shipped Engineering Rule 10
+    frontend extension.
+12. [`12-development-plan-imvp-3-supabase-auth.md`](12-development-plan-imvp-3-supabase-auth.md) —
+    the programme's third slice: replacing Keycloak with Supabase Auth at the token-verification
+    boundary while leaving B1's authorization model untouched, including a Dependency Approval
+    Request stopped on before installing anything, a non-destructive `keycloak_subject` →
+    `identity_subject` rename, and the first production build of this frontend to actually succeed
+    in this environment.
 
 ## A note on what's deliberately not resolved here
 
