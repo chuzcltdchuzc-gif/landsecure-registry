@@ -81,6 +81,27 @@ already the record of truth elsewhere).
     Request stopped on before installing anything, a non-destructive `keycloak_subject` →
     `identity_subject` rename, and the first production build of this frontend to actually succeed
     in this environment.
+13. [`13-development-plan-openapi-source-of-truth-and-security-metadata.md`](13-development-plan-openapi-source-of-truth-and-security-metadata.md)
+    — PR #18 replacing a hand-maintained OpenAPI spec with a deterministic export from the live
+    FastAPI app, and PR #19 hardening the exported schema's security metadata (a real
+    `SupabaseBearerAuth` requirement in place of a bare header/cookie parameter) as a standing
+    contract test.
+14. [`14-development-plan-imvp5-readiness-audit-and-gd007.md`](14-development-plan-imvp5-readiness-audit-and-gd007.md)
+    — a read-only IMVP-5 readiness audit that found a real GD-004/B5.0–B5.3 sequencing conflict and
+    citation errors in the implementation plan; drafting GD-007 to reconcile it, a contradiction in
+    the first draft's authority basis caught and corrected to Article XVI §2 alone, and a
+    branch-naming correction that produced and then closed a duplicate PR.
+15. [`15-development-plan-imvp5-evidence-vertical-slice.md`](15-development-plan-imvp5-evidence-vertical-slice.md)
+    — PR #22: a real Supabase-Storage-backed Evidence upload/list capability stopping at `HASHED`,
+    extending the existing two-tier authorization pattern into a new bounded context, a raw-body
+    upload contract worked out after a bodyless-`Request` approach failed to appear in OpenAPI at
+    all, and an implementation report that stopped short of claiming live verification.
+16. [`16-development-plan-pr22-storage-security-review.md`](16-development-plan-pr22-storage-security-review.md)
+    — a follow-up read-only review that overturned the previous entry's own security justification:
+    ADR-025's "two independent layers" language turned out to be Postgres-RLS-specific and did not
+    actually cover the Evidence Storage adapter's service-role design, leaving only one real control
+    in place rather than two, and closing with **PR #22 BLOCKED — STORAGE SECURITY ADR REQUIRED**
+    rather than clearing it for live verification.
 
 ## A note on what's deliberately not resolved here
 
