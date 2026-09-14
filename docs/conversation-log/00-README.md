@@ -102,6 +102,21 @@ already the record of truth elsewhere).
     actually cover the Evidence Storage adapter's service-role design, leaving only one real control
     in place rather than two, and closing with **PR #22 BLOCKED — STORAGE SECURITY ADR REQUIRED**
     rather than clearing it for live verification.
+17. [`17-development-plan-audit-transaction-semantics-and-chain-concurrency-governance-programme.md`](17-development-plan-audit-transaction-semantics-and-chain-concurrency-governance-programme.md)
+    — a long, single-thread governance programme: ADR-029 (audit transaction semantics) and GD-009
+    (its narrow Batch 1 implementation authority) drafted, reviewed, and ratified; implementing
+    Batch 1 then reproduced a genuine audit hash-chain fork under real concurrent writes — proven,
+    before drafting anything, to be a pre-existing defect in the already-merged production design,
+    not something the new work introduced — which correctly halted implementation exactly as GD-009's
+    own pre-stated stop condition required. ADR-030 then decided the audit chain only ever needed to
+    be a hash-linked DAG, not a strict linear chain, disclosing (after a live red-team the formal
+    review itself required) that neither model can detect a privileged terminal-branch deletion,
+    classified explicitly as "acceptable with disclosed limitation" rather than silently overclaimed.
+    GD-010 (the DAG-aware verifier's own implementation authority) was drafted and remediated —
+    including proving, mathematically, that one of its originally-required test cases described a
+    fixture that cannot exist under the data model — but was **not yet ratified** at the time this
+    entry was written; GD-009's Batch 1 remains suspended throughout, and the blocked implementation
+    branch was preserved, uncommitted, as reproduction evidence for whichever session resumes it next.
 
 ## A note on what's deliberately not resolved here
 
@@ -111,3 +126,10 @@ retrofitted with an answer they didn't have at the time: ADR-024's exact scope, 
 real time, by further work on `aquasavannah-landvault` — ADR-024, then ADR-025 superseding Keycloak
 with Supabase — but that happened after this log's own last entry and belongs to the ADRs
 themselves, not retold here.)
+
+Entry 17 leaves two further items open, on the same basis: GD-010 (the audit-DAG-verifier
+implementation authority) is recorded as drafted-and-remediated, not ratified, because that is what
+was actually true when the entry was written; and GD-009's Batch 1 implementation — the two
+attribution-service audit calls, the transaction-coupled staging capability, and the concurrency
+test that found the fork — is recorded as suspended, uncommitted evidence, not as shipped work,
+because it is neither merged nor authorized to resume as of this entry.
