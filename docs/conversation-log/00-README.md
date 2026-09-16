@@ -117,6 +117,15 @@ already the record of truth elsewhere).
     fixture that cannot exist under the data model — but was **not yet ratified** at the time this
     entry was written; GD-009's Batch 1 remains suspended throughout, and the blocked implementation
     branch was preserved, uncommitted, as reproduction evidence for whichever session resumes it next.
+18. [`18-development-plan-gd010-ratification-verifier-implementation-and-gd009-batch1-resumption.md`](18-development-plan-gd010-ratification-verifier-implementation-and-gd009-batch1-resumption.md)
+    — GD-010 ratified and its DAG-aware verifier implemented and merged (PRs #32/#33); GD-011 drafted,
+    remediated, and ratified to lift specifically GD-009 §11's concurrency suspension (PR #34); Batch 1
+    reconstructed by hand from current `main` in a fresh worktree, catching a stale strict-linearity
+    assertion in the preserved prototype's own concurrency test before it could reintroduce exactly the
+    defect ADR-030 had already closed; a real-Postgres proof that caught and correctly refused to
+    silently paper over a bug in its own verification code; and an adversarial review that found two
+    real, non-blocking test-strength weaknesses rather than confirming a clean result by default. Ends
+    with Batch 1 implemented, live-proven, and adversarially cleared, but still uncommitted.
 
 ## A note on what's deliberately not resolved here
 
@@ -132,4 +141,12 @@ implementation authority) is recorded as drafted-and-remediated, not ratified, b
 was actually true when the entry was written; and GD-009's Batch 1 implementation — the two
 attribution-service audit calls, the transaction-coupled staging capability, and the concurrency
 test that found the fork — is recorded as suspended, uncommitted evidence, not as shipped work,
-because it is neither merged nor authorized to resume as of this entry.
+because it is neither merged nor authorized to resume as of this entry. Entry 18 resolves both: GD-010
+was ratified and its verifier merged, and GD-011 subsequently lifted the Batch 1 suspension.
+
+Entry 18 leaves one item open, on the same basis: Batch 1's actual implementation — the transaction-
+coupled staging capability and the two migrated attribution-service call sites, reconstructed fresh
+against the ratified verifier rather than reused from the preserved prototype — is recorded as
+implemented, live-proven against real PostgreSQL, and adversarially reviewed, but **not committed,
+pushed, or opened as a PR**, because none of those actions had been separately authorized as of this
+entry.
