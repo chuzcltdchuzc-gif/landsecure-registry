@@ -1,0 +1,39 @@
+{
+  "name": "LV Duplicate Detection \u2014 Evidence Hash Check",
+  "description": "Runs SHA-256 hash duplicate check whenever new evidence is uploaded to EvidenceVault. Generates evidence_hash_duplicate DuplicateAlert if a matching hash is found.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "EvidenceVault"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "lv_duplicate_detection_evidence_hash_check",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "lvDuplicateDetection",
+            "args": {
+              "event_type": "evidence"
+            }
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "lvDuplicateDetection"
+  }
+}
