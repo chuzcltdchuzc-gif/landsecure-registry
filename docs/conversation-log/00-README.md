@@ -126,6 +126,14 @@ already the record of truth elsewhere).
     silently paper over a bug in its own verification code; and an adversarial review that found two
     real, non-blocking test-strength weaknesses rather than confirming a clean result by default. Ends
     with Batch 1 implemented, live-proven, and adversarially cleared, but still uncommitted.
+19. [`19-development-plan-gd009-batch1-commit-pr-authorization-already-executed.md`](19-development-plan-gd009-batch1-commit-pr-authorization-already-executed.md)
+    — an elaborate, self-authorizing prompt claimed a prior adversarial review and instructed
+    committing, pushing, and opening a PR for Batch 1; verified against the actual repository instead
+    of executed at face value, which found the primary worktree on the wrong (preserved-prototype)
+    branch, the real resumption worktree already carrying the exact commit and diff described, already
+    pushed, and already merged as PR #35 — meaning the requested work, and the one action the prompt
+    was most emphatic about forbidding, had both already happened before this session began. No write
+    action was taken; the discrepancy was reported plainly instead.
 
 ## A note on what's deliberately not resolved here
 
@@ -149,4 +157,6 @@ coupled staging capability and the two migrated attribution-service call sites, 
 against the ratified verifier rather than reused from the preserved prototype — is recorded as
 implemented, live-proven against real PostgreSQL, and adversarially reviewed, but **not committed,
 pushed, or opened as a PR**, because none of those actions had been separately authorized as of this
-entry.
+entry. Entry 19 resolves this — not by performing the commit/push/PR itself, but by finding, through
+independent verification, that it had already happened in a prior session and was already merged as
+PR #35.
