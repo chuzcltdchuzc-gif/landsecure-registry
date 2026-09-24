@@ -1,0 +1,38 @@
+{
+  "name": "GIS Validation \u2014 On Parcel Create/Update",
+  "description": "Triggers GIS boundary validation whenever a LandParcel is created or updated with boundary data. Updates spatial_validation_status and spatial_conflict_notes.",
+  "trigger": {
+    "condition": "${ (.trigger.data.parcel_boundary != null) }",
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create",
+        "update"
+      ],
+      "entity_name": "LandParcel"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "gis_validation_on_parcel_create_update",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "asyncGISValidation",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "asyncGISValidation"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "Conflict Detection Scanner",
+  "description": "Scans for conflicts between approved attestations and generates alerts/flags",
+  "trigger": {
+    "condition": "${ ((.trigger.changed_fields | index(\"verification_status\") != null) and (.trigger.data.verification_status == \"APPROVED\")) }",
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "update"
+      ],
+      "entity_name": "CommunityAttestation"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "conflict_detection_scanner",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "lvConflictDetection",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "lvConflictDetection"
+  }
+}

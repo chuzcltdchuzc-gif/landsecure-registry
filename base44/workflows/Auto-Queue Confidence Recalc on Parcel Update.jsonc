@@ -1,0 +1,37 @@
+{
+  "name": "Auto-Queue Confidence Recalc on Parcel Update",
+  "description": "When a parcel is updated, queues a confidence recalculation job.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "update"
+      ],
+      "entity_name": "LandVaultParcel"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "auto_queue_confidence_recalc_on_parcel_update",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "lvAutoQueueJobs",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "lvAutoQueueJobs"
+  }
+}
